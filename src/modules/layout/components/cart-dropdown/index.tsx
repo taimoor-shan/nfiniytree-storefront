@@ -106,7 +106,7 @@ const CartDropdown = ({
 
       {/* Dropdown panel */}
       <div
-        className={`absolute right-0 top-full z-50 mt-2 w-[420px] bg-canvas border border-hairline shadow-lg text-ink origin-top-right transition-all duration-200 ${
+        className={`absolute right-0 top-full z-50 mt-2 max-w-[420px] w-full bg-canvas border border-hairline shadow-lg text-ink origin-top-right transition-all duration-200 ${
           open
             ? "opacity-100 visible translate-y-0 scale-100"
             : "opacity-0 invisible -translate-y-1 scale-95 pointer-events-none"
