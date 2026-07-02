@@ -20,7 +20,7 @@ export default function NewsletterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full mt-4 relative">
-      <div className="flex w-[400px]">
+      <div className="flex max-w-[400px]">
         <input 
           type="email" 
           value={email}
