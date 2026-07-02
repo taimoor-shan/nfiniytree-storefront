@@ -1,0 +1,338 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+:root {
+  /* Surfaces */
+  --bg-base: #faf9f5;
+  --bg-base-hover: #f5f0e8;
+  --bg-subtle: #efe9de;
+  --bg-interactive: #cc785c;
+  --bg-disabled: #e6dfd8;
+  --bg-field: #faf9f5;
+  --bg-field-hover: #f5f0e8;
+
+  /* Text */
+  --fg-base: #141413;
+  --fg-subtle: #3d3d3a;
+  --fg-muted: #6c6a64;
+  --fg-disabled: #8e8b82;
+  --fg-interactive: #cc785c;
+  --fg-interactive-hover: #a9583e;
+  --fg-on-color: #ffffff;
+  --fg-on-inverted: #141413;
+  --fg-error: #c64545;
+
+  /* Contrast (Button primary text) */
+  --contrast-fg-primary: #ffffff;
+
+  /* Borders */
+  --border-base: #e6dfd8;
+  --border-error: #c64545;
+
+  /* Buttons — color */
+  --button-inverted: #cc785c;
+  --button-inverted-hover: #a9583e;
+  --button-inverted-pressed: #a9583e;
+  --button-neutral: #faf9f5;
+  --button-neutral-hover: #f5f0e8;
+  --button-neutral-pressed: #e8e0d2;
+  --button-danger: #c64545;
+  --button-danger-hover: #a53838;
+  --button-danger-pressed: #a53838;
+  --button-transparent: transparent;
+  --button-transparent-hover: rgba(20, 20, 19, 0.05);
+  --button-transparent-pressed: rgba(20, 20, 19, 0.1);
+
+  /* Buttons — box-shadow (flat design = no shadow) */
+  --buttons-neutral: none;
+  --buttons-neutral-focus: none;
+  --buttons-inverted: none;
+  --buttons-inverted-focus: none;
+  --buttons-danger: none;
+  --buttons-danger-focus: none;
+}
+
+@layer base {
+  body {
+    @apply font-sans;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    --tw-ring-color: #cc785c;
+    border-color: #cc785c;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    font-style: normal;
+    color: var(--fg-base);
+    font-optical-sizing: auto;
+  }
+
+  h4,
+  h5,
+  h6 {
+    @apply font-display;
+    font-weight: 400;
+    font-style: normal;
+    color: var(--fg-base);
+    font-optical-sizing: auto;
+  }
+
+  .h1-core,
+  .h2-core,
+  .h3-core {
+    @apply font-display;
+    font-weight: 400;
+    font-style: normal;
+    font-optical-sizing: auto;
+  }
+}
+
+@layer utilities {
+  /* Chrome, Safari and Opera */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  input:focus ~ label,
+  input:not(:placeholder-shown) ~ label {
+    @apply -translate-y-2 text-xsmall-regular;
+  }
+
+  input:focus ~ label {
+    @apply left-0;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus {
+    border: 1px solid #d4c9bc;
+    -webkit-text-fill-color: #141413;
+    -webkit-box-shadow: 0 0 0px 1000px #faf9f5 inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  input[type="search"]::-webkit-search-decoration,
+  input[type="search"]::-webkit-search-cancel-button,
+  input[type="search"]::-webkit-search-results-button,
+  input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+  }
+}
+
+@layer components {
+  .content-container {
+    @apply max-w-[1440px] w-full mx-auto px-6;
+  }
+
+  .contrast-btn {
+    @apply px-4 py-2 border border-hairline rounded-full hover:bg-primary hover:text-on-primary transition-colors duration-200 ease-in;
+  }
+
+  /* DESIGN.md button component classes */
+
+  .btn-primary {
+    @apply bg-primary text-on-primary font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
+  }
+  .btn-primary:hover:not(:disabled) {
+    @apply bg-primary-hover;
+  }
+  .btn-primary:disabled {
+    @apply bg-primary-disabled text-muted cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-canvas text-ink font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center border border-hairline transition-colors;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    @apply bg-surface-soft;
+  }
+
+  .btn-secondary-on-dark {
+    @apply bg-surface-dark-elevated text-on-dark font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
+  }
+  .btn-secondary-on-dark:hover:not(:disabled) {
+    @apply bg-surface-dark-soft;
+  }
+
+  .btn-text-link {
+    @apply text-ink font-sans text-sm font-medium bg-transparent border-none cursor-pointer inline-flex items-center transition-colors;
+  }
+  .btn-text-link:hover {
+    @apply text-body;
+  }
+
+  .btn-icon-circular {
+    @apply bg-canvas text-ink rounded-full w-9 h-9 inline-flex items-center justify-center border border-hairline transition-colors cursor-pointer;
+  }
+  .btn-icon-circular:hover {
+    @apply bg-surface-soft;
+  }
+
+  .btn-icon-circular-dark {
+    @apply bg-surface-dark-elevated text-on-dark rounded-full w-9 h-9 inline-flex items-center justify-center border-none transition-colors cursor-pointer;
+  }
+  .btn-icon-circular-dark:hover {
+    @apply bg-surface-dark-soft;
+  }
+
+  .text-link {
+    @apply text-primary font-sans text-sm font-medium bg-transparent border-none cursor-pointer underline-offset-4;
+  }
+  .text-link:hover {
+    @apply underline;
+  }
+
+  .text-xsmall-regular {
+    @apply text-[10px] leading-4 font-normal;
+  }
+
+  .text-small-regular {
+    @apply text-xs leading-5 font-normal;
+  }
+
+  .text-small-semi {
+    @apply text-xs leading-5 font-semibold;
+  }
+
+  .text-base-regular {
+    @apply text-sm leading-6 font-normal;
+  }
+
+  .text-base-semi {
+    @apply text-sm leading-6 font-semibold;
+  }
+
+  .text-large-regular {
+    @apply text-base leading-6 font-normal;
+  }
+
+  .text-large-semi {
+    @apply text-base leading-6 font-semibold;
+  }
+
+  .text-xl-regular {
+    @apply text-2xl leading-[36px] font-normal;
+  }
+
+  .text-xl-semi {
+    @apply text-2xl leading-[36px] font-semibold;
+  }
+
+  .text-2xl-regular {
+    @apply text-[30px] leading-[48px] font-normal;
+  }
+
+  .text-2xl-semi {
+    @apply text-[30px] leading-[48px] font-semibold;
+  }
+
+  .text-3xl-regular {
+    @apply text-[32px] leading-[44px] font-normal;
+  }
+
+  .text-3xl-semi {
+    @apply text-[32px] leading-[44px] font-semibold;
+  }
+
+  /* Rich HTML content (CMS/editor output) */
+
+
+  .prose p {
+    @apply mb-4;
+     @apply text-body;
+  }
+
+  .prose h1 {
+    @apply text-2xl leading-tight mb-4 sm:text-3xl md:text-5xl;
+  }
+
+  .prose h2 {
+    @apply text-xl  mt-8 mb-6 sm:text-2xl md:text-3xl;
+  }
+
+  .prose h3 {
+    @apply text-lg  mt-6 mb-4 sm:text-xl md:text-2xl;
+  }
+
+  .prose h4 {
+    @apply text-base mt-5 mb-4 sm:text-lg;
+  }
+
+  .prose ul {
+    @apply list-disc pl-6 mb-4;
+  }
+
+  .prose ol {
+    @apply list-decimal pl-6 mb-4;
+  }
+
+  .prose li {
+    @apply mb-2;
+  }
+
+  .prose blockquote {
+    @apply border-l-2 border-hairline pl-4 italic text-body my-6;
+  }
+
+  .prose a {
+    @apply underline underline-offset-4;
+  }
+
+  .prose img {
+    @apply my-6 rounded-md;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .prose hr {
+    @apply my-8 border-hairline;
+  }
+
+  .prose table {
+    @apply w-full border-collapse my-6 text-sm;
+  }
+
+  .prose thead th {
+    @apply text-left font-semibold text-ink py-3 px-4 border-b-2 border-hairline bg-surface-card;
+  }
+
+  .prose tbody td {
+    @apply py-3 px-4 border-b border-hairline;
+  }
+
+  .prose strong {
+    @apply font-semibold text-ink;
+  }
+
+  .prose em {
+    @apply italic;
+  }
+}
+
+.outline-none{
+  outline: none;
+}

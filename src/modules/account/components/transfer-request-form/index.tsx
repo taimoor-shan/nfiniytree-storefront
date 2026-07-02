@@ -1,0 +1,81 @@
+"use client"
+
+import { useActionState } from "react"
+import { createTransferRequest } from "@lib/data/orders"
+import { Text, Heading, Input, Button, IconButton, Toaster } from "@medusajs/ui"
+import { SubmitButton } from "@modules/checkout/components/submit-button"
+import { CheckCircleMiniSolid, XCircleSolid } from "@medusajs/icons"
+import { useEffect, useState } from "react"
+
+export default function TransferRequestForm() {
+  const [showSuccess, setShowSuccess] = useState(false)
+
+  const [state, formAction] = useActionState(createTransferRequest, {
+    success: false,
+    error: null,
+    order: null,
+  })
+
+  useEffect(() => {
+    if (state.success && state.order) {
+      setShowSuccess(true)
+    }
+  }, [state.success, state.order])
+
+  return (
+    <div className="flex flex-col gap-y-4 w-full">
+      <div className="grid sm:grid-cols-2 items-center gap-x-8 gap-y-4 w-full">
+        <div className="flex flex-col gap-y-1">
+          <Heading level="h3" className="text-lg text-ink">
+            Order transfers
+          </Heading>
+          <Text className="text-base-regular text-muted">
+            Can&apos;t find the order you are looking for?
+            <br /> Connect an order to your account.
+          </Text>
+        </div>
+        <form
+          action={formAction}
+          className="flex flex-col gap-y-1 sm:items-end"
+        >
+          <div className="flex flex-col gap-y-2 w-full">
+            <Input className="w-full" name="order_id" placeholder="Order ID" />
+            <SubmitButton
+              variant="secondary"
+              className="w-fit whitespace-nowrap self-end"
+            >
+              Request transfer
+            </SubmitButton>
+          </div>
+        </form>
+      </div>
+      {!state.success && state.error && (
+        <Text className="text-base-regular text-error text-right">
+          {state.error}
+        </Text>
+      )}
+      {showSuccess && (
+        <div className="flex justify-between p-4 bg-surface-soft shadow-borders-base w-full self-stretch items-center">
+          <div className="flex gap-x-2 items-center">
+            <CheckCircleMiniSolid className="w-4 h-4 text-success" />
+            <div className="flex flex-col gap-y-1">
+              <Text className="text-medim-pl text-ink">
+                Transfer for order {state.order?.id} requested
+              </Text>
+              <Text className="text-base-regular text-muted">
+                Transfer request email sent to {state.order?.email}
+              </Text>
+            </div>
+          </div>
+          <IconButton
+            variant="transparent"
+            className="h-fit"
+            onClick={() => setShowSuccess(false)}
+          >
+            <XCircleSolid className="w-4 h-4 text-muted" />
+          </IconButton>
+        </div>
+      )}
+    </div>
+  )
+}
