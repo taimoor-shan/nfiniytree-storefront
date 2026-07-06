@@ -1,12 +1,16 @@
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { getLocale } from "@lib/data/locale-actions"
+import { getDictionary } from "@lib/i18n/dictionaries"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
 }
 
-const ProductInfo = ({ product }: ProductInfoProps) => {
+const ProductInfo = async ({ product }: ProductInfoProps) => {
+  const locale = (await getLocale()) || "en"
+  const dict = await getDictionary(locale)
   return (
     <div id="product-info">
       <div className="">
@@ -53,7 +57,7 @@ const ProductInfo = ({ product }: ProductInfoProps) => {
         {product.tags && product.tags.length > 0 && (
           <div className="mt-6">
             <Text className="text-small-regular text-muted mb-2">
-              Ideal for
+              {dict["product.idealFor"]}
             </Text>
             <div className="flex flex-wrap gap-2">
               {product.tags.map((tag) => (

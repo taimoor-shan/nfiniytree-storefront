@@ -4,6 +4,7 @@ import { placeOrder } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { PaymentRequestButtonElement, useStripe } from "@stripe/react-stripe-js"
 import { PaymentRequest } from "@stripe/stripe-js"
+import { useTranslation } from "@/lib/i18n"
 import React, { useEffect, useState } from "react"
 import ErrorMessage from "../error-message"
 
@@ -12,6 +13,7 @@ type ExpressCheckoutProps = {
 }
 
 const ExpressCheckout: React.FC<ExpressCheckoutProps> = ({ cart }) => {
+  const { t } = useTranslation()
   const stripe = useStripe()
   const [paymentRequest, setPaymentRequest] = useState<PaymentRequest | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -33,7 +35,7 @@ const ExpressCheckout: React.FC<ExpressCheckoutProps> = ({ cart }) => {
       country: cart.shipping_address?.country_code?.toUpperCase() || "US",
       currency: cart.currency_code.toLowerCase(),
       total: {
-        label: "Total",
+        label: t("cart.total"),
         amount: cart.total || 0,
       },
       requestPayerName: true,
@@ -62,7 +64,7 @@ const ExpressCheckout: React.FC<ExpressCheckoutProps> = ({ cart }) => {
         // re-show the payment interface, or show an error message and close
         // the payment interface.
         ev.complete("fail")
-        setErrorMessage(confirmError.message || "Payment failed")
+        setErrorMessage(confirmError.message || t("checkout.paymentFailed"))
       } else {
         // Report to the browser that the confirmation was successful, prompting
         // it to close the browser payment method collection interface.
@@ -72,7 +74,7 @@ const ExpressCheckout: React.FC<ExpressCheckoutProps> = ({ cart }) => {
         if (paymentIntent.status === "requires_action") {
           const { error } = await stripe.confirmCardPayment(session.data.client_secret as string)
           if (error) {
-            setErrorMessage(error.message || "Payment failed")
+            setErrorMessage(error.message || t("checkout.paymentFailed"))
             return
           }
         }
@@ -102,7 +104,7 @@ const ExpressCheckout: React.FC<ExpressCheckoutProps> = ({ cart }) => {
           <div className="w-full border-t border-hairline"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="bg-canvas px-2 text-muted">Or pay with card</span>
+          <span className="bg-canvas px-2 text-muted">{t("checkout.orPayWithCard")}</span>
         </div>
       </div>
       <ErrorMessage error={errorMessage} data-testid="express-checkout-error-message" />

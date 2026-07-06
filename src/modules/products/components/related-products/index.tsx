@@ -2,6 +2,8 @@ import { listProducts } from "@lib/data/products"
 import { getRegion } from "@lib/data/regions"
 import { HttpTypes } from "@medusajs/types"
 import Product from "../product-preview"
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 type RelatedProductsProps = {
   product: HttpTypes.StoreProduct
@@ -13,6 +15,7 @@ export default async function RelatedProducts({
   countryCode,
 }: RelatedProductsProps) {
   const region = await getRegion(countryCode)
+  const locale = await getLocale()
 
   if (!region) {
     return null
@@ -49,13 +52,13 @@ export default async function RelatedProducts({
   return (
     <div className="product-page-constraint">
       <div className="flex flex-col items-center text-center mb-16">
-        <span className="text-primary uppercase tracking-wide mb-6">
-          Related products
+        <span className="text-primary uppercase tracking-wide mb-2">
+          {await translate("product.relatedProducts", locale)}
         </span>
-        <h2 className="text-3xl text-ink max-w-lg">
-          You might also want to check out these products.
+        <h2 className="text-3xl text-ink max-w-lg leading-tight">
+          {await translate("product.relatedProductsText", locale)}
         </h2>
-        
+
       </div>
 
       <ul className="grid grid-cols-2 small:grid-cols-3 medium:grid-cols-4 gap-x-6 gap-y-8">

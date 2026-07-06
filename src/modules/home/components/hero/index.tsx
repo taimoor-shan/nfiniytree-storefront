@@ -3,6 +3,7 @@
 import { Button, Heading } from "@medusajs/ui"
 import { ChevronDown } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import { useTranslation } from "@lib/i18n/client"
 import Image from "next/image"
 
 type HeroProps = {
@@ -14,8 +15,9 @@ type HeroProps = {
 }
 
 const Hero = ({ page }: HeroProps) => {
-  const title = page?.title || "Living Art for Timeless Interiors"
-  const excerpt = page?.excerpt || "Handmade artificial trees and botanical masterpieces — each one of a kind. No watering, no sunlight, no care. Just enduring beauty for luxury spaces."
+  const { t } = useTranslation()
+  const title = page?.title || t("hero.fallbackTitle")
+  const excerpt = page?.excerpt || t("hero.fallbackExcerpt")
 
   const backgroundImage = page?.featured_image
     ? `url(${page.featured_image})`
@@ -64,7 +66,7 @@ const Hero = ({ page }: HeroProps) => {
             behavior: "smooth",
           })
         }}
-        aria-label="Scroll down"
+        aria-label={t("hero.scrollDown")}
       >
         <ChevronDown size={32} />
       </button>

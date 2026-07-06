@@ -1,4 +1,5 @@
-import { Metadata } from "next"
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 import ProfilePhone from "@modules/account//components/profile-phone"
 import ProfileBillingAddress from "@modules/account/components/profile-billing-address"
@@ -10,12 +11,17 @@ import { notFound } from "next/navigation"
 import { listRegions } from "@lib/data/regions"
 import { retrieveCustomer } from "@lib/data/customer"
 
-export const metadata: Metadata = {
-  title: "Profile",
-  description: "View and edit your Infinytree profile.",
+export async function generateMetadata() {
+  const locale = await getLocale()
+
+  return {
+    title: await translate("metadata.profileTitle", locale),
+    description: await translate("metadata.profileDescription", locale),
+  }
 }
 
 export default async function Profile() {
+  const locale = await getLocale()
   const customer = await retrieveCustomer()
   const regions = await listRegions()
 
@@ -26,11 +32,9 @@ export default async function Profile() {
   return (
     <div className="w-full" data-testid="profile-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">Profile</h1>
+        <h1 className="text-2xl-semi">{await translate("account.profile", locale)}</h1>
         <p className="text-base-regular">
-          View and update your profile information, including your name, email,
-          and phone number. You can also update your billing address, or change
-          your password.
+          {await translate("account.profileDescription", locale)}
         </p>
       </div>
       <div className="flex flex-col gap-y-8 w-full">

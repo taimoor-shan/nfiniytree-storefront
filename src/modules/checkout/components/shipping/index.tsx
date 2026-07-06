@@ -10,6 +10,7 @@ import { Button, clx, Heading, Text } from "@medusajs/ui"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import Divider from "@modules/common/components/divider"
 import MedusaRadio from "@modules/common/components/radio"
+import { useTranslation } from "@/lib/i18n"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useState } from "react"
 
@@ -64,6 +65,7 @@ const Shipping: React.FC<ShippingProps> = ({
     cart.shipping_methods?.at(-1)?.shipping_option_id || null
   )
 
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -161,7 +163,7 @@ const Shipping: React.FC<ShippingProps> = ({
             }
           )}
         >
-          Delivery
+          {t("checkout.delivery")}
           {!isOpen && (cart.shipping_methods?.length ?? 0) > 0 && (
             <CheckCircleSolid />
           )}
@@ -176,7 +178,7 @@ const Shipping: React.FC<ShippingProps> = ({
                 className="text-link"
                 data-testid="edit-delivery-button"
               >
-                Edit
+                {t("account.edit")}
               </button>
             </Text>
           )}
@@ -186,10 +188,10 @@ const Shipping: React.FC<ShippingProps> = ({
           <div className="grid">
             <div className="flex flex-col">
               <span className="font-medium txt-medium text-ink">
-                Shipping method
+                {t("checkout.shippingMethod")}
               </span>
               <span className="mb-4 text-muted txt-medium">
-                How would you like you order delivered
+                {t("checkout.howDelivery")}
               </span>
             </div>
             <div data-testid="delivery-options-container">
@@ -223,7 +225,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           checked={showPickupOptions === PICKUP_OPTION_ON}
                         />
                         <span className="text-base-regular">
-                          Pick up your order
+                          {t("checkout.pickUpOrder")}
                         </span>
                       </div>
                       <span className="justify-self-end text-ink">
@@ -299,10 +301,10 @@ const Shipping: React.FC<ShippingProps> = ({
             <div className="grid">
               <div className="flex flex-col">
                 <span className="font-medium txt-medium text-ink">
-                  Store
+                  {t("checkout.pickUpOrder")}
                 </span>
                 <span className="mb-4 text-muted txt-medium">
-                  Choose a store near you
+                  {t("checkout.chooseStore")}
                 </span>
               </div>
               <div data-testid="delivery-options-container">
@@ -376,7 +378,7 @@ const Shipping: React.FC<ShippingProps> = ({
               disabled={!cart.shipping_methods?.[0]}
               data-testid="submit-delivery-option-button"
             >
-              Continue to payment
+              {t("checkout.continueToPayment")}
             </Button>
           </div>
         </>
@@ -386,7 +388,7 @@ const Shipping: React.FC<ShippingProps> = ({
             {cart && (cart.shipping_methods?.length ?? 0) > 0 && (
               <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ink mb-1">
-                  Method
+                  {t("checkout.method")}
                 </Text>
                 <Text className="txt-medium text-body">
                   {cart.shipping_methods!.at(-1)!.name}{" "}

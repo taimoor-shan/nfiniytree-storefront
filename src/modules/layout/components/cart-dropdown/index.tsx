@@ -11,6 +11,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import Thumbnail from "@modules/products/components/thumbnail"
 import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "@lib/i18n"
 
 type Props = {
   cart?: HttpTypes.StoreCart | null
@@ -26,6 +27,7 @@ const CartDropdown = ({
   const hasMountedRef = useRef(false)
   const previousCountRef = useRef(0)
   const pathname = usePathname()
+  const { t } = useTranslation()
 
   const close = useCallback(() => setOpen(false), [])
   const toggle = useCallback(() => setOpen((prev) => !prev), [])
@@ -77,7 +79,7 @@ const CartDropdown = ({
   }, [totalItems, pathname])
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="md:relative" ref={containerRef}>
       {/* Trigger button */}
       <button
         type="button"
@@ -85,8 +87,8 @@ const CartDropdown = ({
         aria-expanded={open}
         aria-label={
           totalItems > 0
-            ? `Shopping cart with ${totalItems} items`
-            : "Shopping cart"
+            ? t("misc.shoppingCartWith").replace("{count}", String(totalItems))
+            : t("misc.shoppingCart")
         }
         className={
           iconOnly
@@ -97,28 +99,28 @@ const CartDropdown = ({
         {iconOnly ? (
           <>
             <ShoppingCart />
-            <span className="sr-only">{`Cart (${totalItems})`}</span>
+            <span className="sr-only">{t("nav.cart")} ({totalItems})</span>
           </>
         ) : (
-          `Cart (${totalItems})`
+          <>{t("nav.cart")} ({totalItems})</>
         )}
       </button>
 
       {/* Dropdown panel */}
       <div
-        className={`absolute right-0 top-full z-50 mt-2 w-[420px] bg-canvas border border-hairline shadow-lg text-ink origin-top-right transition-all duration-200 ${
+        className={`absolute right-0 top-full z-50 mt-2 md:w-[420px] w-full bg-canvas border border-hairline shadow-lg text-ink origin-top-right transition-all duration-200 ${
           open
             ? "opacity-100 visible translate-y-0 scale-100"
             : "opacity-0 invisible -translate-y-1 scale-95 pointer-events-none"
         }`}
       >
         <div className="p-4 flex items-center justify-between border-b border-hairline-soft">
-          <h3 className="text-large-semi">Cart</h3>
+          <h3 className="text-large-semi">{t("misc.shoppingCart")}</h3>
           <button
             type="button"
             onClick={close}
             className="btn-icon-circular"
-            aria-label="Close cart"
+            aria-label={t("misc.closeCart")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -171,7 +173,7 @@ const CartDropdown = ({
                             data-testid="cart-item-quantity"
                             data-value={item.quantity}
                           >
-                            Quantity: {item.quantity}
+                            {t("misc.quantity")} {item.quantity}
                           </span>
                         </div>
                         <div className="flex justify-end shrink-0">
@@ -187,7 +189,7 @@ const CartDropdown = ({
                         className="mt-2 w-fit"
                         data-testid="cart-item-remove-button"
                       >
-                        Remove
+                        {t("cart.remove")}
                       </DeleteButton>
                     </div>
                   </div>
@@ -197,7 +199,7 @@ const CartDropdown = ({
             <div className="p-4 border-t border-hairline-soft flex flex-col gap-y-4 text-small-regular">
               <div className="flex items-center justify-between">
                 <span className="text-ink font-semibold">
-                  Subtotal <span className="font-normal">(excl. taxes)</span>
+                  {t("common.subtotalExcl")}
                 </span>
                 <span
                   className="text-large-semi"
@@ -212,7 +214,7 @@ const CartDropdown = ({
               </div>
               <LocalizedClientLink href="/cart" passHref onClick={close}>
                 <Button className="w-full primary" size="large" data-testid="go-to-cart-button">
-                  Go to cart
+                  {t("cart.goToCheckout")}
                 </Button>
               </LocalizedClientLink>
             </div>
@@ -222,9 +224,9 @@ const CartDropdown = ({
             <div className="bg-surface-dark text-small-regular flex items-center justify-center w-6 h-6 rounded-full text-on-dark">
               <span>0</span>
             </div>
-            <span>Your shopping bag is empty.</span>
+            <span>{t("misc.emptyCart")}</span>
             <LocalizedClientLink href="/store" onClick={close}>
-              <Button>Explore products</Button>
+              <Button>{t("cart.exploreProducts")}</Button>
             </LocalizedClientLink>
           </div>
         )}

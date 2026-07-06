@@ -1,47 +1,22 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
+import { getLocale } from "@lib/data/locale-actions"
+import { getDictionary } from "@lib/i18n/dictionaries"
 import { Sparkles, Droplets, TreePine, Building2 } from "lucide-react"
-
-const promisePillars = [
-  {
-    icon: Sparkles,
-    title: "One of a Kind",
-    description:
-      "Every piece is individually handcrafted — a unique 1/1 creation, never exactly replicated.",
-  },
-  {
-    icon: Droplets,
-    title: "Maintenance-Free",
-    description:
-      "No watering, no sun, no care. Hypoallergenic and free from pollen, mold, and allergens.",
-  },
-  {
-    icon: TreePine,
-    title: "Authentic Materials",
-    description:
-      "Real wood trunks, premium artificial foliage, and luxury designer pots for lasting sophistication.",
-  },
-  {
-    icon: Building2,
-    title: "Luxury Spaces",
-    description:
-      "Designed for hotels, villas, boutiques, offices, and exclusive interiors worldwide.",
-  },
-]
 
 type AboutPageProps = {
   params: Promise<{ countryCode: string }>
 }
 
 export async function generateMetadata(props: AboutPageProps): Promise<Metadata> {
-  const page = await retrievePageBySlug("about")
+  const locale = (await getLocale()) || "en"
+  const page = await retrievePageBySlug("about", locale)
 
   if (!page) {
     return {
       title: "About | Infinytree",
-      description:
-        "Handmade artificial botanical masterpieces for luxury interiors.",
+      description: "Handmade artificial botanical masterpieces for luxury interiors.",
     }
   }
 
@@ -55,7 +30,9 @@ export async function generateMetadata(props: AboutPageProps): Promise<Metadata>
 }
 
 export default async function AboutPage(props: AboutPageProps) {
-  const page = await retrievePageBySlug("about")
+  const locale = (await getLocale()) || "en"
+  const dict = await getDictionary(locale)
+  const page = await retrievePageBySlug("about", locale)
 
   if (!page) {
     notFound()
@@ -63,6 +40,29 @@ export default async function AboutPage(props: AboutPageProps) {
 
   const showHero = page.featured_image
   const showContent = page.content
+
+  const promisePillars = [
+    {
+      icon: Sparkles,
+      title: dict["features.oneOfAKind.title"],
+      description: dict["features.oneOfAKind.description"],
+    },
+    {
+      icon: Droplets,
+      title: dict["features.maintenanceFree.title"],
+      description: dict["features.maintenanceFree.description"],
+    },
+    {
+      icon: TreePine,
+      title: dict["features.authenticMaterials.title"],
+      description: dict["features.authenticMaterials.description"],
+    },
+    {
+      icon: Building2,
+      title: dict["features.luxurySpaces.title"],
+      description: dict["features.luxurySpaces.description"],
+    },
+  ]
 
   return (
     <div>
@@ -79,7 +79,7 @@ export default async function AboutPage(props: AboutPageProps) {
             <div className="content-container">
               <div className="max-w-3xl">
                 <p className="text-primary text-xs uppercase tracking-[0.2em] font-medium mb-4">
-                  Handmade Collection
+                  {dict["about.handmadeCollection"]}
                 </p>
                 <h1 className="font-display text-3xl lg:text-5xl text-on-dark leading-tight mb-4">
                   {page.title}
@@ -98,7 +98,7 @@ export default async function AboutPage(props: AboutPageProps) {
         <section className="pt-20 pb-8 lg:pt-28 lg:pb-12">
           <div className="content-container text-center">
             <p className="text-primary text-xs uppercase tracking-[0.2em] font-medium mb-4">
-              Handmade Collection
+              {dict["about.handmadeCollection"]}
             </p>
             <h1 className="font-display text-3xl lg:text-5xl text-ink leading-tight mb-4">
               {page.title}
@@ -135,7 +135,7 @@ export default async function AboutPage(props: AboutPageProps) {
           <aside className="lg:w-80 xl:w-96 shrink-0">
             <div className="sticky top-24 space-y-6">
               <p className="text-xs uppercase tracking-[0.2em] text-body">
-                The Infinytree Promise
+                {dict["about.thePromise"]}
               </p>
               <div className="space-y-5">
                 {promisePillars.map(({ icon: Icon, title, description }) => (
@@ -161,9 +161,7 @@ export default async function AboutPage(props: AboutPageProps) {
               {/* Location note */}
               <div>
                 <p className="text-xs text-body leading-relaxed">
-                  Based in Budapest, Hungary. We ship handcrafted pieces to
-                  Austria, Germany, and Hungary — with more European destinations
-                  available on request.
+                  {dict["about.locationNote"]}
                 </p>
                 <a
                   href="mailto:info@infinytree.com"

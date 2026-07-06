@@ -10,12 +10,14 @@ import Zoom from "yet-another-react-lightbox/plugins/zoom"
 import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"
 import "yet-another-react-lightbox/styles.css"
 import "yet-another-react-lightbox/plugins/thumbnails.css"
+import { useTranslation } from "@/lib/i18n"
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
 }
 
 const ImageGallery = ({ images }: ImageGalleryProps) => {
+  const { t } = useTranslation()
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
@@ -83,7 +85,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
               {!!image.url && (
                 <Image
                   src={image.url}
-                  alt={`Thumbnail ${index + 1}`}
+                  alt={t("product.thumbnail").replace("{index}", String(index + 1))}
                   fill
                   sizes="100px"
                   style={{ objectFit: "cover" }}
@@ -111,7 +113,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
             src={activeImage.url}
             priority={true}
             className="absolute inset-0 rounded-md"
-            alt="Product image"
+            alt={t("product.productImage")}
             fill
             sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 800px"
             style={{ objectFit: "cover" }}
@@ -124,14 +126,14 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
             <button
               className="lg:hidden absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-md z-10"
               onClick={goPrev}
-              aria-label="Previous image"
+              aria-label={t("product.previousImage")}
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               className="lg:hidden absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shadow-md z-10"
               onClick={goNext}
-              aria-label="Next image"
+              aria-label={t("product.nextImage")}
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -146,7 +148,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
                       : "bg-white/70 w-2 h-2"
                   }`}
                   onClick={() => goTo(index)}
-                  aria-label={`Go to image ${index + 1}`}
+                  aria-label={t("product.goToImage").replace("{index}", String(index + 1))}
                 />
               ))}
             </div>

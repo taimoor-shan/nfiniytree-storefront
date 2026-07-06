@@ -179,6 +179,8 @@ export default function TopBar({
     startTransition(async () => {
       await updateLocale(code)
       router.refresh()
+      // Notify client components to re-read the locale cookie
+      document.dispatchEvent(new CustomEvent("localechange"))
     })
   }
 

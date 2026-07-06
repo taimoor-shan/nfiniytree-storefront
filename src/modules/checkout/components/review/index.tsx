@@ -7,6 +7,7 @@ import PaymentButton from "../payment-button"
 import { useSearchParams } from "next/navigation"
 import { CardBrandLogos } from "@modules/checkout/components/card-brand-logos"
 import CheckboxWithLabel from "@modules/common/components/checkbox"
+import { useTranslation } from "@/lib/i18n"
 
 const hasConfiguredItems = (cart: any): boolean => {
   return (
@@ -17,6 +18,7 @@ const hasConfiguredItems = (cart: any): boolean => {
 }
 
 const Review = ({ cart }: { cart: any }) => {
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   const [acknowledged, setAcknowledged] = useState(false)
 
@@ -45,7 +47,7 @@ const Review = ({ cart }: { cart: any }) => {
             }
           )}
         >
-          Review
+          {t("checkout.review")}
         </Heading>
       </div>
       {isOpen && previousStepsCompleted && (
@@ -53,18 +55,17 @@ const Review = ({ cart }: { cart: any }) => {
           <div className="flex items-start gap-x-1 w-full mb-6">
             <div className="w-full">
               <Text className="txt-medium-plus text-ink mb-1">
-                By clicking the Place Order button, you confirm that you have
-                read, understand and accept our{" "}
+                {t("checkout.byClicking")}{" "}
                 <a className="text-link" href="/policies/terms">
-                  Terms & Conditions
+                  {t("footer.termsAndConditions")}
                 </a>
                 ,{" "}
                 <a className="text-link" href="/policies/returns">
-                  Returns & Refunds
+                  {t("footer.returnsRefunds")}
                 </a>{" "}
-                and acknowledge that you have read InfinYtree&apos;s{" "}
+                {t("checkout.andAcknowledge")}{" "}
                 <a className="text-link" href="/policies/privacy">
-                  Privacy Policy
+                  {t("footer.privacyPolicy")}
                 </a>
                 .
               </Text>

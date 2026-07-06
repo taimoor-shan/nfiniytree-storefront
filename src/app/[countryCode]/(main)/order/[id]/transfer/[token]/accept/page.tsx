@@ -1,6 +1,8 @@
 import { acceptTransferRequest } from "@lib/data/orders"
 import { Heading, Text } from "@medusajs/ui"
 import TransferImage from "@modules/order/components/transfer-image"
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 export default async function TransferPage({
   params,
@@ -8,6 +10,7 @@ export default async function TransferPage({
   params: { id: string; token: string }
 }) {
   const { id, token } = params
+  const locale = await getLocale()
 
   const { success, error } = await acceptTransferRequest(id, token)
 
@@ -18,20 +21,22 @@ export default async function TransferPage({
         {success && (
           <>
             <Heading level="h1" className="text-xl text-ink">
-              Order transfered!
+              {await translate("transfer.transferredTitle", locale)}
             </Heading>
             <Text className="text-body">
-              Order {id} has been successfully transfered to the new owner.
+              {(await translate("transfer.transferredText", locale)).replace("{id}", id)}
             </Text>
           </>
         )}
         {!success && (
           <>
             <Text className="text-body">
-              There was an error accepting the transfer. Please try again.
+              {await translate("transfer.acceptFail", locale)}
             </Text>
             {error && (
-              <Text className="text-error">Error message: {error}</Text>
+              <Text className="text-error">
+                {(await translate("transfer.errorMessage", locale)).replace("{error}", error)}
+              </Text>
             )}
           </>
         )}

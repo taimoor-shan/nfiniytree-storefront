@@ -1,3 +1,5 @@
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 import { Container } from "@medusajs/ui"
 
 import ChevronDown from "@modules/common/icons/chevron-down"
@@ -10,16 +12,26 @@ type OverviewProps = {
   orders: HttpTypes.StoreOrder[] | null
 }
 
-const Overview = ({ customer, orders }: OverviewProps) => {
+const Overview = async ({ customer, orders }: OverviewProps) => {
+  const locale = await getLocale()
+
+  // Pre-translate strings used inside .map() callbacks (non-async)
+  const tDatePlaced = await translate("account.datePlaced", locale)
+  const tOrderNumber = await translate("account.orderNumber", locale)
+  const tTotalAmount = await translate("account.totalAmount", locale)
+  const tGoToOrder = await translate("account.goToOrder", locale)
+
   return (
     <div data-testid="overview-page-wrapper">
       <div className="hidden small:block">
         <div className="text-xl-semi flex justify-between items-center mb-4">
           <span data-testid="welcome-message" data-value={customer?.first_name}>
-            Hello {customer?.first_name}
+            {customer?.first_name
+              ? (await translate("account.hello", locale)).replace("{name}", customer.first_name)
+              : ""}
           </span>
           <span className="text-small-regular text-ink">
-            Signed in as:{" "}
+            {await translate("account.signedInAs", locale)}{" "}
             <span
               className="font-semibold"
               data-testid="customer-email"
@@ -33,7 +45,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
           <div className="flex flex-col gap-y-4 h-full col-span-1 row-span-2 flex-1">
             <div className="flex items-start gap-x-16 mb-6">
               <div className="flex flex-col gap-y-4">
-                <h3 className="text-large-semi">Profile</h3>
+                <h3 className="text-large-semi">{await translate("account.profile", locale)}</h3>
                 <div className="flex items-end gap-x-2">
                   <span
                     className="text-3xl-semi leading-none"
@@ -49,7 +61,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
               </div>
 
               <div className="flex flex-col gap-y-4">
-                <h3 className="text-large-semi">Addresses</h3>
+                <h3 className="text-large-semi">{await translate("account.addresses", locale)}</h3>
                 <div className="flex items-end gap-x-2">
                   <span
                     className="text-3xl-semi leading-none"
@@ -67,7 +79,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
 
             <div className="flex flex-col gap-y-4">
               <div className="flex items-center gap-x-2">
-                <h3 className="text-large-semi">Recent orders</h3>
+                <h3 className="text-large-semi">{await translate("account.recentOrders", locale)}</h3>
               </div>
               <ul
                 className="flex flex-col gap-y-4"
@@ -86,12 +98,12 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                         >
                           <Container className="bg-gray-50 flex justify-between items-center p-4">
                             <div className="grid grid-cols-3 grid-rows-2 text-small-regular gap-x-4 flex-1">
-                              <span className="font-semibold">Date placed</span>
+                              <span className="font-semibold">{tDatePlaced}</span>
                               <span className="font-semibold">
-                                Order number
+                                {tOrderNumber}
                               </span>
                               <span className="font-semibold">
-                                Total amount
+                                {tTotalAmount}
                               </span>
                               <span data-testid="order-created-date">
                                 {new Date(order.created_at).toDateString()}
@@ -114,7 +126,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                               data-testid="open-order-button"
                             >
                               <span className="sr-only">
-                                Go to order #{order.display_id}
+                                {tGoToOrder.replace("{id}", String(order.display_id))}
                               </span>
                               <ChevronDown className="-rotate-90" />
                             </button>
@@ -124,7 +136,7 @@ const Overview = ({ customer, orders }: OverviewProps) => {
                     )
                   })
                 ) : (
-                  <span data-testid="no-orders-message">No recent orders</span>
+                  <span data-testid="no-orders-message">{await translate("account.noRecentOrders", locale)}</span>
                 )}
               </ul>
             </div>

@@ -3,8 +3,10 @@
 import { Button, Heading, Input, Textarea, Text } from "@medusajs/ui"
 import { useState } from "react"
 import { sdk } from "@lib/config"
+import { useTranslation } from "@lib/i18n/client"
 
 export default function ContactForm() {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
 
@@ -40,23 +42,23 @@ export default function ContactForm() {
       const message = Array.isArray(err.message)
         ? err.message.map((m: any) => m.message || m).join(", ")
         : err.message
-      setErrorMessage(message || "Something went wrong. Please try again.")
+      setErrorMessage(message || t("contact.form.error"))
     }
   }
 
   if (status === "success") {
     return (
       <div className="flex flex-col gap-y-4 p-8 border border-hairline rounded-lg bg-surface-card text-center">
-        <Heading level="h2" className="text-xl">Message Sent</Heading>
+        <Heading level="h2" className="text-xl">{t("contact.form.success")}</Heading>
         <Text className="text-body">
-          Thank you for reaching out. We have received your message and will get back to you shortly.
+          {t("contact.form.successText")}
         </Text>
-        <Button 
-          variant="secondary" 
+        <Button
+          variant="secondary"
           onClick={() => setStatus("idle")}
           className="mt-4 w-fit mx-auto"
         >
-          Send another message
+          {t("contact.form.sendAnother")}
         </Button>
       </div>
     )
@@ -67,34 +69,34 @@ export default function ContactForm() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-y-2">
           <label htmlFor="name" className="text-sm font-medium text-ink">
-            Name <span className="text-error">*</span>
+            {t("contact.form.name")} <span className="text-error">*</span>
           </label>
-          <Input id="name" name="name" placeholder="Your full name" />
+          <Input id="name" name="name" placeholder={t("contact.form.namePlaceholder")} />
         </div>
-        
+
         <div className="flex flex-col gap-y-2">
           <label htmlFor="email" className="text-sm font-medium text-ink">
-            Email <span className="text-error">*</span>
+            {t("contact.form.email")} <span className="text-error">*</span>
           </label>
-          <Input id="email" name="email" placeholder="your.email@example.com" />
+          <Input id="email" name="email" placeholder={t("contact.form.emailPlaceholder")} />
         </div>
       </div>
 
       <div className="flex flex-col gap-y-2">
         <label htmlFor="subject" className="text-sm font-medium text-ink">
-          Subject <span className="text-error">*</span>
+          {t("contact.form.subject")} <span className="text-error">*</span>
         </label>
-        <Input id="subject" name="subject" placeholder="What is this regarding?" />
+        <Input id="subject" name="subject" placeholder={t("contact.form.subjectPlaceholder")} />
       </div>
 
       <div className="flex flex-col gap-y-2">
         <label htmlFor="message" className="text-sm font-medium text-ink">
-          Message <span className="text-error">*</span>
+          {t("contact.form.message")} <span className="text-error">*</span>
         </label>
         <Textarea
           id="message"
           name="message"
-          placeholder="How can we help you?"
+          placeholder={t("contact.form.messagePlaceholder")}
           rows={6}
         />
       </div>
@@ -103,13 +105,13 @@ export default function ContactForm() {
         <Text className="text-error text-sm">{errorMessage}</Text>
       )}
 
-      <Button 
-        type="submit" 
-        size="large" 
+      <Button
+        type="submit"
+        size="large"
         isLoading={status === "loading"}
         className="w-full sm:w-auto"
       >
-        Send Message
+        {t("contact.form.submit")}
       </Button>
     </form>
   )

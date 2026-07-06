@@ -1,11 +1,51 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { HttpTypes } from "@medusajs/types"
+import { getLocalizedMetadata } from "@lib/i18n/metadata"
+import { useTranslation } from "@/lib/i18n"
 
 type ProductInfoBlocksProps = {
   product: HttpTypes.StoreProduct
+  /** Locale for metadata resolution, provided by the server. */
+  locale?: string
 }
 
-const ProductInfoBlocks = ({ product }: ProductInfoBlocksProps) => {
-  const metadata = (product.metadata as Record<string, any>) || {}
+function getLocaleFromCookie(): string {
+  if (typeof document === "undefined") return "en"
+  const match = document.cookie.match(/(?:^|;\s*)_medusa_locale=([^;]*)/)
+  return match ? decodeURIComponent(match[1]) || "en" : "en"
+}
+
+const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksProps) => {
+  // Use the server-provided locale during SSR/hydration so the rendered
+  // tree matches.  Falls back to cookie detection when no prop is given.
+  const [locale, setLocale] = useState<string>(
+    () => localeProp || getLocaleFromCookie()
+  )
+
+  useEffect(() => {
+    const cookieLocale = getLocaleFromCookie()
+    if (cookieLocale !== "en" && cookieLocale !== locale) {
+      setLocale(cookieLocale)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (localeProp !== undefined) setLocale(localeProp)
+  }, [localeProp])
+
+  const { t } = useTranslation()
+
+  useEffect(() => {
+    const handler = () => setLocale(getLocaleFromCookie())
+    document.addEventListener("localechange", handler)
+    return () => document.removeEventListener("localechange", handler)
+  }, [])
+
+  const rawMetadata = (product.metadata as Record<string, any>) || {}
+  const metadata = getLocalizedMetadata(rawMetadata, locale)
 
   const keyFeaturesRaw = metadata?.key_features
   let parsedKeyFeatures: string[] = []
@@ -50,7 +90,20 @@ const ProductInfoBlocks = ({ product }: ProductInfoBlocksProps) => {
     }
   }
 
-  // Build tree specs
+  // Map English spec labels → translation keys
+  const specLabelKey: Record<string, string> = {
+    Height: "product.height",
+    Width: "product.width",
+    Depth: "product.depth",
+    Weight: "product.weight",
+    Material: "product.material",
+    "Country of origin": "product.countryOfOrigin",
+    Size: "product.size",
+    Finish: "product.finish",
+    Care: "product.care",
+  }
+
+  // Build tree specs (keys are English labels, translated at render time)
   const treeSpecs: Record<string, string> = {}
   if (product.height) treeSpecs["Height"] = `${product.height}`
   if (product.width) treeSpecs["Width"] = `${product.width}`
@@ -88,7 +141,7 @@ const ProductInfoBlocks = ({ product }: ProductInfoBlocksProps) => {
       {hasKeyFeatures && (
         <div className="flex-1">
           <h3 className="font-semibold text-primary text-base mb-4">
-            Key Features
+            {t("product.keyFeatures")}
           </h3>
           <ul className="list-disc pl-4 flex flex-col gap-y-2 marker:text-primary text-sm text-body">
             {parsedKeyFeatures.map((feature, i) => (
@@ -102,20 +155,20 @@ const ProductInfoBlocks = ({ product }: ProductInfoBlocksProps) => {
       {(hasTreeSpecs || hasPotSpecs) && (
         <div className="flex-1">
           <h3 className="font-semibold text-primary text-base mb-4">
-            Specifications
+            {t("product.specifications")}
           </h3>
           {hasTreeSpecs && (
             <div>
               {hasPotSpecs && (
                 <span className="font-semibold text-ink text-sm block mb-2">
-                  Tree (including pot)
+                  {t("product.treeIncludingPot")}
                 </span>
               )}
               <div className="flex flex-col gap-y-2 text-sm">
                 {Object.entries(treeSpecs).map(([key, value], i) => (
                   <div key={i} className="flex gap-x-2">
                     <span className="font-semibold text-ink">
-                      {key}:
+                      {t(specLabelKey[key] || key)}:
                     </span>
                     <span className="text-body">{value}</span>
                   </div>
@@ -126,13 +179,13 @@ const ProductInfoBlocks = ({ product }: ProductInfoBlocksProps) => {
           {hasPotSpecs && (
             <div className={hasTreeSpecs ? "mt-4 pt-4 border-t border-hairline" : ""}>
               <span className="font-semibold text-ink text-sm block mb-2">
-                {parsedPot?.size ? `Pot Only (${parsedPot.size})` : "Pot Only"}
+                {parsedPot?.size ? `${t("product.potOnly")} (${parsedPot.size})` : t("product.potOnly")}
               </span>
               <div className="flex flex-col gap-y-2 text-sm">
                 {Object.entries(potSpecs).map(([key, value], i) => (
                   <div key={i} className="flex gap-x-2">
                     <span className="font-semibold text-ink">
-                      {key}:
+                      {t(specLabelKey[key] || key)}:
                     </span>
                     <span className="text-body">{value}</span>
                   </div>
@@ -147,7 +200,7 @@ const ProductInfoBlocks = ({ product }: ProductInfoBlocksProps) => {
       {hasCare && (
         <div className="flex-1">
           <h3 className="font-semibold text-primary text-base mb-4">
-            Maintenance &amp; Care
+            {t("product.maintenanceCare")}
           </h3>
           <p className="text-sm text-body leading-loose">{care}</p>
         </div>

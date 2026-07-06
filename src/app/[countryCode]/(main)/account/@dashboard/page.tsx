@@ -1,13 +1,17 @@
-import { Metadata } from "next"
-
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 import Overview from "@modules/account/components/overview"
 import { notFound } from "next/navigation"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listOrders } from "@lib/data/orders"
 
-export const metadata: Metadata = {
-  title: "Account",
-  description: "Overview of your account activity.",
+export async function generateMetadata() {
+  const locale = await getLocale()
+
+  return {
+    title: await translate("metadata.accountTitle", locale),
+    description: await translate("metadata.accountDescription", locale),
+  }
 }
 
 export default async function OverviewTemplate() {

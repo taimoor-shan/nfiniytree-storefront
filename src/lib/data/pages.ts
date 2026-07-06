@@ -7,6 +7,7 @@ type Page = {
   id: string
   title: string
   slug: string
+  locale?: string
   content?: string | null
   excerpt?: string | null
   featured_image?: string | null
@@ -48,10 +49,11 @@ export const listPages = async ({
   })
 }
 
-export const retrievePageBySlug = async (slug: string) => {
+export const retrievePageBySlug = async (slug: string, locale?: string | null) => {
   return sdk.client
     .fetch<PageResponse>(`/store/pages/${slug}`, {
       method: "GET",
+      query: locale ? { locale } : undefined,
       cache: "no-store",
     })
     .then(({ page }) => page)

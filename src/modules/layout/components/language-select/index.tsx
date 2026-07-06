@@ -122,6 +122,8 @@ const LanguageSelect = ({
       await updateLocale(option.code)
       close()
       router.refresh()
+      // Notify client components to re-read the locale cookie
+      document.dispatchEvent(new CustomEvent("localechange"))
     })
   }
 
