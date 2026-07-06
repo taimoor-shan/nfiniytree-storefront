@@ -4,6 +4,7 @@ import { listRegions } from "@lib/data/regions"
 import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
 import { retrieveStore } from "@lib/data/store"
+import { getDictionary } from "@lib/i18n/dictionaries"
 import { ShoppingCart, User } from 'lucide-react';
 
 import { StoreRegion } from "@medusajs/types"
@@ -21,6 +22,7 @@ export default async function Nav() {
     retrieveStore(),
   ])
   const storeName = store?.name || "Infinytree"
+  const dict = await getDictionary(currentLocale)
 
   return (
     <HeaderWrapper
@@ -54,28 +56,28 @@ export default async function Nav() {
                 href="/"
                 data-testid="nav-home-link"
               >
-                Home
+                {dict["nav.home"]}
               </LocalizedClientLink>
               <LocalizedClientLink
                 className="hover:text-primary text-sm text-ink uppercase"
                 href="/store"
                 data-testid="nav-store-link-center"
               >
-                Store
+                {dict["nav.store"]}
               </LocalizedClientLink>
               <LocalizedClientLink
                 className="hover:text-primary text-sm text-ink uppercase"
                 href="/about"
                 data-testid="nav-about-link"
               >
-                About
+                {dict["nav.about"]}
               </LocalizedClientLink>
               <LocalizedClientLink
                 className="hover:text-primary text-sm text-ink uppercase"
                 href="/contact"
                 data-testid="nav-contact-link"
               >
-                Contact
+                {dict["nav.contact"]}
               </LocalizedClientLink>
             </div>
           </div>
@@ -88,7 +90,7 @@ export default async function Nav() {
                 className="flex  items-center justify-center rounded-full text-ink"
                 href="/account"
                 data-testid="nav-account-link"
-                aria-label="Account"
+                aria-label={dict["nav.account"]}
               >
                 <User />
               </LocalizedClientLink>
@@ -100,7 +102,7 @@ export default async function Nav() {
                     className="flex  items-center justify-center rounded-full text-ink"
                     href="/cart"
                     data-testid="nav-cart-link"
-                    aria-label="Shopping cart"
+                    aria-label={dict["nav.cart"]}
                   >
                     <ShoppingCart />
                   </LocalizedClientLink>
@@ -117,10 +119,10 @@ export default async function Nav() {
                   className="small:hidden flex h-20 w-20 items-center justify-center rounded-full text-ink"
                   href="/cart"
                   data-testid="mobile-nav-cart-link"
-                  aria-label="Shopping cart"
+                  aria-label={dict["nav.cart"]}
                 >
                   <ShoppingCart />
-                  <span className="sr-only">Cart (0)</span>
+                  <span className="sr-only">{dict["nav.cart"]} (0)</span>
                 </LocalizedClientLink>
               }
             >

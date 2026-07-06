@@ -14,6 +14,7 @@ import { StateType } from "@lib/hooks/use-toggle-state"
 import { useParams, usePathname } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { useTranslation } from "@lib/i18n"
 
 type CountryOption = {
   country: string
@@ -43,6 +44,8 @@ const CountrySelect = ({
   buttonClassName,
   dropdownWrapperClassName,
 }: CountrySelectProps) => {
+  const { t } = useTranslation()
+
   const [current, setCurrent] = useState<
     | { country: string | undefined; region: string; label: string | undefined }
     | undefined
@@ -93,7 +96,7 @@ const CountrySelect = ({
           className={["py-1 w-full", buttonClassName].filter(Boolean).join(" ")}
         >
           <div className="txt-compact-small flex items-start gap-x-2">
-            {label !== null ? <span>{label}</span> : null}
+            {label !== null ? <span>{t("misc.shippingTo", label)}</span> : null}
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
                 {/* @ts-ignore */}

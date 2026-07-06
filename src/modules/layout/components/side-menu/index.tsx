@@ -3,20 +3,14 @@
 import { Popover, PopoverPanel, Transition } from "@headlessui/react"
 import { ArrowRightMini, BarsThree, XMark } from "@medusajs/icons"
 import { Text, clx, useToggleState } from "@medusajs/ui"
-import { Fragment } from "react"
+import { Fragment, useMemo } from "react"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import CountrySelect from "../country-select"
 import LanguageSelect from "../language-select"
 import { HttpTypes } from "@medusajs/types"
 import { Locale } from "@lib/data/locales"
-
-const SideMenuItems = {
-  Home: "/",
-  Store: "/store",
-  Account: "/account",
-  Cart: "/cart",
-}
+import { useTranslation } from "@lib/i18n/client"
 
 type SideMenuProps = {
   regions: HttpTypes.StoreRegion[] | null
@@ -33,8 +27,16 @@ const SideMenu = ({
   storeName = "Infinytree",
   triggerClassName,
 }: SideMenuProps) => {
+  const { t } = useTranslation()
   const countryToggleState = useToggleState()
   const languageToggleState = useToggleState()
+
+  const SideMenuItems = useMemo(() => ({
+    [t("nav.home")]: "/",
+    [t("nav.store")]: "/store",
+    [t("nav.account")]: "/account",
+    [t("nav.cart")]: "/cart",
+  }), [t])
 
   return (
     <div className="h-full">
@@ -49,10 +51,10 @@ const SideMenu = ({
                     "relative flex h-11 w-11 items-center justify-center rounded-full transition-all duration-200 ease-out hover:text-ink focus:outline-none",
                     triggerClassName
                   )}
-                  aria-label="Open menu"
+                  aria-label={t("nav.menu")}
                 >
                   <BarsThree />
-                  <span className="sr-only">Menu</span>
+                  <span className="sr-only">{t("nav.menu")}</span>
                 </Popover.Button>
               </div>
 
@@ -147,8 +149,9 @@ const SideMenu = ({
                         </div>
                       )}
                       <Text className="flex justify-between txt-compact-small">
-                        © {new Date().getFullYear()} {storeName}. All rights
-                        reserved.
+                        {t("footer.allRightsReserved")
+                          .replace("{year}", String(new Date().getFullYear()))
+                          .replace("{storeName}", storeName)}
                       </Text>
                     </div>
                   </div>

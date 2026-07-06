@@ -1,4 +1,5 @@
-import { Metadata } from "next"
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 import OrderOverview from "@modules/account/components/order-overview"
 import { notFound } from "next/navigation"
@@ -6,12 +7,17 @@ import { listOrders } from "@lib/data/orders"
 import Divider from "@modules/common/components/divider"
 import TransferRequestForm from "@modules/account/components/transfer-request-form"
 
-export const metadata: Metadata = {
-  title: "Orders",
-  description: "Overview of your previous orders.",
+export async function generateMetadata() {
+  const locale = await getLocale()
+
+  return {
+    title: await translate("metadata.ordersTitle", locale),
+    description: await translate("metadata.ordersDescription", locale),
+  }
 }
 
 export default async function Orders() {
+  const locale = await getLocale()
   const orders = await listOrders()
 
   if (!orders) {
@@ -21,10 +27,9 @@ export default async function Orders() {
   return (
     <div className="w-full" data-testid="orders-page-wrapper">
       <div className="mb-8 flex flex-col gap-y-4">
-        <h1 className="text-2xl-semi">Orders</h1>
+        <h1 className="text-2xl-semi">{await translate("account.orders", locale)}</h1>
         <p className="text-base-regular">
-          View your previous orders and their status. You can also create
-          returns or exchanges for your orders if needed.
+          {await translate("account.ordersDescription", locale)}
         </p>
       </div>
       <div>

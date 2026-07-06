@@ -10,10 +10,12 @@ const StoreTemplate = ({
   sortBy,
   page,
   countryCode,
+  title,
 }: {
   sortBy?: SortOptions
   page?: string
   countryCode: string
+  title: string
 }) => {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "price_desc"
@@ -29,7 +31,7 @@ const StoreTemplate = ({
           className="text-2xl sm:text-3xl font-display text-ink"
           data-testid="store-page-title"
         >
-          All Products
+          {title}
         </h1>
         <RefinementList sortBy={sort} />
       </div>

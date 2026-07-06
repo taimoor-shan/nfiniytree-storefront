@@ -11,6 +11,7 @@ import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
+import { getLocale } from "@lib/data/locale-actions"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 
@@ -21,7 +22,7 @@ type ProductTemplateProps = {
   images: HttpTypes.StoreProductImage[]
 }
 
-const ProductTemplate: React.FC<ProductTemplateProps> = ({
+const ProductTemplate: React.FC<ProductTemplateProps> = async ({
   product,
   region,
   countryCode,
@@ -30,6 +31,12 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
   if (!product || !product.id) {
     return notFound()
   }
+
+  // Resolve the locale server-side so the client component receives
+  // a stable value — avoids hydration mismatches caused by the SSR
+  // fallback (document === undefined → "en") disagreeing with the
+  // client's cookie-based detection.
+  const locale = (await getLocale()) || "en"
 
   return (
     <>
@@ -59,13 +66,13 @@ const ProductTemplate: React.FC<ProductTemplateProps> = ({
             <ProductActionsWrapper id={product.id} region={region} />
           </Suspense>
 
-<ProductTabs product={product} />
+<ProductTabs product={product} locale={locale} />
 
           <ProductOnboardingCta />
         </div>
       </div>
       {/* <div className="content-container my-16 small:my-32">
-        <ProductInfoBlocks product={product} />
+        <ProductInfoBlocks product={product} locale={locale} />
       </div> */}
     <Features />
       <div

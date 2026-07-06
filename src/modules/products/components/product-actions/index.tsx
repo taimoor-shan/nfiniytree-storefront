@@ -12,6 +12,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
 import { useRouter } from "next/navigation"
+import { useTranslation } from "@/lib/i18n"
 
 type ProductActionsProps = {
   product: HttpTypes.StoreProduct
@@ -35,6 +36,7 @@ export default function ProductActions({
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { t } = useTranslation()
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
@@ -177,7 +179,9 @@ export default function ProductActions({
 
         {quantityExceedsStock && (
           <p className="text-error text-xs">
-            Only {maxQuantity} item{maxQuantity !== 1 ? "s" : ""} available in stock.
+            {maxQuantity === 1
+              ? t("product.onlyLeft").replace("{count}", String(maxQuantity))
+              : t("product.onlyLeftPlural").replace("{count}", String(maxQuantity))}
           </p>
         )}
         <div className="flex gap-x-3">
@@ -187,7 +191,7 @@ export default function ProductActions({
               onClick={() => setQuantity((q) => Math.max(1, q - 1))}
               disabled={isAdding || !!disabled || !inStock || !selectedVariant}
               className="btn-icon-circular w-10 h-10 rounded-l-md text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Decrease quantity"
+              aria-label={t("product.decreaseQuantity")}
             >
               −
             </button>
@@ -199,7 +203,7 @@ export default function ProductActions({
               onClick={() => setQuantity((q) => q + 1)}
               disabled={isAdding || !!disabled || !inStock || !selectedVariant || quantity >= maxQuantity}
               className="btn-icon-circular w-10 h-10 rounded-r-md text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Increase quantity"
+              aria-label={t("product.increaseQuantity")}
             >
               +
             </button>
@@ -220,12 +224,12 @@ export default function ProductActions({
             data-testid="add-product-button"
           >
             {!selectedVariant && !options
-              ? "Select variant"
+              ? t("product.selectVariant")
               : !inStock || !isValidVariant
-              ? "Out of stock"
+              ? t("product.outOfStock")
               : quantityExceedsStock
-              ? "Not enough stock"
-              : "Add to cart"}
+              ? t("product.notEnoughStock")
+              : t("product.addToCart")}
           </Button>
         </div>
         <MobileActions

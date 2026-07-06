@@ -9,6 +9,8 @@ import OrderDetails from "@modules/order/components/order-details"
 import ShippingDetails from "@modules/order/components/shipping-details"
 import PaymentDetails from "@modules/order/components/payment-details"
 import { HttpTypes } from "@medusajs/types"
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 type OrderCompletedTemplateProps = {
   order: HttpTypes.StoreOrder
@@ -18,6 +20,7 @@ export default async function OrderCompletedTemplate({
   order,
 }: OrderCompletedTemplateProps) {
   const cookies = await nextCookies()
+  const locale = await getLocale()
 
   const isOnboarding = cookies.get("_medusa_onboarding")?.value === "true"
 
@@ -33,12 +36,12 @@ export default async function OrderCompletedTemplate({
             level="h1"
             className="flex flex-col gap-y-3 text-ink text-3xl mb-4"
           >
-            <span>Thank you!</span>
-            <span>Your order was placed successfully.</span>
+            <span>{await translate("order.thankYou", locale)}</span>
+            <span>{await translate("order.placedSuccessfully", locale)}</span>
           </Heading>
           <OrderDetails order={order} />
           <Heading level="h2" className="flex flex-row text-3xl-regular">
-            Summary
+            {await translate("order.summary", locale)}
           </Heading>
           <Items order={order} />
           <CartTotals totals={order} />

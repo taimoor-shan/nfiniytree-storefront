@@ -3,16 +3,19 @@ import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
 
 import Divider from "@modules/common/components/divider"
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 type ShippingDetailsProps = {
   order: HttpTypes.StoreOrder
 }
 
-const ShippingDetails = ({ order }: ShippingDetailsProps) => {
+const ShippingDetails = async ({ order }: ShippingDetailsProps) => {
+  const locale = await getLocale()
   return (
     <div>
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
-        Delivery
+        {await translate("checkout.delivery", locale)}
       </Heading>
       <div className="flex items-start gap-x-8">
         <div
@@ -20,7 +23,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ink mb-1">
-            Shipping Address
+            {await translate("order.shippingAddress", locale)}
           </Text>
           <Text className="txt-medium text-body">
             {order.shipping_address?.first_name}{" "}
@@ -43,7 +46,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           className="flex flex-col w-1/3 "
           data-testid="shipping-contact-summary"
         >
-          <Text className="txt-medium-plus text-ink mb-1">Contact</Text>
+          <Text className="txt-medium-plus text-ink mb-1">{await translate("order.contact", locale)}</Text>
           <Text className="txt-medium text-body">
             {order.shipping_address?.phone}
           </Text>
@@ -54,7 +57,7 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           className="flex flex-col w-1/3"
           data-testid="shipping-method-summary"
         >
-          <Text className="txt-medium-plus text-ink mb-1">Method</Text>
+          <Text className="txt-medium-plus text-ink mb-1">{await translate("order.method", locale)}</Text>
           <Text className="txt-medium text-body">
             {(order as any).shipping_methods[0]?.name} (
             {convertToLocale({

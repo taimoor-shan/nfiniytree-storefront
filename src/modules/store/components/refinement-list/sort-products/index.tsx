@@ -1,6 +1,7 @@
 "use client"
 
 import { Select } from "@medusajs/ui"
+import { useTranslation } from "@/lib/i18n"
 
 export type SortOptions =
   | "price_asc"
@@ -16,26 +17,18 @@ type SortProductsProps = {
   "data-testid"?: string
 }
 
-const sortOptions = [
-  {
-    value: "created_at",
-    label: "Latest Arrivals",
-  },
-  {
-    value: "price_asc",
-    label: "Price: Low → High",
-  },
-  {
-    value: "price_desc",
-    label: "Price: High → Low",
-  },
-]
-
 const SortProducts = ({
   "data-testid": dataTestId,
   sortBy,
   setQueryParams,
 }: SortProductsProps) => {
+  const { t } = useTranslation()
+
+  const sortOptions = [
+    { value: "created_at", label: t("store.latestArrivals") },
+    { value: "price_asc", label: t("store.priceLowToHigh") },
+    { value: "price_desc", label: t("store.priceHighToLow") },
+  ]
   return (
     <div
       className="w-full sm:w-[180px]"

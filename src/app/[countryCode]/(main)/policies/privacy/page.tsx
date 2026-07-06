@@ -1,20 +1,24 @@
 import { Metadata } from "next"
 import { retrievePageBySlug } from "@lib/data/pages"
+import { translate } from "@lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 const SLUG = "privacy-policy"
-const FALLBACK_TITLE = "Privacy Policy"
 
 export async function generateMetadata(): Promise<Metadata> {
   const page = await retrievePageBySlug(SLUG)
+  const locale = await getLocale()
+  const title = await translate("footer.privacyPolicy", locale)
   return {
-    title: page?.seo_title || page?.title || `${FALLBACK_TITLE} | Infinytree`,
+    title: page?.seo_title || page?.title || `${title} | Infinytree`,
     description:
-      page?.seo_description || page?.excerpt || "How we collect, use and protect your data.",
+      page?.seo_description || page?.excerpt || (await translate("policy.pageBeingUpdated", locale)),
   }
 }
 
 export default async function PrivacyPolicyPage() {
   const page = await retrievePageBySlug(SLUG)
+  const locale = await getLocale()
 
   return (
     <div className="content-container py-16">
@@ -27,12 +31,12 @@ export default async function PrivacyPolicyPage() {
         ) : (
           <>
             <h1 className="text-2xl font-semibold text-ink">
-              {FALLBACK_TITLE}
+              {await translate("footer.privacyPolicy", locale)}
             </h1>
             <div className="mt-6 space-y-4 text-body">
-              <p>This page is being updated. Please check back soon.</p>
+              <p>{await translate("policy.pageBeingUpdated", locale)}</p>
               <p>
-                For privacy-related requests, contact us at:{" "}
+                {await translate("policy.forPrivacyRequests", locale)}{" "}
                 <a
                   href="mailto:info@infinytree.com"
                   className="text-ink underline"

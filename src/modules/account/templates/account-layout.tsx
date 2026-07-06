@@ -1,3 +1,5 @@
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 import React from "react"
 
 import UnderlineLink from "@modules/common/components/interactive-link"
@@ -10,10 +12,12 @@ interface AccountLayoutProps {
   children: React.ReactNode
 }
 
-const AccountLayout: React.FC<AccountLayoutProps> = ({
+const AccountLayout: React.FC<AccountLayoutProps> = async ({
   customer,
   children,
 }) => {
+  const locale = await getLocale()
+
   return (
     <div className="flex-1 small:py-12" data-testid="account-page">
       <div className="flex-1 content-container h-full max-w-5xl mx-auto bg-canvas flex flex-col">
@@ -23,15 +27,14 @@ const AccountLayout: React.FC<AccountLayoutProps> = ({
         </div>
         <div className="flex flex-col small:flex-row items-end justify-between small:border-t border-hairline py-12 gap-8">
           <div>
-            <h3 className="text-xl-semi mb-4">Got questions?</h3>
+            <h3 className="text-xl-semi mb-4">{await translate("account.gotQuestions", locale)}</h3>
             <span className="txt-medium">
-              You can find frequently asked questions and answers on our
-              customer service page.
+              {await translate("account.customerServiceText", locale)}
             </span>
           </div>
           <div>
             <UnderlineLink href="/customer-service">
-              Customer Service
+              {await translate("account.customerService", locale)}
             </UnderlineLink>
           </div>
         </div>

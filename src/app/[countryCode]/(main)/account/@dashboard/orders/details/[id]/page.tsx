@@ -1,3 +1,5 @@
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 import { retrieveOrder } from "@lib/data/orders"
 import OrderDetailsTemplate from "@modules/order/templates/order-details-template"
 import { Metadata } from "next"
@@ -15,9 +17,11 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const locale = await getLocale()
+
   return {
-    title: `Order #${order.display_id}`,
-    description: `View your order`,
+    title: `#${order.display_id}`,
+    description: await translate("metadata.viewOrderDescription", locale),
   }
 }
 

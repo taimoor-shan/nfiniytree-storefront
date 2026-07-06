@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
+import { getLocale } from "@lib/data/locale-actions"
 
 type PageProps = {
   params: Promise<{ countryCode: string; slug: string }>
@@ -10,7 +11,8 @@ export async function generateMetadata(
   props: PageProps
 ): Promise<Metadata> {
   const params = await props.params
-  const page = await retrievePageBySlug(params.slug)
+  const locale = (await getLocale()) || "en"
+  const page = await retrievePageBySlug(params.slug, locale)
 
   if (!page) {
     return {}
@@ -24,7 +26,8 @@ export async function generateMetadata(
 
 export default async function Page(props: PageProps) {
   const params = await props.params
-  const page = await retrievePageBySlug(params.slug)
+  const locale = (await getLocale()) || "en"
+  const page = await retrievePageBySlug(params.slug, locale)
 
   if (!page) {
     notFound()
