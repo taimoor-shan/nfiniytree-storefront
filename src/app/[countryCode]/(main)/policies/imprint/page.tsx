@@ -6,8 +6,8 @@ import { getLocale } from "@lib/data/locale-actions"
 const SLUG = "imprint"
 
 export async function generateMetadata(): Promise<Metadata> {
-  const page = await retrievePageBySlug(SLUG)
-  const locale = await getLocale()
+  const locale = (await getLocale()) || "en"
+  const page = await retrievePageBySlug(SLUG, locale)
   const title = await translate("footer.imprint", locale)
   return {
     title: page?.seo_title || page?.title || `${title} | Infinytree`,
@@ -17,8 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ImprintPage() {
-  const page = await retrievePageBySlug(SLUG)
-  const locale = await getLocale()
+  const locale = (await getLocale()) || "en"
+  const page = await retrievePageBySlug(SLUG, locale)
 
   return (
     <div className="content-container py-16">

@@ -191,11 +191,11 @@ export default function TopBar({
 
   return (
     <div
-      className={`bg-surface-dark text-on-dark w-full h-10 small:h-12 ${className}`}
+      className={`bg-surface-dark text-on-dark hidden md:block w-full h-10 small:h-12 ${className}`}
     >
       <div className="content-container h-full flex items-stretch">
         {/* Left third — Contact info */}
-        <div className="flex-1 h-full hidden small:flex items-center gap-x-4">
+        <div className="flex-1 h-full small:flex items-center gap-x-4">
          
           
           <a
@@ -215,10 +215,10 @@ export default function TopBar({
         </div>
 
         {/* Center third — empty */}
-        <div className="flex-1 h-full hidden small:block" />
+        <div className="flex-1 h-full small:block" />
 
         {/* Right third — Language + Country */}
-        <div className="flex-1 h-full hidden small:flex items-center justify-end gap-x-1">
+        <div className="flex-1 h-full small:flex items-center justify-end gap-x-1">
           {locales && locales.length > 0 && (
             <SimpleDropdown
               trigger={
