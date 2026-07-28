@@ -31,7 +31,7 @@ export default async function Footer() {
             {dict["footer.stayUpdated"].replace("{storeName}", storeName)}
           </p>
           <NewsletterForm />
-           <ul className="flex space-x-6 items-center mt-5">
+           {/* <ul className="flex space-x-6 items-center mt-5">
             <li>
               <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:opacity-75 transition-opacity" aria-label={dict["footer.facebook"]}>
                 <svg viewBox="0 0 11 22" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-current text-ink h-[24px] w-auto">
@@ -60,10 +60,20 @@ export default async function Footer() {
                 </svg>
               </a>
             </li>
-          </ul>
+          </ul> */}
         </div>
-
-        <div className="grid grid-cols-1 gap-8 lg:col-span-4 lg:col-start-6 lg:row-span-full mt-12 lg:mt-0">
+{/* Image column commented out — empty space preserved */}
+        {/* <div className="flex flex-col items-center lg:items-start mt-12 lg:mt-0 max-w-full sm:max-w-[66%] lg:max-w-full text-center lg:text-left mx-auto lg:mx-0 lg:col-start-10 lg:col-span-3 lg:row-span-full">
+          <LocalizedClientLink className="w-full" href="/store">
+            <img
+              src="/footer-image.jpg"
+              alt={`${storeName} Collection`}
+              className="w-full h-auto object-cover rounded-sm"
+              loading="lazy"
+            />
+          </LocalizedClientLink>
+        </div> */}
+        <div className="grid grid-cols-1 gap-8 lg:col-span-4 lg:col-start-8 lg:row-span-full mt-12 lg:mt-0">
           <div className="grid grid-cols-2 gap-8 lg:gap-2">
             <div>
               <h3 className="text-lg md:text-xl text-ink mb-4">{dict["footer.shop"]}</h3>
@@ -104,23 +114,16 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center lg:items-start mt-12 lg:mt-0 max-w-full sm:max-w-[66%] lg:max-w-full text-center lg:text-left mx-auto lg:mx-0 lg:col-start-10 lg:col-span-3 lg:row-span-full">
-          <LocalizedClientLink className="w-full" href="/store">
-            <img
-              src="/footer-image.jpg"
-              alt={`${storeName} Collection`}
-              className="w-full h-auto object-cover rounded-sm"
-              loading="lazy"
-            />
-          </LocalizedClientLink>
-        </div>
+  
 
-        <div className=" pt-8 lg:pt-0 lg:col-span-6 lg:row-start-3 lg:self-end">
-         
-          <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6 text-xs text-muted">
+        <div className="border-t border-hairline pt-6 mt-8 lg:col-span-12 lg:row-start-3 lg:self-end">
+
+          <div className="flex flex-col sm:flex-row sm:justify-between space-y-4 sm:space-y-0 text-xs text-muted">
             <p>{dict["footer.allRightsReserved"].replace("{year}", String(currentYear)).replace("{storeName}", storeName)}</p>
-            <LocalizedClientLink href="/policies/terms" className="hover:text-ink transition-colors">{dict["footer.termsAndConditions"]}</LocalizedClientLink>
-            <LocalizedClientLink href="/policies/privacy" className="hover:text-ink transition-colors">{dict["footer.privacyPolicy"]}</LocalizedClientLink>
+            <div className="flex space-x-6">
+              <LocalizedClientLink href="/policies/terms" className="hover:text-ink transition-colors">{dict["footer.termsAndConditions"]}</LocalizedClientLink>
+              <LocalizedClientLink href="/policies/privacy" className="hover:text-ink transition-colors">{dict["footer.privacyPolicy"]}</LocalizedClientLink>
+            </div>
           </div>
         </div>
       </div>

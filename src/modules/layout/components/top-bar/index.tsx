@@ -198,13 +198,13 @@ export default function TopBar({
         <div className="flex-1 h-full small:flex items-center gap-x-4">
          
           
-          <a
+          {/* <a
             href="tel:+1234567890"
             className="flex items-center gap-x-1.5 text-sm font-light hover:opacity-80 transition-opacity"
           >
             <Phone className="w-4 h-4" strokeWidth={1} />
             <span>+1 (234) 567-890</span>
-          </a>
+          </a> */}
           <a
             href="mailto:info@infinytree.com"
             className="flex items-center gap-x-1.5 text-sm font-light hover:opacity-80 transition-opacity"

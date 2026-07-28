@@ -27,8 +27,8 @@
   "hero.scrollDown": "Scroll down",
   "hero.shopCollection": "Shop the collection",
 
-  "features.oneOfAKind.title": "One of a Kind",
-  "features.oneOfAKind.description": "Every piece is individually handcrafted — a unique 1/1 creation, never exactly replicated.",
+  "features.oneOfAKind.title": "Handmade",
+  "features.oneOfAKind.description": "Each piece is meticulously handcrafted by skilled artisans, ensuring exceptional quality and character in every creation.",
   "features.maintenanceFree.title": "Maintenance-Free",
   "features.maintenanceFree.description": "No watering, no sun, no care. Hypoallergenic and free from pollen, mold, and allergens.",
   "features.authenticMaterials.title": "Authentic Materials",
@@ -38,7 +38,7 @@
 
   "about.handmadeCollection": "Handmade Collection",
   "about.thePromise": "The Infinytree Promise",
-  "about.locationNote": "Based in Budapest, Hungary. We ship handcrafted pieces to Austria, Germany, and Hungary — with more European destinations available on request.",
+  "about.locationNote": "We ship handcrafted pieces to Austria, Germany, and Hungary — with more European destinations available on request.",
   "about.fallbackTitle": "About",
   "about.fallbackDescription": "Handmade artificial botanical masterpieces for luxury interiors.",
 

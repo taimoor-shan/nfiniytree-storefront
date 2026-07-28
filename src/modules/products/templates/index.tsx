@@ -51,9 +51,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
 
         {/* Right Column - Product Details sticky wrapper */}
         <div className="flex flex-col w-full small:w-[45%] pb-8 gap-y-12">
-
           <ProductInfo product={product} />
-          
+
           <Suspense
             fallback={
               <ProductActions
@@ -66,7 +65,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
             <ProductActionsWrapper id={product.id} region={region} />
           </Suspense>
 
-<ProductTabs product={product} locale={locale} />
+          <ProductTabs product={product} locale={locale} />
 
           <ProductOnboardingCta />
         </div>
@@ -74,7 +73,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
       {/* <div className="content-container my-16 small:my-32">
         <ProductInfoBlocks product={product} locale={locale} />
       </div> */}
-    <Features />
+      <Features />
       <div
         className="content-container my-16 small:my-32"
         data-testid="related-products-container"

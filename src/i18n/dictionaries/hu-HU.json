@@ -27,8 +27,8 @@
   "hero.scrollDown": "Görgessen le",
   "hero.shopCollection": "Kollekció megtekintése",
 
-  "features.oneOfAKind.title": "Egyedi",
-  "features.oneOfAKind.description": "Minden darab egyedileg kézzel készített — egyedi 1/1 alkotás, amely soha nem készül el pontosan ugyanígy.",
+  "features.oneOfAKind.title": "Kézzel készített",
+  "features.oneOfAKind.description": "Minden darabot tapasztalt kézművesek gondosan készítenek, kivételes minőséget és karaktert biztosítva minden alkotásnak.",
   "features.maintenanceFree.title": "Gondozásmentes",
   "features.maintenanceFree.description": "Nincs öntözés, napfény, gondozás. Hipoallergén, pollen-, penész- és allergénmentes.",
   "features.authenticMaterials.title": "Eredeti anyagok",
@@ -38,7 +38,7 @@
 
   "about.handmadeCollection": "Kézzel készített kollekció",
   "about.thePromise": "Az Infinytree ígérete",
-  "about.locationNote": "Székhelyünk Budapest, Magyarország. Kézzel készített darabjainkat Ausztriába, Németországba és Magyarországra szállítjuk — további európai célállomások igény szerint.",
+  "about.locationNote": "Kézzel készített darabjainkat Ausztriába, Németországba és Magyarországra szállítjuk — további európai célállomások igény szerint.",
   "about.fallbackTitle": "Rólunk",
   "about.fallbackDescription": "Kézzel készített botanikai remekművek luxus belső terekbe.",
 

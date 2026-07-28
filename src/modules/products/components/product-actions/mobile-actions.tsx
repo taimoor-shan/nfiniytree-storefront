@@ -24,6 +24,8 @@ type MobileActionsProps = {
   isAdding?: boolean
   show: boolean
   optionsDisabled: boolean
+  /** IDs of option values where ALL matching variants are out of stock */
+  unavailableValueIds?: Set<string>
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
@@ -36,6 +38,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   isAdding,
   show,
   optionsDisabled,
+  unavailableValueIds,
 }) => {
   const { state, open, close } = useToggleState()
   const { t } = useTranslation()
@@ -188,6 +191,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                                 updateOption={updateOptions}
                                 title={option.title ?? ""}
                                 disabled={optionsDisabled}
+                                unavailableValueIds={unavailableValueIds}
                               />
                             </div>
                           )

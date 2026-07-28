@@ -12,6 +12,8 @@ type OptionSelectProps = {
   title: string
   disabled: boolean
   "data-testid"?: string
+  /** IDs of option values where ALL matching variants are out of stock */
+  unavailableValueIds?: Set<string>
 }
 
 const OptionSelect: React.FC<OptionSelectProps> = ({
@@ -21,9 +23,9 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
   title,
   "data-testid": dataTestId,
   disabled,
+  unavailableValueIds,
 }) => {
   const { t } = useTranslation()
-  const filteredOptions = (option.values ?? []).map((v) => v.value)
 
   return (
     <div className="flex flex-col gap-y-3">
@@ -32,23 +34,26 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
         className="flex flex-wrap gap-2"
         data-testid={dataTestId}
       >
-        {filteredOptions.map((v) => {
+        {(option.values ?? []).map((value) => {
+          const isUnavailable = unavailableValueIds?.has(value.id) ?? false
+
           return (
             <button
-              onClick={() => updateOption(option.id, v)}
-              key={v}
+              onClick={() => updateOption(option.id, value.value)}
+              key={value.id}
               className={clx(
                 "btn-secondary h-10 py-2 px-4 text-xs",
                 {
-                  "border-primary": v === current,
+                  "border-primary": value.value === current && !isUnavailable,
+                  "line-through opacity-60": isUnavailable,
                   "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
-                    v !== current,
+                    value.value !== current && !isUnavailable,
                 }
               )}
               disabled={disabled}
               data-testid="option-button"
             >
-              {v}
+              {value.value}
             </button>
           )
         })}

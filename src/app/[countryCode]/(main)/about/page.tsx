@@ -78,9 +78,9 @@ export default async function AboutPage(props: AboutPageProps) {
           <div className="absolute inset-0 flex flex-col justify-end pb-16">
             <div className="content-container">
               <div className="max-w-3xl">
-                <p className="text-primary text-xs uppercase tracking-[0.2em] font-medium mb-4">
+                {/* <p className="text-primary text-xs uppercase tracking-[0.2em] font-medium mb-4">
                   {dict["about.handmadeCollection"]}
-                </p>
+                </p> */}
                 <h1 className="font-display text-3xl lg:text-5xl text-on-dark leading-tight mb-4">
                   {page.title}
                 </h1>

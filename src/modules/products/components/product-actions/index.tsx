@@ -29,6 +29,16 @@ const optionsAsKeymap = (
   }, {})
 }
 
+// Helper: check if a variant is available for purchase
+const isVariantAvailable = (
+  variant: HttpTypes.StoreProductVariant
+) => {
+  if (!variant.manage_inventory) return true
+  if (variant.allow_backorder) return true
+  if ((variant.inventory_quantity || 0) > 0) return true
+  return false
+}
+
 export default function ProductActions({
   product,
   disabled,
@@ -43,12 +53,47 @@ export default function ProductActions({
   const [quantity, setQuantity] = useState(1)
   const countryCode = useParams().countryCode as string
 
-  // If there is only 1 variant, preselect the options
+  // Ref to ensure preselection only runs once on mount, not on every
+  // server re-fetch (which would override the user's manual selection).
+  const preselectedRef = useRef(false)
+
+  // Preselect the first available variant on mount (or first variant if none available)
   useEffect(() => {
-    if (product.variants?.length === 1) {
-      const variantOptions = optionsAsKeymap(product.variants[0].options)
-      setOptions(variantOptions ?? {})
+    if (preselectedRef.current) return
+    if (!product.variants || product.variants.length === 0) return
+
+    const firstAvailable =
+      product.variants.find(isVariantAvailable) || product.variants[0]
+    const variantOptions = optionsAsKeymap(firstAvailable.options)
+    setOptions(variantOptions ?? {})
+    preselectedRef.current = true
+  }, [product.variants])
+
+  // Compute which option values lead only to unavailable (out-of-stock) variants
+  const unavailableOptionValueIds = useMemo(() => {
+    if (!product.options || !product.variants) return new Set<string>()
+
+    const unavailable = new Set<string>()
+
+    for (const option of product.options) {
+      for (const value of option.values ?? []) {
+        // Find all variants that include this option value
+        const matchingVariants = product.variants.filter((v: HttpTypes.StoreProductVariant) => {
+          const vOpts = optionsAsKeymap(v.options)
+          return vOpts[option.id] === value.value
+        })
+
+        // Mark as unavailable only if matching variants exist but none are available
+        if (
+          matchingVariants.length > 0 &&
+          !matchingVariants.some(isVariantAvailable)
+        ) {
+          unavailable.add(value.id)
+        }
+      }
     }
+
+    return unavailable
   }, [product.variants])
 
   const selectedVariant = useMemo(() => {
@@ -166,6 +211,7 @@ export default function ProductActions({
                       title={option.title ?? ""}
                       data-testid="product-options"
                       disabled={!!disabled || isAdding}
+                      unavailableValueIds={unavailableOptionValueIds}
                     />
                   </div>
                 )
@@ -242,6 +288,7 @@ export default function ProductActions({
           isAdding={isAdding}
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
+          unavailableValueIds={unavailableOptionValueIds}
         />
       </div>
     </>
