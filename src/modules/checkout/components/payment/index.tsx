@@ -223,7 +223,7 @@ const Payment = ({
                     activeSession?.provider_id}
                 </Text>
               </div>
-              <div className="flex flex-col w-1/3">
+              {/* <div className="flex flex-col w-1/3">
                 <Text className="txt-medium-plus text-ink mb-1">
                   {t("checkout.payment")}
                 </Text>
@@ -242,7 +242,7 @@ const Payment = ({
                       : t("checkout.anotherStep")}
                   </Text>
                 </div>
-              </div>
+              </div> */}
             </div>
           ) : paidByGiftcard ? (
             <div className="flex flex-col w-1/3">

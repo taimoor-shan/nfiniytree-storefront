@@ -5,7 +5,7 @@ import React, { useEffect, useActionState } from "react"
 import Input from "@modules/common/components/input"
 import AccountInfo from "../account-info"
 import { HttpTypes } from "@medusajs/types"
-import { toast } from "@medusajs/ui"
+import { updateCustomerPassword } from "@lib/data/customer"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
@@ -15,18 +15,53 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
   const { t } = useTranslation()
   const [successState, setSuccessState] = React.useState(false)
 
-  // TODO: Add support for password updates
-  const updatePassword = async () => {
-    toast.info(t("account.passwordUpdateNotImplemented"))
+  const updatePassword = async (
+    _currentState: Record<string, unknown>,
+    formData: FormData
+  ) => {
+    const oldPassword = formData.get("old_password") as string
+    const newPassword = formData.get("new_password") as string
+    const confirmPassword = formData.get("confirm_password") as string
+
+    if (!oldPassword || !newPassword || !confirmPassword) {
+      return { success: false, error: "All fields are required" }
+    }
+
+    if (newPassword !== confirmPassword) {
+      return { success: false, error: "Passwords do not match" }
+    }
+
+    if (newPassword.length < 8) {
+      return { success: false, error: "Password must be at least 8 characters" }
+    }
+
+    try {
+      const result = await updateCustomerPassword(customer.email, oldPassword, newPassword)
+      if (result.success) {
+        return { success: true, error: null }
+      }
+      return { success: false, error: result.error }
+    } catch (error: any) {
+      return { success: false, error: error.toString() }
+    }
   }
+
+  const [state, formAction] = useActionState(updatePassword, {
+    error: null,
+    success: false,
+  })
 
   const clearState = () => {
     setSuccessState(false)
   }
 
+  useEffect(() => {
+    setSuccessState(state.success)
+  }, [state])
+
   return (
     <form
-      action={updatePassword}
+      action={formAction}
       onReset={() => clearState()}
       className="w-full"
     >
@@ -36,8 +71,8 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
           <span>{t("account.passwordNotShown")}</span>
         }
         isSuccess={successState}
-        isError={false}
-        errorMessage={undefined}
+        isError={!!state.error}
+        errorMessage={state.error || undefined}
         clearState={clearState}
         data-testid="account-password-editor"
       >

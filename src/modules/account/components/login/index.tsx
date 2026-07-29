@@ -7,6 +7,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import { useActionState } from "react"
+import { useParams } from "next/navigation"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
@@ -15,6 +16,8 @@ type Props = {
 const Login = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(login, null)
   const { t } = useTranslation()
+  const params = useParams()
+  const countryCode = (params.countryCode as string) || "en"
 
   return (
     <div
@@ -44,6 +47,14 @@ const Login = ({ setCurrentView }: Props) => {
             required
             data-testid="password-input"
           />
+        </div>
+        <div className="flex justify-end mt-1">
+          <a
+            href={`/${countryCode}/account/forgot-password`}
+            className="text-small-regular text-link hover:underline"
+          >
+            {t("account.forgotPassword") || "Forgot password?"}
+          </a>
         </div>
         <ErrorMessage error={message} data-testid="login-error-message" />
         <SubmitButton data-testid="sign-in-button" className="w-full mt-6">

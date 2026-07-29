@@ -247,6 +247,21 @@
   "account.transferEmailSent": "Átruházási kérelem e-mail elküldve: {email}",
   "account.requestTransfer": "Átruházás kérése",
 
+  "account.backToLogin": "Vissza a bejelentkezéshez",
+  "account.backToAccount": "Vissza a fiókomhoz",
+  "account.checkEmail": "Ellenőrizze e-mailjeit",
+  "account.forgotPassword": "Elfelejtett jelszó",
+  "account.forgotPasswordPrompt": "Adja meg e-mail-címét, és küldünk egy hivatkozást a jelszó visszaállításához.",
+  "account.resetLinkSent": "Ha létezik fiók ezzel az e-mail-címmel, elküldtük a jelszó-visszaállítási hivatkozást.",
+  "account.sendResetLink": "Jelszó-visszaállítási hivatkozás küldése",
+  "account.invalidLink": "Érvénytelen hivatkozás",
+  "account.invalidLinkPrompt": "A jelszó-visszaállítási hivatkozás érvénytelen vagy lejárt. Kérjen egy újat.",
+  "account.requestNewLink": "Új hivatkozás kérése",
+  "account.resetPassword": "Jelszó visszaállítása",
+  "account.resetPasswordPrompt": "Adja meg alább az új jelszavát.",
+  "account.updatePassword": "Jelszó frissítése",
+
+
   "addresses.newAddress": "Új cím",
   "addresses.addAddress": "Cím hozzáadása",
   "addresses.editAddress": "Cím szerkesztése",

@@ -3,6 +3,7 @@
 # IDEs
 .idea
 .vscode
+.codegraph
 
 # dependencies
 /node_modules

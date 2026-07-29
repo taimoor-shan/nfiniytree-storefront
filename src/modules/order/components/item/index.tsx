@@ -16,7 +16,7 @@ const Item = ({ item, currencyCode }: ItemProps) => {
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
         <div className="flex w-16">
-          <Thumbnail thumbnail={item.variant?.thumbnail || item.thumbnail} size="square" />
+          <Thumbnail thumbnail={item.variant?.thumbnail || item.product?.thumbnail || item.thumbnail} images={item.variant?.images || item.product?.images || []} size="square" />
         </div>
       </Table.Cell>
 

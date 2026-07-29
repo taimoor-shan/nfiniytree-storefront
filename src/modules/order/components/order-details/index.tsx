@@ -1,29 +1,30 @@
+"use client"
+
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
-import { translate } from "@/lib/i18n"
-import { getLocale } from "@lib/data/locale-actions"
+import { useTranslation } from "@/lib/i18n"
 
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
   showStatus?: boolean
 }
 
-const OrderDetails = async ({ order, showStatus }: OrderDetailsProps) => {
-  const locale = await getLocale()
+const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
+  const { t } = useTranslation()
   const formatStatus = (str: string) => {
     const formatted = str.split("_").join(" ")
 
     return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
   }
 
-  const weHaveSent = (await translate("order.weHaveSent", locale)).replace(
+  const weHaveSent = t("order.weHaveSent").replace(
     "{email}",
     order.email ?? ""
   )
-  const orderDate = await translate("order.orderDate", locale)
-  const orderNumber = await translate("order.number", locale)
-  const orderStatus = await translate("order.status", locale)
-  const paymentStatus = await translate("order.paymentStatus", locale)
+  const orderDate = t("order.orderDate")
+  const orderNumber = t("order.number")
+  const orderStatus = t("order.status")
+  const paymentStatus = t("order.paymentStatus")
 
   return (
     <div>

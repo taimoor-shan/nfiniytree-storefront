@@ -1,7 +1,6 @@
 import { translate } from "@/lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
 import Overview from "@modules/account/components/overview"
-import { notFound } from "next/navigation"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listOrders } from "@lib/data/orders"
 
@@ -19,7 +18,7 @@ export default async function OverviewTemplate() {
   const orders = (await listOrders().catch(() => null)) || null
 
   if (!customer) {
-    notFound()
+    return <div data-dashboard-empty />
   }
 
   return <Overview customer={customer} orders={orders} />

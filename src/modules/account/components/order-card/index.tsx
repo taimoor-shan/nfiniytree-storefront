@@ -1,5 +1,6 @@
-import { translate } from "@/lib/i18n"
-import { getLocale } from "@lib/data/locale-actions"
+"use client"
+
+import { useTranslation } from "@/lib/i18n"
 import { Button } from "@medusajs/ui"
 
 import Thumbnail from "@modules/products/components/thumbnail"
@@ -11,8 +12,8 @@ type OrderCardProps = {
   order: HttpTypes.StoreOrder
 }
 
-const OrderCard = async ({ order }: OrderCardProps) => {
-  const locale = await getLocale()
+const OrderCard = ({ order }: OrderCardProps) => {
+  const { t } = useTranslation()
 
   const numberOfLines = order.items?.reduce((acc, item) => {
     return acc + item.quantity
@@ -35,7 +36,7 @@ const OrderCard = async ({ order }: OrderCardProps) => {
             currency_code: order.currency_code,
           })}
         </span>
-        <span className="pl-2">{await translate(`account.${numberOfLines > 1 ? "items" : "item"}`, locale).then(s => s.replace("{count}", String(numberOfLines)))}</span>
+        <span className="pl-2">{t(`account.${numberOfLines > 1 ? "items" : "item"}`).replace("{count}", String(numberOfLines))}</span>
       </div>
       <div className="grid grid-cols-2 small:grid-cols-4 gap-4 my-4">
         {order.items?.slice(0, 3).map((i) => {
@@ -45,7 +46,7 @@ const OrderCard = async ({ order }: OrderCardProps) => {
               className="flex flex-col gap-y-2"
               data-testid="order-item"
             >
-              <Thumbnail thumbnail={i.variant?.thumbnail || i.thumbnail} images={i.variant?.images || []} size="full" />
+              <Thumbnail thumbnail={i.variant?.thumbnail || i.product?.thumbnail || i.thumbnail} images={i.variant?.images || i.product?.images || []} size="full" />
               <div className="flex items-center text-small-regular text-ink">
                 <span
                   className="text-ink font-semibold"
@@ -64,14 +65,14 @@ const OrderCard = async ({ order }: OrderCardProps) => {
             <span className="text-small-regular text-ink">
               + {numberOfLines - 4}
             </span>
-            <span className="text-small-regular text-ink">{await translate("account.more", locale)}</span>
+            <span className="text-small-regular text-ink">{t("account.more")}</span>
           </div>
         )}
       </div>
       <div className="flex justify-end">
         <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
           <Button data-testid="order-details-link" variant="secondary">
-            {await translate("account.seeDetails", locale)}
+            {t("account.seeDetails")}
           </Button>
         </LocalizedClientLink>
       </div>

@@ -215,6 +215,76 @@ export const deleteCustomerAddress = async (
     })
 }
 
+export async function requestPasswordReset(
+  _currentState: unknown,
+  formData: FormData
+) {
+  const email = formData.get("email") as string
+
+  if (!email) {
+    return "Email is required"
+  }
+
+  try {
+    await sdk.auth.resetPassword("customer", "emailpass", {
+      identifier: email,
+    })
+    return null
+  } catch (error: any) {
+    return error.toString()
+  }
+}
+
+export async function resetPassword(
+  email: string,
+  token: string,
+  password: string
+): Promise<{ success: boolean; error: string | null }> {
+  try {
+    await sdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      { password },
+      token
+    )
+    return { success: true, error: null }
+  } catch (error: any) {
+    return { success: false, error: error.toString() }
+  }
+}
+
+export async function updateCustomerPassword(
+  email: string,
+  oldPassword: string,
+  newPassword: string
+): Promise<{ success: boolean; error: string | null }> {
+  try {
+    // Re-authenticate with the old password to get a fresh identity token.
+    // The JWT from the cookie can't be used with updateProvider — that
+    // endpoint expects a login token or reset token, not a session JWT.
+    const loginResult = await sdk.auth.login("customer", "emailpass", {
+      email,
+      password: oldPassword,
+    })
+
+    const token = typeof loginResult === "string" ? loginResult : null
+    if (!token) {
+      return { success: false, error: "Current password is incorrect" }
+    }
+
+    await sdk.auth.updateProvider(
+      "customer",
+      "emailpass",
+      { password: newPassword },
+      token
+    )
+
+    return { success: true, error: null }
+  } catch (error: any) {
+    return { success: false, error: error.toString() }
+  }
+}
+
 export const updateCustomerAddress = async (
   currentState: Record<string, unknown>,
   formData: FormData

@@ -1,23 +1,24 @@
+"use client"
+
 import { Heading } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { translate } from "@/lib/i18n"
-import { getLocale } from "@lib/data/locale-actions"
+import { useTranslation } from "@/lib/i18n"
 import React from "react"
 
-const Help = async () => {
-  const locale = await getLocale()
+const Help = () => {
+  const { t } = useTranslation()
 
   return (
     <div className="mt-6">
-      <Heading className="text-base-semi">{await translate("order.needHelp", locale)}</Heading>
+      <Heading className="text-base-semi">{t("order.needHelp")}</Heading>
       <div className="text-base-regular my-2">
         <ul className="gap-y-2 flex flex-col">
           <li>
-            <LocalizedClientLink className="hover:underline text-primary" href="/contact">{await translate("nav.contact", locale)}</LocalizedClientLink>
+            <LocalizedClientLink className="hover:underline text-primary" href="/contact">{t("nav.contact")}</LocalizedClientLink>
           </li>
           <li>
             <LocalizedClientLink className="hover:underline text-primary" href="/policies/returns">
-              {await translate("order.returnsExchanges", locale)}
+              {t("order.returnsExchanges")}
             </LocalizedClientLink>
           </li>
         </ul>

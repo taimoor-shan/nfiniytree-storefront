@@ -1,14 +1,15 @@
+"use client"
+
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
-import { translate } from "@/lib/i18n"
-import { getLocale } from "@lib/data/locale-actions"
+import { useTranslation } from "@/lib/i18n"
 
 type OrderSummaryProps = {
   order: HttpTypes.StoreOrder
 }
 
-const OrderSummary = async ({ order }: OrderSummaryProps) => {
-  const locale = await getLocale()
+const OrderSummary = ({ order }: OrderSummaryProps) => {
+  const { t } = useTranslation()
   const getAmount = (amount?: number | null) => {
     if (!amount) {
       return
@@ -22,37 +23,37 @@ const OrderSummary = async ({ order }: OrderSummaryProps) => {
 
   return (
     <div>
-      <h2 className="text-base-semi">{await translate("order.summary", locale)}</h2>
+      <h2 className="text-base-semi">{t("order.summary")}</h2>
       <div className="text-small-regular text-ink my-2">
         <div className="flex items-center justify-between text-base-regular text-ink mb-2">
-          <span>{await translate("cart.subtotal", locale)}</span>
+          <span>{t("cart.subtotal")}</span>
           <span>{getAmount(order.subtotal)}</span>
         </div>
         <div className="flex flex-col gap-y-1">
           {order.discount_total > 0 && (
             <div className="flex items-center justify-between">
-              <span>{await translate("order.discount", locale)}</span>
+              <span>{t("order.discount")}</span>
               <span>- {getAmount(order.discount_total)}</span>
             </div>
           )}
           {order.gift_card_total > 0 && (
             <div className="flex items-center justify-between">
-              <span>{await translate("order.discount", locale)}</span>
+              <span>{t("order.discount")}</span>
               <span>- {getAmount(order.gift_card_total)}</span>
             </div>
           )}
           <div className="flex items-center justify-between">
-            <span>{await translate("cart.shipping", locale)}</span>
+            <span>{t("cart.shipping")}</span>
             <span>{getAmount(order.shipping_total)}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span>{await translate("order.taxes", locale)}</span>
+            <span>{t("order.taxes")}</span>
             <span>{getAmount(order.tax_total)}</span>
           </div>
         </div>
         <div className="h-px w-full border-b border-hairline border-dashed my-4" />
         <div className="flex items-center justify-between text-base-regular text-ink mb-2">
-          <span>{await translate("cart.total", locale)}</span>
+          <span>{t("cart.total")}</span>
           <span>{getAmount(order.total)}</span>
         </div>
       </div>
