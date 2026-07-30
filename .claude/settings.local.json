@@ -8,7 +8,18 @@
       "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/dictionaries/hu-HU.json','utf8'\\)\\); console.log\\('hu-HU.json: valid'\\)\")",
       "Bash(curl -s \"http://localhost:9000/store/orders/order_01KYQSM3GQAH41QPWMEGC2CYGK?fields=*payment_collections.payments,*items,*items.metadata,*items.variant,*items.variant.images,*items.product,*fulfillments,*fulfillments.labels\" -H \"Cookie: $\\(cat /Users/macbookpro/Documents/Work/Web/richard-austria/webshop/infinytree/nfiniytree-backend/.cookie || echo ''\\)\")",
       "mcp__next-devtools__nextjs_index",
-      "mcp__next-devtools__nextjs_docs"
+      "mcp__next-devtools__nextjs_docs",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(yarn install *)",
+      "Bash(yarn build *)",
+      "Bash(timeout 20 yarn dev)",
+      "mcp__next-devtools__nextjs_call",
+      "mcp__next-devtools__browser_eval",
+      "Bash(curl -s -H \"x-publishable-api-key: $\\(grep NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY /Users/macbookpro/Documents/Work/Web/richard-austria/webshop/infinytree/nfiniytree-storefront/.env.local)",
+      "Bash(curl *)",
+      "Skill(superpowers:brainstorming)",
+      "mcp__context7__resolve-library-id",
+      "Bash(npx tsc *)"
     ]
   },
   "enableAllProjectMcpServers": true,

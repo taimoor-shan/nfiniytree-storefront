@@ -7,9 +7,9 @@ import { getLocale } from "@lib/data/locale-actions"
 export default async function TransferPage({
   params,
 }: {
-  params: { id: string; token: string }
+  params: Promise<{ id: string; token: string }>
 }) {
-  const { id, token } = params
+  const { id, token } = await params
   const locale = await getLocale()
 
   const { success, error } = await declineTransferRequest(id, token)

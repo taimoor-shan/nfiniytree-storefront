@@ -14,10 +14,14 @@ import React from "react"
 
 type OrderDetailsTemplateProps = {
   order: HttpTypes.StoreOrder
+  showBackLink?: boolean
+  isGuest?: boolean
 }
 
 const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
   order,
+  showBackLink = true,
+  isGuest = false,
 }) => {
   const { t } = useTranslation()
 
@@ -25,22 +29,24 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
     <div className="flex flex-col justify-center gap-y-4">
       <div className="flex gap-2 justify-between items-center">
         <h1 className="text-2xl-semi">{t("order.details")}</h1>
-        <LocalizedClientLink
-          href="/account/orders"
-          className="flex gap-2 items-center text-body hover:text-ink"
-          data-testid="back-to-overview-button"
-        >
-          <XMark /> {t("order.backToOverview")}
-        </LocalizedClientLink>
+        {showBackLink && (
+          <LocalizedClientLink
+            href="/account/orders"
+            className="flex gap-2 items-center text-body hover:text-ink"
+            data-testid="back-to-overview-button"
+          >
+            <XMark /> {t("order.backToOverview")}
+          </LocalizedClientLink>
+        )}
       </div>
       <div
         className="flex flex-col gap-4 h-full bg-canvas w-full"
         data-testid="order-details-container"
       >
-        <OrderDetails order={order} />
+        <OrderDetails order={order} isGuest={isGuest} />
         <Timeline order={order} />
         <Items order={order} />
-        <ShippingDetails order={order} />
+        <ShippingDetails order={order} isGuest={isGuest} />
         <OrderSummary order={order} />
         <Help />
       </div>
