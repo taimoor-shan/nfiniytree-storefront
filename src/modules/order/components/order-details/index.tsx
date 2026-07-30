@@ -7,19 +7,26 @@ import { useTranslation } from "@/lib/i18n"
 type OrderDetailsProps = {
   order: HttpTypes.StoreOrder
   showStatus?: boolean
+  isGuest?: boolean
 }
 
-const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
+const OrderDetails = ({ order, showStatus, isGuest }: OrderDetailsProps) => {
   const { t } = useTranslation()
   const formatStatus = (str: string) => {
+    if (!str) return "N/A"
     const formatted = str.split("_").join(" ")
-
     return formatted.slice(0, 1).toUpperCase() + formatted.slice(1)
+  }
+
+  const maskEmail = (email: string) => {
+    const [name, domain] = email.split("@")
+    if (!domain) return email
+    return `${name[0]}***@${domain}`
   }
 
   const weHaveSent = t("order.weHaveSent").replace(
     "{email}",
-    order.email ?? ""
+    isGuest && order.email ? maskEmail(order.email) : (order.email ?? "")
   )
   const orderDate = t("order.orderDate")
   const orderNumber = t("order.number")

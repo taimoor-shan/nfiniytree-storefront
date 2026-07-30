@@ -31,7 +31,7 @@ const Timeline = ({ order }: TimelineProps) => {
         <div className="relative -mt-5 mb-2 mx-2">
           <div className="absolute top-0 left-2 right-2 h-px bg-ui-bg-interactive-disabled" />
           <div
-            className="absolute top-0 left-2 h-px bg-primary transition-all duration-500"
+            className="absolute top-[-6px] left-2 h-px bg-primary transition-all duration-500"
             style={{
               width: `${
                 currentStep === "confirmed"
@@ -45,7 +45,7 @@ const Timeline = ({ order }: TimelineProps) => {
             }}
           />
         </div>
-        <div className="flex justify-between">
+        <div className="flex justify-between pt-4">
           {steps.map((step) => (
             <div key={step.id} className="flex-1 text-center">
               <p

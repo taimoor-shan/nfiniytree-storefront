@@ -9,9 +9,10 @@ import { useTranslation } from "@/lib/i18n"
 
 type ShippingDetailsProps = {
   order: HttpTypes.StoreOrder
+  isGuest?: boolean
 }
 
-const ShippingDetails = ({ order }: ShippingDetailsProps) => {
+const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
   const { t } = useTranslation()
   return (
     <div>
@@ -26,21 +27,34 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           <Text className="txt-medium-plus text-ink mb-1">
             {t("order.shippingAddress")}
           </Text>
-          <Text className="txt-medium text-body">
-            {order.shipping_address?.first_name}{" "}
-            {order.shipping_address?.last_name}
-          </Text>
-          <Text className="txt-medium text-body">
-            {order.shipping_address?.address_1}{" "}
-            {order.shipping_address?.address_2}
-          </Text>
-          <Text className="txt-medium text-body">
-            {order.shipping_address?.postal_code},{" "}
-            {order.shipping_address?.city}
-          </Text>
-          <Text className="txt-medium text-body">
-            {order.shipping_address?.country_code?.toUpperCase()}
-          </Text>
+          {isGuest ? (
+            <>
+              <Text className="txt-medium text-body">
+                {order.shipping_address?.city}
+              </Text>
+              <Text className="txt-medium text-body">
+                {order.shipping_address?.country_code?.toUpperCase()}
+              </Text>
+            </>
+          ) : (
+            <>
+              <Text className="txt-medium text-body">
+                {order.shipping_address?.first_name}{" "}
+                {order.shipping_address?.last_name}
+              </Text>
+              <Text className="txt-medium text-body">
+                {order.shipping_address?.address_1}{" "}
+                {order.shipping_address?.address_2}
+              </Text>
+              <Text className="txt-medium text-body">
+                {order.shipping_address?.postal_code},{" "}
+                {order.shipping_address?.city}
+              </Text>
+              <Text className="txt-medium text-body">
+                {order.shipping_address?.country_code?.toUpperCase()}
+              </Text>
+            </>
+          )}
         </div>
 
         <div
@@ -48,9 +62,11 @@ const ShippingDetails = ({ order }: ShippingDetailsProps) => {
           data-testid="shipping-contact-summary"
         >
           <Text className="txt-medium-plus text-ink mb-1">{t("order.contact")}</Text>
-          <Text className="txt-medium text-body">
-            {order.shipping_address?.phone}
-          </Text>
+          {!isGuest && (
+            <Text className="txt-medium text-body">
+              {order.shipping_address?.phone}
+            </Text>
+          )}
           <Text className="txt-medium text-body">{order.email}</Text>
         </div>
 
