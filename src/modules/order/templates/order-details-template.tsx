@@ -8,6 +8,7 @@ import Items from "@modules/order/components/items"
 import OrderDetails from "@modules/order/components/order-details"
 import OrderSummary from "@modules/order/components/order-summary"
 import ShippingDetails from "@modules/order/components/shipping-details"
+import Timeline from "@modules/order/components/timeline"
 import { useTranslation } from "@/lib/i18n"
 import React from "react"
 
@@ -36,7 +37,8 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
         className="flex flex-col gap-4 h-full bg-canvas w-full"
         data-testid="order-details-container"
       >
-        <OrderDetails order={order} showStatus />
+        <OrderDetails order={order} />
+        <Timeline order={order} />
         <Items order={order} />
         <ShippingDetails order={order} />
         <OrderSummary order={order} />

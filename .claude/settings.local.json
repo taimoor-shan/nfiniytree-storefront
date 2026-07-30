@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__codegraph__codegraph_explore",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/dictionaries/en.json','utf8'\\)\\); console.log\\('en.json: valid'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/dictionaries/de-DE.json','utf8'\\)\\); console.log\\('de-DE.json: valid'\\)\")",
+      "Bash(node -e \"JSON.parse\\(require\\('fs'\\).readFileSync\\('src/i18n/dictionaries/hu-HU.json','utf8'\\)\\); console.log\\('hu-HU.json: valid'\\)\")",
+      "Bash(curl -s \"http://localhost:9000/store/orders/order_01KYQSM3GQAH41QPWMEGC2CYGK?fields=*payment_collections.payments,*items,*items.metadata,*items.variant,*items.variant.images,*items.product,*fulfillments,*fulfillments.labels\" -H \"Cookie: $\\(cat /Users/macbookpro/Documents/Work/Web/richard-austria/webshop/infinytree/nfiniytree-backend/.cookie || echo ''\\)\")",
+      "mcp__next-devtools__nextjs_index",
+      "mcp__next-devtools__nextjs_docs"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "next-devtools"
+  ]
 }

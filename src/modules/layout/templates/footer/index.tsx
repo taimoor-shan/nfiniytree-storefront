@@ -96,19 +96,20 @@ export default async function Footer() {
                     )
                 })}
               </ul> */}
-               <ul className="space-y-4">
+               <ul className="space-y-2">
                 <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4" href="/">{dict["nav.home"]}</LocalizedClientLink></li>
                 <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/store">{dict["nav.store"]}</LocalizedClientLink></li>
                 <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/about">{dict["nav.about"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/contact">{dict["nav.contact"]}</LocalizedClientLink></li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg md:text-xl text-ink mb-4">{dict["footer.company"]}</h3>
-              <ul className="space-y-4">
+              <ul className="space-y-2">
                 <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4" href="/policies/returns">{dict["footer.returnsRefunds"]}</LocalizedClientLink></li>
                 <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/policies/shipping">{dict["footer.shippingPolicy"]}</LocalizedClientLink></li>
                 <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/policies/imprint">{dict["footer.imprint"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/contact">{dict["nav.contact"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/customer-service">{dict["account.customerService"]}</LocalizedClientLink></li>
               </ul>
             </div>
           </div>

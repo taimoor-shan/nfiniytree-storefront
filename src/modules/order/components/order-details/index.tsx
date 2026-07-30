@@ -42,24 +42,22 @@ const OrderDetails = ({ order, showStatus }: OrderDetailsProps) => {
 
       <div className="flex items-center text-compact-small gap-x-4 mt-4">
         {showStatus && (
-          <>
-            <Text>
-              {orderStatus}{" "}
-              <span className="text-body " data-testid="order-status">
-                {formatStatus(order.fulfillment_status)}
-              </span>
-            </Text>
-            <Text>
-              {paymentStatus}{" "}
-              <span
-                className="text-body "
-                sata-testid="order-payment-status"
-              >
-                {formatStatus(order.payment_status)}
-              </span>
-            </Text>
-          </>
+          <Text>
+            {orderStatus}{" "}
+            <span className="text-body " data-testid="order-status">
+              {formatStatus(order.fulfillment_status)}
+            </span>
+          </Text>
         )}
+        <Text>
+          {paymentStatus}{" "}
+          <span
+            className="text-body "
+            sata-testid="order-payment-status"
+          >
+            {formatStatus(order.payment_status)}
+          </span>
+        </Text>
       </div>
     </div>
   )

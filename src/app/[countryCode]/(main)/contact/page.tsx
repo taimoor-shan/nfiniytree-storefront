@@ -46,19 +46,19 @@ export default async function ContactPage() {
               <div className="prose max-w-none text-body">
                 <h2 className="text-3xl font-display text-ink mb-6">{dict["contact.getInTouch"]}</h2>
                 <p>{dict["contact.getInTouchText"]}</p>
-                <div className="mt-8 space-y-4">
+                <div className="mt-8 space-y-6">
                   <div>
-                    <strong className="block text-ink font-medium">{dict["contact.email"]}</strong>
+                    <strong className="block text-ink font-medium mb-1">{dict["contact.email"]}</strong>
                     <a href="mailto:info@infinytree.com" className="hover:text-ink transition-colors">
                       info@infinytree.com
                     </a>
                   </div>
                   <div>
-                    <strong className="block text-ink font-medium">{dict["contact.studio"]}</strong>
+                    <strong className="block text-ink font-medium mb-1">{dict["contact.studio"]}</strong>
                     <p>{dict["contact.address"]}<br />{dict["contact.byAppointment"]}</p>
                   </div>
                   <div>
-                    <strong className="block text-ink font-medium">{dict["contact.businessHours"]}</strong>
+                    <strong className="block text-ink font-medium mb-1">{dict["contact.businessHours"]}</strong>
                     <p>{dict["contact.hoursValue"]}</p>
                   </div>
                 </div>
