@@ -105,7 +105,7 @@
   "product.original": "Original",
   "product.onlyLeft": "Only {count} item available in stock.",
   "product.onlyLeftPlural": "Only {count} items available in stock.",
-  "product.netPrice": "net (+VAT)",
+  "product.netPrice": "(+VAT)",
   "product.selectOption": "Select {title}",
 
   "newsletter.placeholder": "youremail@example.com",
