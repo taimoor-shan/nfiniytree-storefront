@@ -105,6 +105,7 @@
   "product.original": "Ursprünglich",
   "product.onlyLeft": "Nur noch {count} Stück verfügbar.",
   "product.onlyLeftPlural": "Nur noch {count} Stück verfügbar.",
+  "product.netPrice": "netto (+MwSt.)",
   "product.selectOption": "{title} auswählen",
 
   "newsletter.placeholder": "ihre.email@beispiel.com",

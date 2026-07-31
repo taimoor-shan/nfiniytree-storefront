@@ -29,37 +29,42 @@ export default function ProductPrice({
     selectedPrice.calculated_price_number < selectedPrice.original_price_number
 
   return (
-    <div className="flex items-center gap-x-2 text-ink">
-      <span
-        className={clx("text-lg", {
-          "text-primary": isDiscounted,
-        })}
-      >
-        {!variant && t("product.from") + " "}
+    <div className="flex flex-col gap-y-0.5">
+      <div className="flex items-center gap-x-2 text-ink">
         <span
-          data-testid="product-price"
-          data-value={selectedPrice.calculated_price_number}
+          className={clx("text-lg", {
+            "text-primary": isDiscounted,
+          })}
         >
-          {selectedPrice.calculated_price}
-        </span>
-      </span>
-      {isDiscounted && (
-        <>
-          <p>
-            <span className="text-body">{t("product.original")}: </span>
-            <span
-              className="line-through"
-              data-testid="original-product-price"
-              data-value={selectedPrice.original_price_number}
-            >
-              {selectedPrice.original_price}
-            </span>
-          </p>
-          <span className="text-primary">
-            -{selectedPrice.percentage_diff}%
+          {!variant && t("product.from") + " "}
+          <span
+            data-testid="product-price"
+            data-value={selectedPrice.calculated_price_number}
+          >
+            {selectedPrice.calculated_price}
           </span>
-        </>
-      )}
+        </span>
+        {isDiscounted && (
+          <>
+            <p>
+              <span className="text-body">{t("product.original")}: </span>
+              <span
+                className="line-through"
+                data-testid="original-product-price"
+                data-value={selectedPrice.original_price_number}
+              >
+                {selectedPrice.original_price}
+              </span>
+            </p>
+            <span className="text-primary">
+              -{selectedPrice.percentage_diff}%
+            </span>
+          </>
+        )}
+      </div>
+      <span className="text-xs text-muted-foreground">
+        {t("product.netPrice")}
+      </span>
     </div>
   )
 }

@@ -105,6 +105,7 @@
   "product.original": "Eredeti",
   "product.onlyLeft": "Csak {count} darab érhető el.",
   "product.onlyLeftPlural": "Csak {count} darab érhető el.",
+  "product.netPrice": "nettó (+ÁFA)",
   "product.selectOption": "{title} kiválasztása",
 
   "newsletter.placeholder": "az.email@példa.hu",

@@ -5,6 +5,8 @@ import { HttpTypes } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "../thumbnail"
 import PreviewPrice from "./price"
+import { getLocale } from "@lib/data/locale-actions"
+import { translate } from "@/lib/i18n"
 
 export default async function ProductPreview({
   product,
@@ -28,6 +30,9 @@ export default async function ProductPreview({
     product,
   })
 
+  const locale = await getLocale()
+  const netPriceLabel = await translate("product.netPrice", locale)
+
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
       <div data-testid="product-wrapper">
@@ -42,7 +47,7 @@ export default async function ProductPreview({
             {product.title}
           </Text>
           <div className="flex items-center gap-x-2">
-            {cheapestPrice && <PreviewPrice price={cheapestPrice} />}
+            {cheapestPrice && <PreviewPrice price={cheapestPrice} netPriceLabel={netPriceLabel} />}
           </div>
         </div>
       </div>

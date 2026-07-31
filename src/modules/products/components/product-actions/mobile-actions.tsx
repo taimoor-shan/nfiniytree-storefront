@@ -84,21 +84,26 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               <span data-testid="mobile-title">{product.title}</span>
               <span>—</span>
               {selectedPrice ? (
-                <div className="flex items-end gap-x-2 text-ink">
-                  {selectedPrice.price_type === "sale" && (
-                    <p>
-                      <span className="line-through text-small-regular">
-                        {selectedPrice.original_price}
-                      </span>
-                    </p>
-                  )}
-                  <span
-                    className={clx({
-                      "text-primary":
-                        selectedPrice.price_type === "sale",
-                    })}
-                  >
-                    {selectedPrice.calculated_price}
+                <div className="flex flex-col items-end">
+                  <div className="flex items-end gap-x-2 text-ink">
+                    {selectedPrice.price_type === "sale" && (
+                      <p>
+                        <span className="line-through text-small-regular">
+                          {selectedPrice.original_price}
+                        </span>
+                      </p>
+                    )}
+                    <span
+                      className={clx({
+                        "text-primary":
+                          selectedPrice.price_type === "sale",
+                      })}
+                    >
+                      {selectedPrice.calculated_price}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground leading-tight">
+                    {t("product.netPrice")}
                   </span>
                 </div>
               ) : (
