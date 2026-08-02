@@ -18,37 +18,6 @@ export const getAuthHeaders = async (): Promise<
   }
 }
 
-export const getCacheTag = async (tag: string): Promise<string> => {
-  try {
-    const cookies = await nextCookies()
-    const cacheId = cookies.get("_medusa_cache_id")?.value
-
-    if (!cacheId) {
-      return ""
-    }
-
-    return `${tag}-${cacheId}`
-  } catch (error) {
-    return ""
-  }
-}
-
-export const getCacheOptions = async (
-  tag: string
-): Promise<{ tags: string[] } | {}> => {
-  if (typeof window !== "undefined") {
-    return {}
-  }
-
-  const cacheTag = await getCacheTag(tag)
-
-  if (!cacheTag) {
-    return {}
-  }
-
-  return { tags: [`${cacheTag}`] }
-}
-
 export const setAuthToken = async (token: string) => {
   const cookies = await nextCookies()
   cookies.set("_medusa_jwt", token, {

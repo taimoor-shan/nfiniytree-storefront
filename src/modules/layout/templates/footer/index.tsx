@@ -22,7 +22,7 @@ export default async function Footer() {
 
   return (
     <footer className="border-t border-hairline w-full bg-surface-soft pb-8">
-      <div className="pt-20 lg:grid lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:gap-x-8 lg:pt-28 max-w-[1440px] mx-auto content-container">
+      <div className="pt-16 lg:grid lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:gap-x-8 max-w-[1440px] mx-auto content-container">
         <div className="lg:mt-0 lg:col-span-4 lg:row-span-1">
           <LocalizedClientLink href="/" className="inline-flex items-center gap-3 text-3xl font-display text-ink hover:text-ink">
             <img src="/logo-full.png" alt="Logo" className="w-48 object-contain" />

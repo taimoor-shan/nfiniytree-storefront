@@ -4,7 +4,8 @@ import { sdk } from "@lib/config"
 import { sortProducts } from "@lib/util/sort-products"
 import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
-import { getAuthHeaders, getCacheOptions } from "./cookies"
+import { getAuthHeaders } from "./cookies"
+import { getCacheOptions, CACHE_TAGS } from "./cache"
 import { getRegion, retrieveRegion } from "./regions"
 
 export const listProducts = async ({
@@ -50,11 +51,7 @@ export const listProducts = async ({
   }
 
   const disableCache = process.env.NODE_ENV !== "production"
-  const next = disableCache
-    ? undefined
-    : {
-        ...(await getCacheOptions("products")),
-      }
+  const next = disableCache ? undefined : getCacheOptions(CACHE_TAGS.products)
 
   return sdk.client
     .fetch<{ products: HttpTypes.StoreProduct[]; count: number }>(

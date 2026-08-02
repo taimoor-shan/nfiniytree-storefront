@@ -1,7 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
-import { getCacheOptions } from "./cookies"
+import { getCacheOptions, CACHE_TAGS } from "./cache"
 
 type StoreResponse = {
   store: {
@@ -11,9 +11,7 @@ type StoreResponse = {
 }
 
 export const retrieveStore = async () => {
-  const next = {
-    ...(await getCacheOptions("store")),
-  }
+  const next = getCacheOptions(CACHE_TAGS.store)
 
   return sdk.client
     .fetch<StoreResponse>("/store/site", {

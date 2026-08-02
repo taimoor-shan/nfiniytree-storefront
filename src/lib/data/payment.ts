@@ -1,35 +1,25 @@
 "use server"
 
 import { sdk } from "@lib/config"
-import { getAuthHeaders, getCacheOptions } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
+import { getAuthHeaders } from "./cookies"
+import { getCacheOptions, CACHE_TAGS, TTL } from "./cache"
 
-export const listCartPaymentMethods = async (regionId: string) => {
+export const listCartPaymentMethods = async (cartId: string) => {
   const headers = {
     ...(await getAuthHeaders()),
   }
 
-  const next = {
-    ...(await getCacheOptions("payment_providers")),
-  }
+  const next = getCacheOptions(CACHE_TAGS.paymentProviders, TTL.static)
 
-  return sdk.client
-    .fetch<HttpTypes.StorePaymentProviderListResponse>(
-      `/store/payment-providers`,
-      {
-        method: "GET",
-        query: { region_id: regionId },
-        headers,
-        next,
-        cache: "force-cache",
-      }
-    )
-    .then(({ payment_providers }) =>
-      payment_providers.sort((a, b) => {
-        return a.id > b.id ? 1 : -1
-      })
-    )
-    .catch(() => {
-      return null
-    })
+  return await sdk.client.fetch<HttpTypes.StorePaymentProviderListResponse>(
+    `/store/payment-providers`,
+    {
+      method: "GET",
+      query: { region_id: cartId },
+      headers,
+      next,
+      cache: "force-cache",
+    }
+  )
 }

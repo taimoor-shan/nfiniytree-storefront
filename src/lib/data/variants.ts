@@ -3,7 +3,8 @@
 import { sdk } from "@lib/config"
 import { HttpTypes } from "@medusajs/types"
 
-import { getAuthHeaders, getCacheOptions } from "./cookies"
+import { getAuthHeaders } from "./cookies"
+import { getCacheOptions, CACHE_TAGS } from "./cache"
 
 export const retrieveVariant = async (
   variant_id: string
@@ -19,9 +20,7 @@ export const retrieveVariant = async (
   const disableCache = process.env.NODE_ENV !== "production"
   const next = disableCache
     ? undefined
-    : {
-        ...(await getCacheOptions("variants")),
-      }
+    : getCacheOptions(CACHE_TAGS.variants)
 
   return await sdk.client
     .fetch<{ variant: HttpTypes.StoreProductVariant }>(

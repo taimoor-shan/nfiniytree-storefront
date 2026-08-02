@@ -133,10 +133,17 @@ export default function TopBar({
   /* -------------------------------------------------- */
   const localeOptions = useMemo(() => {
     if (!locales) return []
-    return locales.map((l) => ({
-      code: l.code,
-      label: getLocalizedLanguageName(l.code, l.name, currentLocale ?? "en-US"),
-    }))
+    const seen = new Set<string>()
+    return locales
+      .filter((l) => {
+        if (seen.has(l.code)) return false
+        seen.add(l.code)
+        return true
+      })
+      .map((l) => ({
+        code: l.code,
+        label: getLocalizedLanguageName(l.code, l.name, currentLocale ?? "en-US"),
+      }))
   }, [locales, currentLocale])
 
   const currentLocaleLabel = useMemo(() => {

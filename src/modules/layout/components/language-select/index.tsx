@@ -93,16 +93,26 @@ const LanguageSelect = ({
   const { state, close } = toggleState
 
   const options = useMemo(() => {
-    const localeOptions = locales.map((locale) => ({
-      code: locale.code,
-      name: locale.name,
-      localizedName: getLocalizedLanguageName(
-        locale.code,
-        locale.name,
-        currentLocale ?? "en-US"
-      ),
-      countryCode: getCountryCodeFromLocale(locale.code),
-    }))
+    const seen = new Set<string>()
+    const localeOptions = locales
+      // Deduplicate: if the backend returns the same locale code
+      // twice (e.g. from cached responses with different locale
+      // headers), only keep the first occurrence.
+      .filter((locale) => {
+        if (seen.has(locale.code)) return false
+        seen.add(locale.code)
+        return true
+      })
+      .map((locale) => ({
+        code: locale.code,
+        name: locale.name,
+        localizedName: getLocalizedLanguageName(
+          locale.code,
+          locale.name,
+          currentLocale ?? "en-US"
+        ),
+        countryCode: getCountryCodeFromLocale(locale.code),
+      }))
     return [DEFAULT_OPTION, ...localeOptions]
   }, [locales, currentLocale])
 

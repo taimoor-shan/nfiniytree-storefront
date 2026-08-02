@@ -31,7 +31,7 @@ const SortProducts = ({
   ]
   return (
     <div
-      className="w-full sm:w-[180px]"
+      className="w-full sm:w-auto"
       data-testid={dataTestId}
     >
       <Select

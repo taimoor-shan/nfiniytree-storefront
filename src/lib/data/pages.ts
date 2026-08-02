@@ -1,7 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
-import { getCacheOptions } from "./cookies"
+import { getCacheOptions, CACHE_TAGS } from "./cache"
 
 type Page = {
   id: string
@@ -38,6 +38,8 @@ export const listPages = async ({
   offset?: number
   q?: string
 }) => {
+  const next = getCacheOptions(CACHE_TAGS.pages)
+
   return sdk.client.fetch<PagesResponse>("/store/pages", {
     method: "GET",
     query: {
@@ -45,16 +47,20 @@ export const listPages = async ({
       offset,
       q,
     },
-    cache: "no-store",
+    next,
+    cache: "force-cache",
   })
 }
 
 export const retrievePageBySlug = async (slug: string, locale?: string | null) => {
+  const next = getCacheOptions(CACHE_TAGS.pages)
+
   return sdk.client
     .fetch<PageResponse>(`/store/pages/${slug}`, {
       method: "GET",
       query: locale ? { locale } : undefined,
-      cache: "no-store",
+      next,
+      cache: "force-cache",
     })
     .then(({ page }) => page)
     .catch(() => null)
