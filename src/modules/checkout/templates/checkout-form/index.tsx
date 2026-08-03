@@ -20,13 +20,7 @@ export default async function CheckoutForm({
   const shippingMethods = await listCartShippingMethods(cart.id)
   const paymentMethods = await listCartPaymentMethods(cart.region?.id ?? "")
 
-  console.log("[DEBUG CheckoutForm] cart.region?.id:", cart.region?.id)
-  console.log("[DEBUG CheckoutForm] shippingMethods:", shippingMethods?.length, "| isArray:", Array.isArray(shippingMethods))
-  console.log("[DEBUG CheckoutForm] paymentMethods TYPE:", typeof paymentMethods, "| isArray:", Array.isArray(paymentMethods))
-  console.log("[DEBUG CheckoutForm] paymentMethods RAW:", JSON.stringify(paymentMethods)?.slice(0, 200))
-
   if (!shippingMethods || !paymentMethods) {
-    console.error("[DEBUG CheckoutForm] BAILING — shippingMethods:", !!shippingMethods, "paymentMethods:", !!paymentMethods)
     return null
   }
 

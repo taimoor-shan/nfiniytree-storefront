@@ -12,8 +12,6 @@ export const listCartPaymentMethods = async (cartId: string) => {
 
   const next = getCacheOptions(CACHE_TAGS.paymentProviders, TTL.static)
 
-  console.log("[DEBUG listCartPaymentMethods] region_id:", cartId)
-
   const result = await sdk.client.fetch<HttpTypes.StorePaymentProviderListResponse>(
     `/store/payment-providers`,
     {
@@ -24,8 +22,6 @@ export const listCartPaymentMethods = async (cartId: string) => {
       cache: "force-cache",
     }
   )
-
-  console.log("[DEBUG listCartPaymentMethods] RAW response type:", typeof result, "| keys:", Object.keys(result || {}), "| isArray:", Array.isArray(result))
 
   // Extract the providers array from the paginated response
   return (result as any)?.payment_providers ?? []

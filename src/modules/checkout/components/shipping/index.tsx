@@ -136,6 +136,9 @@ const Shipping: React.FC<ShippingProps> = ({
     })
 
     await setShippingMethod({ cartId: cart.id, shippingMethodId: id })
+      .then(() => {
+        router.refresh()
+      })
       .catch((err) => {
         setShippingMethodId(currentId)
 

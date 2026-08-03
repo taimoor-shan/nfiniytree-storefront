@@ -22,13 +22,9 @@ export const listCartShippingMethods = async (cartId: string) => {
       }
     )
     .then(({ shipping_options }) => {
-      console.log("[DEBUG listCartShippingMethods] cart:", cartId.slice(-8),
-        "| count:", shipping_options?.length,
-        "| options:", JSON.stringify(shipping_options?.map((o: any) => ({ id: o.id, name: o.name, amount: o.amount }))))
       return shipping_options
     })
     .catch((e) => {
-      console.error("[DEBUG listCartShippingMethods] FAILED for cart", cartId.slice(-8), ":", e?.message || e)
       return null
     })
 }
