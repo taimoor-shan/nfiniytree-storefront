@@ -3,7 +3,7 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
-import { revalidateTag } from "next/cache"
+import { revalidatePath, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
   getAuthHeaders,
@@ -100,6 +100,7 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
     .update(cartId, data, {}, headers)
     .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
       revalidateTag(CACHE_TAGS.products, "max")
+      revalidatePath("/", "layout")
       return cart
     })
     .catch((err) => {
@@ -142,6 +143,7 @@ export async function addToCart({
     )
     .then(async () => {
       revalidateTag(CACHE_TAGS.products, "max")
+      revalidatePath("/", "layout")
     })
     .catch(medusaError)
 }
@@ -171,6 +173,7 @@ export async function updateLineItem({
     .updateLineItem(cartId, lineId, { quantity }, {}, headers)
     .then(async () => {
       revalidateTag(CACHE_TAGS.products, "max")
+      revalidatePath("/", "layout")
     })
     .catch(medusaError)
 }
@@ -194,6 +197,7 @@ export async function deleteLineItem(lineId: string) {
     .deleteLineItem(cartId, lineId, {}, headers)
     .then(async () => {
       revalidateTag(CACHE_TAGS.products, "max")
+      revalidatePath("/", "layout")
     })
     .catch(medusaError)
 }

@@ -47,9 +47,11 @@
   "contact.getInTouch": "Kontaktieren Sie uns",
   "contact.getInTouchText": "Bei Infinytree ist jedes Stück eine einzigartige Kreation. Wir laden Sie ein, uns bei Fragen zu unseren verfügbaren Stücken, Auftragsarbeiten oder dazu, wie unsere handgefertigten botanischen Designs Ihren Innenraum aufwerten können, zu kontaktieren.",
   "contact.email": "E-Mail",
-  "contact.studio": "Studio / Hauptsitz",
-  "contact.address": "Budapest, Ungarn",
+  "contact.address": "1065 Budapest, Podmaniczky utca 19, Ungarn",
   "contact.byAppointment": "(Nur nach Vereinbarung)",
+  "contact.companyName": "Deltalivings Kft.",
+  "contact.taxNumberLabel": "Steuernummer",
+  "contact.taxNumber": "32214460-2-42",
   "contact.businessHours": "Geschäftszeiten",
   "contact.hoursValue": "Montag - Freitag: 9:00 - 17:00 Uhr (MEZ)",
   "contact.sendMessage": "Nachricht senden",
@@ -247,6 +249,19 @@
   "account.transferRequested": "Übertragung für Bestellung {id} angefordert",
   "account.transferEmailSent": "Übertragungsanfrage-E-Mail gesendet an {email}",
   "account.requestTransfer": "Übertragung anfordern",
+  "account.backToLogin": "Zurück zur Anmeldung",
+  "account.backToAccount": "Zurück zum Konto",
+  "account.checkEmail": "E-Mail überprüfen",
+  "account.forgotPassword": "Passwort vergessen",
+  "account.forgotPasswordPrompt": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen Ihres Passworts.",
+  "account.resetLinkSent": "Falls ein Konto mit dieser E-Mail existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet.",
+  "account.sendResetLink": "Link zum Zurücksetzen senden",
+  "account.invalidLink": "Ungültiger Link",
+  "account.invalidLinkPrompt": "Der Link zum Zurücksetzen ist ungültig oder abgelaufen. Bitte fordern Sie einen neuen an.",
+  "account.requestNewLink": "Neuen Link anfordern",
+  "account.resetPassword": "Passwort zurücksetzen",
+  "account.resetPasswordPrompt": "Geben Sie unten Ihr neues Passwort ein.",
+  "account.updatePassword": "Passwort aktualisieren",
 
   "addresses.newAddress": "Neue Adresse",
   "addresses.addAddress": "Adresse hinzufügen",
@@ -360,5 +375,12 @@
   "common.subtotalExcl": "Zwischensumme (exkl. Versand und Steuern)",
 
   "topbar.defaultLanguage": "Standard",
-  "topbar.selectCountry": "Land auswählen"
+  "topbar.selectCountry": "Land auswählen",
+
+  "withdrawal.noticeTitle": "Hinweis zum Widerrufsrecht",
+  "withdrawal.importantPrefix": "Wichtig: ",
+  "withdrawal.legalText": "Dieses Produkt wird nach Ihrer Bestellung auf Grundlage Ihrer gewählten Konfiguration individuell montiert und fertiggestellt. Da es sich um ein nicht vorgefertigtes, nach Ihren individuellen Vorgaben hergestelltes Produkt handelt, besteht das 14-tägige gesetzliche Widerrufsrecht gemäß {decree} nicht.",
+  "withdrawal.decree": "§ 29 Abs. 1 Buchst. c der ungarischen Regierungsverordnung 45/2014 (II. 26.)",
+  "withdrawal.seeOurDetails": "Weitere Einzelheiten finden Sie in unserer {policyLink}.",
+  "withdrawal.policyLinkLabel": "Rückgabe- und Erstattungsrichtlinie"
 }

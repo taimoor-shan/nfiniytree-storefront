@@ -193,13 +193,14 @@ export default function ProductActions({
 
     setIsAdding(false)
     setQuantity(1)
+    router.refresh()
   }
 
   return (
     <>
       <div className="flex flex-col gap-y-2" ref={actionsRef}>
         <div>
-          {(product.variants?.length ?? 0) > 1 && (
+          {(product.variants?.length ?? 0) > 0 && (
             <div className="flex flex-col gap-y-4">
               {(product.options || []).map((option) => {
                 return (

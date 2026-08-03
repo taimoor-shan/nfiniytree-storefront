@@ -5,22 +5,18 @@ import SignInPrompt from "../components/sign-in-prompt"
 import Divider from "@modules/common/components/divider"
 import WithdrawalNotice from "@modules/common/components/withdrawal-notice"
 import { HttpTypes } from "@medusajs/types"
+import { translate } from "@/lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
-const hasConfiguredItems = (cart: HttpTypes.StoreCart | null): boolean => {
-  return (
-    cart?.items?.some(
-      (item: any) => (item.variant?.options?.length || 0) > 1
-    ) ?? false
-  )
-}
-
-const CartTemplate = ({
+const CartTemplate = async ({
   cart,
   customer,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
 }) => {
+  const locale = await getLocale()
+
   return (
     <div className="py-12">
       <div className="content-container" data-testid="cart-container">
@@ -34,9 +30,15 @@ const CartTemplate = ({
                 </>
               )}
               <ItemsTemplate cart={cart} />
-              {hasConfiguredItems(cart) && (
-                <WithdrawalNotice variant="banner" />
-              )}
+              <WithdrawalNotice
+                variant="banner"
+                title={await translate("withdrawal.noticeTitle", locale)}
+                importantPrefix={await translate("withdrawal.importantPrefix", locale)}
+                legalText={await translate("withdrawal.legalText", locale)}
+                decree={await translate("withdrawal.decree", locale)}
+                seeOurDetails={await translate("withdrawal.seeOurDetails", locale)}
+                policyLinkLabel={await translate("withdrawal.policyLinkLabel", locale)}
+              />
             </div>
             <div className="relative">
               <div className="flex flex-col gap-y-8 sticky top-24">

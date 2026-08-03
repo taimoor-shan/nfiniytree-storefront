@@ -99,16 +99,27 @@ function CurrencyIcon() {
 /* ------------------------------------------------------------------ */
 /* Locale display helper                                               */
 /* ------------------------------------------------------------------ */
+
+/** Extract the bare language subtag, e.g. "de" from "de-DE". */
+function getLanguageSubtag(localeCode: string): string {
+  try {
+    return new Intl.Locale(localeCode).language
+  } catch {
+    return localeCode.split(/[-_]/)[0] ?? localeCode
+  }
+}
+
 function getLocalizedLanguageName(
   code: string,
   fallback: string,
   displayLocale?: string
 ): string {
   try {
+    const lang = getLanguageSubtag(code)
     const displayNames = new Intl.DisplayNames([displayLocale ?? "en-US"], {
       type: "language",
     })
-    return displayNames.of(code) ?? fallback
+    return displayNames.of(lang) ?? fallback
   } catch {
     return fallback
   }
@@ -147,13 +158,13 @@ export default function TopBar({
   }, [locales, currentLocale])
 
   const currentLocaleLabel = useMemo(() => {
-    if (!currentLocale || !locales) return "Default"
+    if (!currentLocale || !locales) return "English"
     const found = locales.find(
       (l) => l.code.toLowerCase() === currentLocale.toLowerCase()
     )
     return found
       ? getLocalizedLanguageName(found.code, found.name, currentLocale ?? "en-US")
-      : "Default"
+      : "English"
   }, [currentLocale, locales])
 
   /* -------------------------------------------------- */
@@ -244,7 +255,7 @@ export default function TopBar({
                     onClick={() => handleLocaleChange("")}
                     disabled={isPending}
                   >
-                    Default
+                    English
                   </button>
                 </li>
                 {localeOptions.map((opt) => (

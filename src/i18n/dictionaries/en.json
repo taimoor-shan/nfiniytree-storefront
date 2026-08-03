@@ -47,9 +47,11 @@
   "contact.getInTouch": "Get in Touch",
   "contact.getInTouchText": "At Infinytree, every piece is a unique creation. We invite you to contact us regarding inquiries about our available pieces, commissioned work, or how our handcrafted botanical designs can elevate your interior space.",
   "contact.email": "Email",
-  "contact.studio": "Office Address",
-  "contact.address": "Budapest, Hungary",
+  "contact.address": "1065 Budapest, Podmaniczky utca 19, Hungary",
   "contact.byAppointment": "(By appointment only)",
+  "contact.companyName": "Deltalivings Kft.",
+  "contact.taxNumberLabel": "Tax number",
+  "contact.taxNumber": "32214460-2-42",
   "contact.businessHours": "Business Hours",
   "contact.hoursValue": "Monday - Friday: 9:00 AM - 5:00 PM (CET)",
   "contact.sendMessage": "Send us a message",
@@ -373,5 +375,12 @@
   "common.subtotalExcl": "Subtotal (excl. shipping and taxes)",
 
   "topbar.defaultLanguage": "Default",
-  "topbar.selectCountry": "Select country"
+  "topbar.selectCountry": "Select country",
+
+  "withdrawal.noticeTitle": "Withdrawal Right Notice",
+  "withdrawal.importantPrefix": "Important: ",
+  "withdrawal.legalText": "This product is individually assembled and finalised after your order based on your selected configuration. As a non-prefabricated product produced according to your individual choices, the 14-day statutory right of withdrawal does not apply under {decree}.",
+  "withdrawal.decree": "Section 29(1)(c) of Hungarian Government Decree 45/2014 (II. 26.)",
+  "withdrawal.seeOurDetails": "See our {policyLink} for full details.",
+  "withdrawal.policyLinkLabel": "Returns & Refunds Policy"
 }

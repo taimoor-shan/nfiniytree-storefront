@@ -4,47 +4,82 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 type WithdrawalNoticeProps = {
   variant?: "inline" | "banner"
   className?: string
+  /** Translated heading — defaults to English */
+  title?: string
+  /** Translated "Important:" prefix — defaults to English */
+  importantPrefix?: string
+  /** Translated legal body text with {decree} placeholder — defaults to English */
+  legalText?: string
+  /** Translated decree reference — defaults to English */
+  decree?: string
+  /** Translated "See our {policyLink}…" line — defaults to English */
+  seeOurDetails?: string
+  /** Translated link label — defaults to English */
+  policyLinkLabel?: string
+}
+
+const DEFAULT_TITLE = "Withdrawal Right Notice"
+const DEFAULT_IMPORTANT_PREFIX = "Important: "
+const DEFAULT_LEGAL_TEXT =
+  "This product is individually assembled and finalised after your order based on your selected configuration. As a non-prefabricated product produced according to your individual choices, the 14-day statutory right of withdrawal does not apply under {decree}."
+const DEFAULT_DECREE =
+  "Section 29(1)(c) of Hungarian Government Decree 45/2014 (II. 26.)"
+const DEFAULT_SEE_OUR_DETAILS = "See our {policyLink} for full details."
+const DEFAULT_POLICY_LINK_LABEL = "Returns & Refunds Policy"
+
+/** Split `text` on the first occurrence of `placeholder`. If missing, returns the
+ *  full text as the first element so the caller still renders something sensible. */
+const splitOn = (
+  text: string,
+  placeholder: string
+): readonly [string, string] => {
+  const idx = text.indexOf(placeholder)
+  if (idx === -1) return [text, ""] as const
+  return [text.slice(0, idx), text.slice(idx + placeholder.length)] as const
 }
 
 const WithdrawalNotice = ({
   variant = "inline",
   className = "",
+  title = DEFAULT_TITLE,
+  importantPrefix = DEFAULT_IMPORTANT_PREFIX,
+  legalText = DEFAULT_LEGAL_TEXT,
+  decree = DEFAULT_DECREE,
+  seeOurDetails = DEFAULT_SEE_OUR_DETAILS,
+  policyLinkLabel = DEFAULT_POLICY_LINK_LABEL,
 }: WithdrawalNoticeProps) => {
-  const legalText = (
+  const [legalBefore, legalAfter] = splitOn(legalText, "{decree}")
+  const legalBody = (
     <>
-      This product is individually assembled and finalised after your order based
-      on your selected configuration. As a non-prefabricated product produced
-      according to your individual choices, the 14-day statutory right of
-      withdrawal does not apply under{" "}
-      <span className="whitespace-nowrap">
-        Section 29(1)(c) of Hungarian Government Decree 45/2014 (II. 26.)
-      </span>
-      .
+      {legalBefore}
+      <span className="whitespace-nowrap">{decree}</span>
+      {legalAfter}
     </>
   )
 
-  const policyLink = (
-    <LocalizedClientLink
-      href="/policies/returns"
-      className="text-primary underline hover:opacity-80 transition-opacity"
-    >
-      Returns &amp; Refunds Policy
-    </LocalizedClientLink>
+  const [seeBefore, seeAfter] = splitOn(seeOurDetails, "{policyLink}")
+  const policyLine = (
+    <>
+      {seeBefore}
+      <LocalizedClientLink
+        href="/policies/returns"
+        className="text-primary underline hover:opacity-80 transition-opacity"
+      >
+        {policyLinkLabel}
+      </LocalizedClientLink>
+      {seeAfter}
+    </>
   )
 
   if (variant === "inline") {
     return (
-      <div
-        className={`mt-6 pt-6 border-t border-hairline ${className}`}
-      >
+      <div className={`mt-6 pt-6 border-t border-hairline ${className}`}>
         <div className="bg-surface-card rounded-lg p-4 border-l-2 border-l-primary">
           <p className="text-sm text-body leading-relaxed">
-            <span className="font-medium text-ink">Important: </span>
-            {legalText}
+            <span className="font-medium text-ink">{importantPrefix}</span>
+            {legalBody}
           </p>
-          <p className="text-sm text-muted mt-2">
-            See our {policyLink} for full details.
-          </p>
+          <p className="text-sm text-muted mt-2">{policyLine}</p>
         </div>
       </div>
     )
@@ -56,13 +91,9 @@ const WithdrawalNotice = ({
       <div className="flex items-start gap-x-3">
         <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
         <div>
-          <p className="font-medium text-ink text-sm mb-1">
-            Withdrawal Right Notice
-          </p>
-          <p className="text-sm text-body leading-relaxed">{legalText}</p>
-          <p className="text-sm text-muted mt-2">
-            See our {policyLink} for full details.
-          </p>
+          <p className="font-medium text-ink text-sm mb-1">{title}</p>
+          <p className="text-sm text-body leading-relaxed">{legalBody}</p>
+          <p className="text-sm text-muted mt-2">{policyLine}</p>
         </div>
       </div>
     </div>

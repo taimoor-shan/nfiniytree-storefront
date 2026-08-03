@@ -54,8 +54,12 @@ export default async function ContactPage() {
                     </a>
                   </div>
                   <div>
-                    <strong className="block text-ink font-medium mb-1">{dict["contact.studio"]}</strong>
+                    <strong className="block text-ink font-medium mb-1">{dict["contact.companyName"]}</strong>
                     <p>{dict["contact.address"]}<br />{dict["contact.byAppointment"]}</p>
+                  </div>
+                  <div>
+                    <strong className="block text-ink font-medium mb-1">{dict["contact.taxNumberLabel"]}</strong>
+                    <p>{dict["contact.taxNumber"]}</p>
                   </div>
                   <div>
                     <strong className="block text-ink font-medium mb-1">{dict["contact.businessHours"]}</strong>

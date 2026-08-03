@@ -47,9 +47,11 @@
   "contact.getInTouch": "Lépjen kapcsolatba velünk",
   "contact.getInTouchText": "Az Infinytree-nél minden darab egyedi alkotás. Hívjuk Önt, hogy érdeklődjön elérhető darabjainkról, megbízásos munkáinkról, vagy arról, hogyan emelhetik kézzel készített botanikai terveink az Ön belső terét.",
   "contact.email": "E-mail",
-  "contact.studio": "Iroda címe",
-  "contact.address": "Budapest, Magyarország",
+  "contact.address": "1065 Budapest, Podmaniczky utca 19, Magyarország",
   "contact.byAppointment": "(Csak előzetes egyeztetés alapján)",
+  "contact.companyName": "Deltalivings Kft.",
+  "contact.taxNumberLabel": "Adószám",
+  "contact.taxNumber": "32214460-2-42",
   "contact.businessHours": "Üzleti órák",
   "contact.hoursValue": "Hétfő - Péntek: 9:00 - 17:00 (CET)",
   "contact.sendMessage": "Üzenet küldése",
@@ -375,5 +377,12 @@
   "common.subtotalExcl": "Részösszeg (szállítás és adók nélkül)",
 
   "topbar.defaultLanguage": "Alapértelmezett",
-  "topbar.selectCountry": "Ország kiválasztása"
+  "topbar.selectCountry": "Ország kiválasztása",
+
+  "withdrawal.noticeTitle": "Tájékoztató az elállási jogról",
+  "withdrawal.importantPrefix": "Fontos: ",
+  "withdrawal.legalText": "Ezt a terméket megrendelése után, az Ön által kiválasztott konfiguráció alapján egyedileg szerelik össze és készítik el. Mivel nem előregyártott, hanem az Ön egyedi döntései alapján készülő termékről van szó, a 14 napos törvényes elállási jog a {decree} alapján nem illeti meg Önt.",
+  "withdrawal.decree": "a 45/2014. (II. 26.) Korm. rendelet 29. § (1) bekezdés c) pontja",
+  "withdrawal.seeOurDetails": "A részletes feltételekért lásd {policyLink}.",
+  "withdrawal.policyLinkLabel": "Visszaküldési és visszatérítési szabályzat"
 }

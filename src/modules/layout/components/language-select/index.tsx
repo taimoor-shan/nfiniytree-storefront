@@ -36,6 +36,19 @@ const getCountryCodeFromLocale = (localeCode: string): string => {
   }
 }
 
+/**
+ * Extract the bare language subtag from a locale code,
+ * e.g. "de" from "de-DE" or "en" from "en-US".
+ */
+const getLanguageSubtag = (localeCode: string): string => {
+  try {
+    return new Intl.Locale(localeCode).language
+  } catch {
+    const parts = localeCode.split(/[-_]/)
+    return parts[0] ?? localeCode
+  }
+}
+
 type LanguageSelectProps = {
   toggleState: StateType
   locales: Locale[]
@@ -55,6 +68,8 @@ type LanguageSelectProps = {
 /**
  * Gets the localized display name for a language code using Intl API.
  * Falls back to the provided name if Intl is unavailable.
+ * Uses only the language subtag (e.g. "de") to avoid region-qualified names
+ * like "German (Germany)".
  */
 const getLocalizedLanguageName = (
   code: string,
@@ -62,10 +77,11 @@ const getLocalizedLanguageName = (
   displayLocale: string = "en-US"
 ): string => {
   try {
+    const lang = getLanguageSubtag(code)
     const displayNames = new Intl.DisplayNames([displayLocale], {
       type: "language",
     })
-    return displayNames.of(code) ?? fallbackName
+    return displayNames.of(lang) ?? fallbackName
   } catch {
     return fallbackName
   }
@@ -73,8 +89,8 @@ const getLocalizedLanguageName = (
 
 const DEFAULT_OPTION: LanguageOption = {
   code: "",
-  name: "Default",
-  localizedName: "Default",
+  name: "English",
+  localizedName: "English",
   countryCode: "",
 }
 
