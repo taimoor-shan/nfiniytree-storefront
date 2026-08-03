@@ -253,6 +253,7 @@
   "addresses.editAddress": "Adresse bearbeiten",
   "addresses.shippingAddresses": "Lieferadressen",
   "addresses.company": "Firma",
+  "addresses.vatNumber": "UID-Nummer",
   "addresses.address": "Adresse",
   "addresses.apartment": "Wohnung, Suite, etc.",
   "addresses.postalCode": "Postleitzahl",

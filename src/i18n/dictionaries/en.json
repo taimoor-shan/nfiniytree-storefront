@@ -266,6 +266,7 @@
   "addresses.editAddress": "Edit address",
   "addresses.shippingAddresses": "Shipping Addresses",
   "addresses.company": "Company",
+  "addresses.vatNumber": "VAT Number",
   "addresses.address": "Address",
   "addresses.apartment": "Apartment, suite, etc.",
   "addresses.postalCode": "Postal code",

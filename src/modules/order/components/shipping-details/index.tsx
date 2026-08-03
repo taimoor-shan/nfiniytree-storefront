@@ -53,6 +53,17 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
               <Text className="txt-medium text-body">
                 {order.shipping_address?.country_code?.toUpperCase()}
               </Text>
+              {order.shipping_address?.company && (
+                <Text className="txt-medium text-body">
+                  {order.shipping_address.company}
+                </Text>
+              )}
+              {(order.shipping_address?.metadata as any)?.vat_number && (
+                <Text className="txt-medium text-body">
+                  {t("addresses.vatNumber")}:{" "}
+                  {(order.shipping_address?.metadata as any).vat_number}
+                </Text>
+              )}
             </>
           )}
         </div>

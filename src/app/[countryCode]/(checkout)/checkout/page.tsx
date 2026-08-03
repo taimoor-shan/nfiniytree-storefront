@@ -13,6 +13,16 @@ export const metadata: Metadata = {
 export default async function Checkout() {
   const cart = await retrieveCart()
 
+  console.log("[DEBUG Checkout page] cart exists:", !!cart)
+  if (cart) {
+    console.log("[DEBUG Checkout page] cart.id:", cart.id?.slice(-8),
+      "| region_id:", cart.region_id,
+      "| region:", cart.region?.id,
+      "| shipping_address:", !!cart.shipping_address,
+      "| shipping_methods:", cart.shipping_methods?.length,
+      "| payment_collection:", !!cart.payment_collection)
+  }
+
   if (!cart) {
     return notFound()
   }

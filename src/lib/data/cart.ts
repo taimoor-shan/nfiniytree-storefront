@@ -23,7 +23,7 @@ import { getLocale } from "@lib/data/locale-actions"
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId())
   fields ??=
-    "*items, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name"
+    "*items, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name, *shipping_address"
 
   if (!id) {
     return null
@@ -42,8 +42,18 @@ export async function retrieveCart(cartId?: string, fields?: string) {
       headers,
       cache: "no-store",
     })
-    .then(({ cart }: { cart: HttpTypes.StoreCart }) => cart)
-    .catch(() => null)
+    .then(({ cart }: { cart: HttpTypes.StoreCart }) => {
+      console.log("[DEBUG retrieveCart] cart.id:", cart?.id?.slice(-8),
+        "| has shipping_address:", !!cart?.shipping_address,
+        "| shipping_address.country_code:", cart?.shipping_address?.country_code,
+        "| shipping_address.metadata:", JSON.stringify(cart?.shipping_address?.metadata),
+        "| cart.metadata:", JSON.stringify(cart?.metadata))
+      return cart
+    })
+    .catch((e) => {
+      console.error("[DEBUG retrieveCart] FAILED:", e?.message || e)
+      return null
+    })
 }
 
 export async function getOrSetCart(countryCode: string) {
@@ -92,14 +102,19 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
     ...(await getAuthHeaders()),
   }
 
+  console.log("[DEBUG updateCart] Sending to cart", cartId.slice(-8), ":", JSON.stringify(data, null, 2))
+
   return sdk.store.cart
     .update(cartId, data, {}, headers)
     .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
+      console.log("[DEBUG updateCart] SUCCESS — cart has shipping_address:", !!cart.shipping_address)
       revalidateTag(CACHE_TAGS.products, "max")
-
       return cart
     })
-    .catch(medusaError)
+    .catch((err) => {
+      console.error("[DEBUG updateCart] FAILED:", err?.message || err)
+      return medusaError(err)
+    })
 }
 
 export async function addToCart({
@@ -314,6 +329,11 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
+    const vatNumber = String(formData.get("vat_number") ?? "").trim()
+    if (!vatNumber) {
+      throw new Error("VAT number is required")
+    }
+
     const data = {
       shipping_address: {
         first_name: formData.get("shipping_address.first_name"),
@@ -326,9 +346,13 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         country_code: formData.get("shipping_address.country_code"),
         province: formData.get("shipping_address.province"),
         phone: formData.get("shipping_address.phone"),
+        metadata: { vat_number: vatNumber },
       },
       email: formData.get("email"),
     } as any
+
+    console.log("[DEBUG setAddresses] VAT:", vatNumber, "| country:", formData.get("shipping_address.country_code"), "| email:", formData.get("email"))
+    console.log("[DEBUG setAddresses] data.shipping_address:", JSON.stringify(data.shipping_address, null, 2))
 
     const sameAsBilling = formData.get("same_as_billing")
     if (sameAsBilling === "on") data.billing_address = data.shipping_address
@@ -346,7 +370,9 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         province: formData.get("billing_address.province"),
         phone: formData.get("billing_address.phone"),
       }
+    console.log("[DEBUG setAddresses] Calling updateCart...")
     await updateCart(data)
+    console.log("[DEBUG setAddresses] updateCart succeeded — redirecting to delivery")
   } catch (e: any) {
     return e.message
   }

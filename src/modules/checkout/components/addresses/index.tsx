@@ -119,6 +119,17 @@ const Addresses = ({
                     <Text className="txt-medium text-body">
                       {cart.shipping_address.country_code?.toUpperCase()}
                     </Text>
+                    {cart.shipping_address.company && (
+                      <Text className="txt-medium text-body">
+                        {cart.shipping_address.company}
+                      </Text>
+                    )}
+                    {(cart.shipping_address?.metadata as any)?.vat_number && (
+                      <Text className="txt-medium text-body">
+                        {t("addresses.vatNumber")}:{" "}
+                        {(cart.shipping_address?.metadata as any).vat_number}
+                      </Text>
+                    )}
                   </div>
 
                   <div

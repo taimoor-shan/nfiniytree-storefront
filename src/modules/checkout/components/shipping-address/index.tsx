@@ -32,6 +32,7 @@ const ShippingAddress = ({
     "shipping_address.country_code": cart?.shipping_address?.country_code || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
     "shipping_address.phone": cart?.shipping_address?.phone || "",
+    vat_number: (cart?.shipping_address?.metadata as any)?.vat_number || "",
     email: cart?.email || "",
   })
 
@@ -214,6 +215,15 @@ const ShippingAddress = ({
           value={formData["shipping_address.phone"]}
           onChange={handleChange}
           data-testid="shipping-phone-input"
+        />
+        <Input
+          label={t("addresses.vatNumber")}
+          name="vat_number"
+          autoComplete="off"
+          value={formData.vat_number}
+          onChange={handleChange}
+          required
+          data-testid="shipping-vat-input"
         />
       </div>
     </>
