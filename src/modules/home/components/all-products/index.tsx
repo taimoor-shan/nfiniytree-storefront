@@ -21,7 +21,7 @@ export default async function AllProducts({
 
   return (
     <div className="content-container pb-12">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-4 border-b border-hairline gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-4 gap-4">
         <h2 className="text-2xl sm:text-3xl font-display text-ink">
           {await translate("store.allProducts", locale)}
         </h2>

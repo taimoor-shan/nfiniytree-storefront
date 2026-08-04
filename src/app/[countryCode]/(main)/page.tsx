@@ -57,7 +57,7 @@ export default async function Home(props: {
       <Features />
           <FeaturedProducts collections={collections} region={region} />
 
-      <div className="py-12">
+      <div className="">
           <AllProducts sortBy={sortBy} page={page} countryCode={countryCode} />
      
       </div>

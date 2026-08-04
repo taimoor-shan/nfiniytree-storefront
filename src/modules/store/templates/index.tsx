@@ -26,7 +26,7 @@ const StoreTemplate = ({
       data-testid="category-container"
     >
       {/* Top bar: title on left, filters on right */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-4 border-b border-hairline gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-4 gap-4">
         <h1
           className="text-2xl sm:text-3xl font-display text-ink"
           data-testid="store-page-title"
