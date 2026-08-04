@@ -9,7 +9,6 @@ import {
 } from "@headlessui/react"
 import { Fragment, useEffect, useMemo, useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
-import ReactCountryFlag from "react-country-flag"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { updateLocale } from "@lib/data/locale-actions"
@@ -36,19 +35,6 @@ const getCountryCodeFromLocale = (localeCode: string): string => {
   }
 }
 
-/**
- * Extract the bare language subtag from a locale code,
- * e.g. "de" from "de-DE" or "en" from "en-US".
- */
-const getLanguageSubtag = (localeCode: string): string => {
-  try {
-    return new Intl.Locale(localeCode).language
-  } catch {
-    const parts = localeCode.split(/[-_]/)
-    return parts[0] ?? localeCode
-  }
-}
-
 type LanguageSelectProps = {
   toggleState: StateType
   locales: Locale[]
@@ -65,23 +51,17 @@ type LanguageSelectProps = {
   dropdownWrapperClassName?: string
 }
 
-/**
- * Gets the localized display name for a language code using Intl API.
- * Falls back to the provided name if Intl is unavailable.
- * Uses only the language subtag (e.g. "de") to avoid region-qualified names
- * like "German (Germany)".
- */
-const getLocalizedLanguageName = (
-  code: string,
+const getCountryName = (
+  localeCode: string,
   fallbackName: string,
   displayLocale: string = "en-US"
 ): string => {
   try {
-    const lang = getLanguageSubtag(code)
+    const region = getCountryCodeFromLocale(localeCode)
     const displayNames = new Intl.DisplayNames([displayLocale], {
-      type: "language",
+      type: "region",
     })
-    return displayNames.of(lang) ?? fallbackName
+    return displayNames.of(region) ?? fallbackName
   } catch {
     return fallbackName
   }
@@ -122,7 +102,7 @@ const LanguageSelect = ({
       .map((locale) => ({
         code: locale.code,
         name: locale.name,
-        localizedName: getLocalizedLanguageName(
+        localizedName: getCountryName(
           locale.code,
           locale.name,
           currentLocale ?? "en-US"
@@ -172,17 +152,6 @@ const LanguageSelect = ({
             {label !== null ? <span>{label}</span> : null}
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
-                {current.countryCode && (
-                  /* @ts-ignore */
-                  <ReactCountryFlag
-                    svg
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                    }}
-                    countryCode={current.countryCode}
-                  />
-                )}
                 {isPending ? "..." : current.localizedName}
               </span>
             )}
@@ -206,19 +175,6 @@ const LanguageSelect = ({
                   value={o}
                   className="py-2 hover:bg-surface-card px-3 cursor-pointer flex items-center gap-x-2"
                 >
-                  {o.countryCode ? (
-                    /* @ts-ignore */
-                    <ReactCountryFlag
-                      svg
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                      }}
-                      countryCode={o.countryCode}
-                    />
-                  ) : (
-                    <span style={{ width: "16px", height: "16px" }} />
-                  )}
                   {o.localizedName}
                 </ListboxOption>
               ))}
