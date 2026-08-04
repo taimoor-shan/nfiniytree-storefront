@@ -1,7 +1,7 @@
 "use client"
 
 import { RadioGroup } from "@headlessui/react"
-import { isStripeLike, paymentInfoMap } from "@lib/constants"
+import { isManual, isStripeLike, paymentInfoMap } from "@lib/constants"
 import { initiatePaymentSession } from "@lib/data/cart"
 import { CheckCircleSolid, CreditCard } from "@medusajs/icons"
 import { Button, Container, Heading, Text, clx } from "@medusajs/ui"
@@ -219,8 +219,11 @@ const Payment = ({
                   className="txt-medium text-body"
                   data-testid="payment-method-summary"
                 >
-                  {paymentInfoMap[activeSession?.provider_id]?.title ||
-                    activeSession?.provider_id}
+                  {activeSession?.provider_id &&
+                  isManual(activeSession.provider_id)
+                    ? t("checkout.directBankTransfer")
+                    : paymentInfoMap[activeSession?.provider_id]?.title ||
+                      activeSession?.provider_id}
                 </Text>
               </div>
               {/* <div className="flex flex-col w-1/3">

@@ -5,6 +5,7 @@ import React, { useContext, type JSX } from "react"
 import Radio from "@modules/common/components/radio"
 
 import { isManual } from "@lib/constants"
+import { useTranslation } from "@/lib/i18n"
 import SkeletonCardDetails from "@modules/skeletons/components/skeleton-card-details"
 import { PaymentElement } from "@stripe/react-stripe-js"
 import PaymentTest from "../payment-test"
@@ -25,6 +26,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
   disabled = false,
   children,
 }) => {
+  const { t } = useTranslation()
   return (
     <RadioGroupOption
       key={paymentProviderId}
@@ -42,7 +44,9 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
         <div className="flex items-center gap-x-4">
           <Radio checked={selectedPaymentOptionId === paymentProviderId} />
           <Text className="text-base-regular">
-            {paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
+            {isManual(paymentProviderId)
+              ? t("checkout.directBankTransfer")
+              : paymentInfoMap[paymentProviderId]?.title || paymentProviderId}
           </Text>
           {isManual(paymentProviderId) && (
             <PaymentTest className="hidden small:block" />

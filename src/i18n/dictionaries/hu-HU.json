@@ -181,6 +181,8 @@
   "checkout.paymentFailed": "A fizetés sikertelen",
   "checkout.backToCart": "Vissza a kosárhoz",
   "checkout.back": "Vissza",
+  "checkout.directBankTransfer": "Közvetlen banki átutalás",
+  "checkout.orderProcessedInvoice": "Rendelése feldolgozásra kerül és e-mailben kapja meg a számlát.",
 
   "account.overview": "Áttekintés",
   "account.profile": "Profil",

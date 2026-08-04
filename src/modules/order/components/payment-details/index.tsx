@@ -2,7 +2,7 @@
 
 import { Container, Heading, Text } from "@medusajs/ui"
 
-import { isStripeLike, paymentInfoMap } from "@lib/constants"
+import { isManual, isStripeLike, paymentInfoMap } from "@lib/constants"
 import Divider from "@modules/common/components/divider"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -32,7 +32,9 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
                 className="txt-medium text-body"
                 data-testid="payment-method"
               >
-                {paymentInfoMap[payment.provider_id].title}
+                {isManual(payment.provider_id)
+                  ? t("checkout.directBankTransfer")
+                  : paymentInfoMap[payment.provider_id].title}
               </Text>
             </div>
             {/* <div className="flex flex-col w-2/3">

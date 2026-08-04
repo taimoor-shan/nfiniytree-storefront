@@ -1,9 +1,11 @@
 import { Badge } from "@medusajs/ui"
+import { useTranslation } from "@/lib/i18n"
 
 const PaymentTest = ({ className }: { className?: string }) => {
+  const { t } = useTranslation()
   return (
     <Badge color="orange" className={className}>
-      Your order will be reserved — payment handled separately
+      {t("checkout.orderProcessedInvoice")}
     </Badge>
   )
 }

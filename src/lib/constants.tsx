@@ -1,5 +1,6 @@
 import React from "react"
 import { CreditCard } from "@medusajs/icons"
+import { TaxInclusive } from "@medusajs/icons"
 
 import Ideal from "@modules/common/icons/ideal"
 import Bancontact from "@modules/common/icons/bancontact"
@@ -51,8 +52,8 @@ export const paymentInfoMap: Record<
     icon: <PayPal />,
   },
   pp_system_default: {
-    title: "Order Reservation",
-    icon: <CreditCard />,
+    title: "Direct Bank Transfer",
+    icon: <TaxInclusive />,
   },
   // Add more payment providers here
 }

@@ -181,6 +181,8 @@
   "checkout.paymentFailed": "Zahlung fehlgeschlagen",
   "checkout.backToCart": "Zurück zum Warenkorb",
   "checkout.back": "Zurück",
+  "checkout.directBankTransfer": "Direktüberweisung",
+  "checkout.orderProcessedInvoice": "Ihre Bestellung wird bearbeitet und Sie erhalten eine E-Mail mit der Rechnung.",
 
   "account.overview": "Übersicht",
   "account.profile": "Profil",

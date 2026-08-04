@@ -53,7 +53,8 @@ const SideMenu = ({
                   )}
                   aria-label={t("nav.menu")}
                 >
-                  <BarsThree />
+                
+                  <BarsThree className="size-6"/>
                   <span className="sr-only">{t("nav.menu")}</span>
                 </Popover.Button>
               </div>
@@ -91,7 +92,7 @@ const SideMenu = ({
                   >
                     <div className="flex justify-end" id="xmark">
                       <button data-testid="close-menu-button" onClick={close}>
-                        <XMark />
+                        <XMark className="size-8" />
                       </button>
                     </div>
                     <ul className="flex flex-col gap-6 items-start justify-start">

@@ -181,6 +181,8 @@
   "checkout.paymentFailed": "Payment failed",
   "checkout.backToCart": "Back to shopping cart",
   "checkout.back": "Back",
+  "checkout.directBankTransfer": "Direct Bank Transfer",
+  "checkout.orderProcessedInvoice": "Your order will be processed and receive the email with invoice.",
 
   "account.overview": "Overview",
   "account.profile": "Profile",
