@@ -14,6 +14,7 @@ import {
 import { CACHE_TAGS } from "./cache"
 import { getRegion } from "./regions"
 import { getLocale } from "@lib/data/locale-actions"
+import { validateVatNumber } from "@lib/util/vat"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -326,6 +327,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     const vatNumber = String(formData.get("vat_number") ?? "").trim()
     if (!vatNumber) {
       throw new Error("VAT number is required")
+    }
+
+    const countryCode = String(
+      formData.get("shipping_address.country_code") ?? ""
+    ).toLowerCase()
+    const vatError = validateVatNumber(countryCode, vatNumber)
+    if (vatError) {
+      throw new Error(vatError)
     }
 
     const data = {

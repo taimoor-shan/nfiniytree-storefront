@@ -1,8 +1,10 @@
 "use client"
 
-import { Container, Heading, Text } from "@medusajs/ui"
+import { useState } from "react"
+import { Container, Heading, Text, Button } from "@medusajs/ui"
+import { ArrowDownTray, DocumentText } from "@medusajs/icons"
 
-import { isManual, isStripeLike, paymentInfoMap } from "@lib/constants"
+import { getPaymentStatusLabel, isManual, isStripeLike, paymentInfoMap } from "@lib/constants"
 import Divider from "@modules/common/components/divider"
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
@@ -14,7 +16,30 @@ type PaymentDetailsProps = {
 
 const PaymentDetails = ({ order }: PaymentDetailsProps) => {
   const { t } = useTranslation()
+  const [downloading, setDownloading] = useState(false)
   const payment = order.payment_collections?.[0].payments?.[0]
+  const showBankTransfer = payment && isManual(payment.provider_id)
+
+  const handleDownloadInvoice = async () => {
+    setDownloading(true)
+    try {
+      const response = await fetch(`/api/orders/${order.id}/invoice`)
+      if (!response.ok) throw new Error("Failed to download invoice")
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = `INV-${order.display_id}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error("Invoice download failed:", err)
+    } finally {
+      setDownloading(false)
+    }
+  }
 
   return (
     <div>
@@ -34,29 +59,62 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
               >
                 {isManual(payment.provider_id)
                   ? t("checkout.directBankTransfer")
-                  : paymentInfoMap[payment.provider_id].title}
+                  : paymentInfoMap[payment.provider_id]?.title ||
+                    payment.provider_id}
+              </Text>
+              <Text
+                className="txt-medium text-body mt-1"
+                data-testid="payment-status"
+              >
+                {t("order.paymentStatus")}:{" "}
+                {getPaymentStatusLabel(order.payment_status)}
               </Text>
             </div>
-            {/* <div className="flex flex-col w-2/3">
-              <Text className="txt-medium-plus text-ink mb-1">
-                {t("checkout.payment")}
-              </Text>
-              <div className="flex gap-2 txt-medium text-body items-center">
-                <Container className="flex items-center h-7 w-fit p-2 bg-primary-hover">
-                  {paymentInfoMap[payment.provider_id].icon}
-                </Container>
-                <Text data-testid="payment-amount">
-                  {isStripeLike(payment.provider_id) && payment.data?.card_last4
-                    ? `**** **** **** ${payment.data.card_last4}`
-                    : `${convertToLocale({
-                        amount: payment.amount,
-                        currency_code: order.currency_code,
-                      })} paid at ${new Date(
-                        payment.created_at ?? ""
-                      ).toLocaleString()}`}
-                </Text>
-              </div>
-            </div> */}
+          </div>
+        )}
+
+        {/* Download Invoice Button */}
+        <div className="mt-6">
+          <Button
+            variant="secondary"
+            onClick={handleDownloadInvoice}
+            disabled={downloading}
+            data-testid="download-invoice-button"
+          >
+            {downloading ? (
+              <span className="flex items-center gap-x-2">
+                <DocumentText />
+                {t("order.downloadingInvoice")}
+              </span>
+            ) : (
+              <span className="flex items-center gap-x-2">
+                <ArrowDownTray />
+                {t("order.downloadInvoice")}
+              </span>
+            )}
+          </Button>
+        </div>
+
+        {/* Next Steps for Bank Transfer */}
+        {showBankTransfer && (
+          <div className="mt-8">
+            <Heading level="h3" className="text-xl-regular text-ink mb-4">
+              {t("order.nextSteps.heading")}
+            </Heading>
+            <ol className="flex flex-col gap-y-3 list-decimal list-inside">
+              <li className="txt-medium text-body">
+                {t("order.nextSteps.step1")}
+              </li>
+              <li className="txt-medium text-body">
+                {t("order.nextSteps.step2")}
+              </li>
+              <li className="txt-medium text-body">
+                {t("order.nextSteps.step3")}
+              </li>
+              <li className="txt-medium text-body">
+                {t("order.nextSteps.step4")}
+              </li>
+            </ol>
           </div>
         )}
       </div>

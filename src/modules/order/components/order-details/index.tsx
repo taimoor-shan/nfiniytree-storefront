@@ -1,5 +1,6 @@
 "use client"
 
+import { getPaymentStatusLabel } from "@lib/constants"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
 import { useTranslation } from "@/lib/i18n"
@@ -62,7 +63,7 @@ const OrderDetails = ({ order, showStatus, isGuest }: OrderDetailsProps) => {
             className="text-body "
             sata-testid="order-payment-status"
           >
-            {formatStatus(order.payment_status)}
+            {getPaymentStatusLabel(order.payment_status)}
           </span>
         </Text>
       </div>

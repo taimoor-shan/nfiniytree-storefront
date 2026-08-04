@@ -52,10 +52,37 @@ export const paymentInfoMap: Record<
     icon: <PayPal />,
   },
   pp_system_default: {
-    title: "Direct Bank Transfer",
+    title: "Bank Transfer",
     icon: <TaxInclusive />,
   },
   // Add more payment providers here
+}
+
+/**
+ * Maps Medusa payment statuses to customer-friendly business terms.
+ * Never expose raw statuses like "authorized" / "captured" / "pending".
+ */
+export const PAYMENT_STATUS_MAP: Record<string, string> = {
+  pending: "Awaiting Payment",
+  authorized: "Awaiting Payment",
+  captured: "Payment Received",
+  settled: "Payment Confirmed",
+  requires_action: "Awaiting Payment",
+  not_paid: "Awaiting Payment",
+  refunded: "Refunded",
+  partially_refunded: "Partially Refunded",
+  canceled: "Canceled",
+}
+
+/**
+ * Returns a business-friendly label for a Medusa payment status.
+ */
+export const getPaymentStatusLabel = (status?: string): string => {
+  if (!status) return "N/A"
+  return PAYMENT_STATUS_MAP[status] ?? status
+    .split("_")
+    .join(" ")
+    .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
 // This only checks if it is native stripe or medusa payments for card payments, it ignores the other stripe-based providers

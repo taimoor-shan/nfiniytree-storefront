@@ -1,12 +1,13 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
-import { Container } from "@medusajs/ui"
+import { Container, Text } from "@medusajs/ui"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { useTranslation } from "@/lib/i18n"
+import { validateVatNumber, getVatFormatHint } from "@lib/util/vat"
 import { mapKeys } from "lodash"
-import React, { useEffect, useMemo, useState } from "react"
+import React, { useCallback, useEffect, useMemo, useState } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
 
@@ -35,6 +36,28 @@ const ShippingAddress = ({
     vat_number: (cart?.shipping_address?.metadata as any)?.vat_number || "",
     email: cart?.email || "",
   })
+
+  const [vatError, setVatError] = useState<string | null>(null)
+
+  const validateVat = useCallback(
+    (vat: string, countryCode: string) => {
+      if (!vat || !vat.trim()) {
+        setVatError("VAT number is required")
+      } else {
+        const err = validateVatNumber(countryCode, vat)
+        setVatError(err)
+      }
+    },
+    []
+  )
+
+  // Re-validate VAT when country changes
+  useEffect(() => {
+    const countryCode = formData["shipping_address.country_code"]
+    if (countryCode && formData.vat_number) {
+      validateVat(formData.vat_number, countryCode)
+    }
+  }, [formData["shipping_address.country_code"]])
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -95,6 +118,12 @@ const ShippingAddress = ({
       ...formData,
       [e.target.name]: e.target.value,
     })
+
+    // Validate VAT in real-time
+    if (e.target.name === "vat_number") {
+      const countryCode = formData["shipping_address.country_code"]
+      validateVat(e.target.value, countryCode)
+    }
   }
 
   return (
@@ -224,7 +253,20 @@ const ShippingAddress = ({
           onChange={handleChange}
           required
           data-testid="shipping-vat-input"
+          errors={vatError ? { vat_number: vatError } : undefined}
         />
+        {getVatFormatHint(formData["shipping_address.country_code"]) && (
+          <Text className="text-xs text-ui-fg-subtle -mt-3 mb-2">
+            {t("checkout.vatFormatHint", {
+              format: getVatFormatHint(formData["shipping_address.country_code"]),
+            })}
+          </Text>
+        )}
+        {vatError && (
+          <Text className="text-xs text-red-500 -mt-3 mb-2">
+            {vatError}
+          </Text>
+        )}
       </div>
     </>
   )
