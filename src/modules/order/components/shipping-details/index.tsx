@@ -89,7 +89,9 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
           <Text className="txt-medium text-body">
             {(order as any).shipping_methods[0]?.name} (
             {convertToLocale({
-              amount: order.shipping_methods?.[0].total ?? 0,
+              amount: (order.shipping_methods?.[0] as any)?.subtotal
+                ?? order.shipping_methods?.[0].total
+                ?? 0,
               currency_code: order.currency_code,
             })}
             )
