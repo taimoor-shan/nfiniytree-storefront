@@ -186,6 +186,10 @@
   "checkout.vatFormatHint": "Format: {format}",
   "checkout.vatNumberInvalid": "Ungültige UID-Nummer für {country}. Erwartetes Format: {example}",
   "checkout.vatNumberRequired": "UID-Nummer ist erforderlich",
+  "checkout.vatVerifying": "Wird überprüft...",
+  "checkout.vatVerified": "UID verifiziert",
+  "checkout.vatNotRegistered": "UID-Nummer nicht im VIES registriert",
+  "checkout.vatServiceUnavailable": "UID-Überprüfung derzeit nicht möglich. Sie können mit Ihrer Bestellung fortfahren.",
 
   "account.overview": "Übersicht",
   "account.profile": "Profil",

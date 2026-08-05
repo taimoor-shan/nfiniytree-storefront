@@ -7,7 +7,13 @@ import Input from "@modules/common/components/input"
 import { useTranslation } from "@/lib/i18n"
 import { validateVatNumber, getVatFormatHint } from "@lib/util/vat"
 import { mapKeys } from "lodash"
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
 
@@ -39,6 +45,13 @@ const ShippingAddress = ({
 
   const [vatError, setVatError] = useState<string | null>(null)
 
+  // Async VIES verification state
+  const [vatVerificationStatus, setVatVerificationStatus] = useState<
+    "idle" | "checking" | "active" | "invalid" | "service_unavailable"
+  >("idle")
+  const [vatCompanyName, setVatCompanyName] = useState<string>("")
+  const abortControllerRef = useRef<AbortController | null>(null)
+
   const validateVat = useCallback(
     (vat: string, countryCode: string) => {
       if (!vat || !vat.trim()) {
@@ -51,13 +64,87 @@ const ShippingAddress = ({
     []
   )
 
-  // Re-validate VAT when country changes
+  // Re-validate VAT format when country changes
   useEffect(() => {
     const countryCode = formData["shipping_address.country_code"]
     if (countryCode && formData.vat_number) {
       validateVat(formData.vat_number, countryCode)
     }
+    // Reset async verification when country changes
+    setVatVerificationStatus("idle")
+    setVatCompanyName("")
+    // Cancel any in-flight verification
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
   }, [formData["shipping_address.country_code"]])
+
+  // Async VIES verification (debounced) when VAT or country changes
+  useEffect(() => {
+    const countryCode = formData["shipping_address.country_code"]
+    const vatNumber = formData.vat_number?.trim()
+
+    if (!countryCode || !vatNumber) {
+      setVatVerificationStatus("idle")
+      setVatCompanyName("")
+      return
+    }
+
+    // Check format first — don't call API for badly formatted numbers
+    const formatErr = validateVatNumber(countryCode, vatNumber)
+    if (formatErr) {
+      setVatVerificationStatus("idle")
+      setVatCompanyName("")
+      return
+    }
+
+    // Cancel any in-flight request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+    }
+
+    const controller = new AbortController()
+    abortControllerRef.current = controller
+
+    const timer = setTimeout(async () => {
+      try {
+        setVatVerificationStatus("checking")
+        setVatCompanyName("")
+
+        const res = await fetch(
+          `/api/validate-vat?country=${encodeURIComponent(countryCode)}&vat=${encodeURIComponent(vatNumber)}`,
+          { signal: controller.signal }
+        )
+
+        if (!res.ok) {
+          setVatVerificationStatus("service_unavailable")
+          return
+        }
+
+        const data = await res.json()
+        setVatVerificationStatus(data.status)
+        if (data.company_name) {
+          setVatCompanyName(data.company_name)
+        }
+      } catch (err: any) {
+        if (err?.name === "AbortError") return // stale request, ignore
+        setVatVerificationStatus("service_unavailable")
+      }
+    }, 600) // 600ms debounce
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [formData.vat_number, formData["shipping_address.country_code"]])
+
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort()
+      }
+    }
+  }, [])
 
   const countriesInRegion = useMemo(
     () => cart?.region?.countries?.map((c) => c.iso_2),
@@ -265,6 +352,29 @@ const ShippingAddress = ({
         {vatError && (
           <Text className="text-xs text-red-500 -mt-3 mb-2">
             {vatError}
+          </Text>
+        )}
+
+        {/* Async VIES verification status */}
+        {vatVerificationStatus === "checking" && (
+          <Text className="text-xs text-ui-fg-subtle -mt-3 mb-2">
+            {t("checkout.vatVerifying")}
+          </Text>
+        )}
+        {vatVerificationStatus === "active" && (
+          <Text className="text-xs text-green-600 -mt-3 mb-2">
+            ✓ {t("checkout.vatVerified")}
+            {vatCompanyName ? ` — ${vatCompanyName}` : ""}
+          </Text>
+        )}
+        {vatVerificationStatus === "invalid" && (
+          <Text className="text-xs text-red-500 -mt-3 mb-2">
+            ✗ {t("checkout.vatNotRegistered")}
+          </Text>
+        )}
+        {vatVerificationStatus === "service_unavailable" && (
+          <Text className="text-xs text-amber-600 -mt-3 mb-2">
+            ⚠ {t("checkout.vatServiceUnavailable")}
           </Text>
         )}
       </div>

@@ -16,6 +16,7 @@ import { getRegion } from "./regions"
 import { getLocale } from "@lib/data/locale-actions"
 import { listCartShippingMethods } from "./fulfillment"
 import { validateVatNumber } from "@lib/util/vat"
+import { verifyVatWithTaxID } from "@lib/util/taxid"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -387,6 +388,16 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error(vatError)
     }
 
+    // VIES verification via TaxID.dev (shared cache — typically a cache hit
+    // when the client-side blur already verified this VAT before submit)
+    const verification = await verifyVatWithTaxID(countryCode, vatNumber)
+    if (verification.status === "invalid") {
+      throw new Error(
+        `VAT number is not registered in VIES for ${countryCode.toUpperCase()}`
+      )
+    }
+    // service_unavailable: fail-open — allow checkout, no rejection
+
     const data = {
       shipping_address: {
         first_name: formData.get("shipping_address.first_name"),
@@ -399,7 +410,12 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         country_code: formData.get("shipping_address.country_code"),
         province: formData.get("shipping_address.province"),
         phone: formData.get("shipping_address.phone"),
-        metadata: { vat_number: vatNumber },
+        metadata: {
+          vat_number: vatNumber,
+          vat_company_name: verification.company_name || "",
+          vat_validation_request_id: verification.request_id || "",
+          vat_validation_timestamp: new Date().toISOString(),
+        },
       },
       email: formData.get("email"),
     } as any
