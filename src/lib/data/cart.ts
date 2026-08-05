@@ -14,6 +14,7 @@ import {
 import { CACHE_TAGS } from "./cache"
 import { getRegion } from "./regions"
 import { getLocale } from "@lib/data/locale-actions"
+import { listCartShippingMethods } from "./fulfillment"
 import { validateVatNumber } from "@lib/util/vat"
 
 /**
@@ -24,7 +25,7 @@ import { validateVatNumber } from "@lib/util/vat"
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId())
   fields ??=
-    "*items, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, +shipping_methods.name, *shipping_address"
+    "*items, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, *shipping_methods, *shipping_address"
 
   if (!id) {
     return null
@@ -51,6 +52,48 @@ export async function retrieveCart(cartId?: string, fields?: string) {
     })
 }
 
+/**
+ * Ensures the cart has a shipping address with the correct country code,
+ * then fetches available shipping options and auto-selects if there is
+ * exactly one. This triggers Medusa's server-side totals recalculation
+ * so shipping cost and tax appear before checkout.
+ */
+async function ensureCartShippingCountry(
+  cartId: string,
+  countryCode: string,
+  currentShippingAddress?: HttpTypes.StoreCartAddress | null,
+  currentShippingMethods?: HttpTypes.StoreCartShippingMethod[] | null
+) {
+  const headers = {
+    ...(await getAuthHeaders()),
+  }
+
+  if (!currentShippingAddress?.country_code) {
+    await sdk.store.cart.update(
+      cartId,
+      { shipping_address: { country_code: countryCode } },
+      {},
+      headers
+    )
+  }
+
+  if (currentShippingMethods?.length) {
+    return
+  }
+
+  const shippingOptions = await listCartShippingMethods(cartId)
+
+  if (shippingOptions && shippingOptions.length === 1) {
+    await sdk.store.cart.addShippingMethod(
+      cartId,
+      { option_id: shippingOptions[0].id },
+      {},
+      headers
+    )
+    revalidateTag(CACHE_TAGS.products, "max")
+  }
+}
+
 export async function getOrSetCart(countryCode: string) {
   const region = await getRegion(countryCode)
 
@@ -58,7 +101,7 @@ export async function getOrSetCart(countryCode: string) {
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
 
-  let cart = await retrieveCart(undefined, "id,region_id")
+  let cart = await retrieveCart(undefined, "id,region_id,shipping_address,shipping_methods")
 
   const headers = {
     ...(await getAuthHeaders()),
@@ -75,11 +118,18 @@ export async function getOrSetCart(countryCode: string) {
 
     await setCartId(cart.id)
 
+    await ensureCartShippingCountry(cart.id, countryCode)
     revalidateTag(CACHE_TAGS.products, "max")
   }
 
   if (cart && cart?.region_id !== region.id) {
     await sdk.store.cart.update(cart.id, { region_id: region.id }, {}, headers)
+    await ensureCartShippingCountry(
+      cart.id,
+      countryCode,
+      cart.shipping_address,
+      cart.shipping_methods
+    )
     revalidateTag(CACHE_TAGS.products, "max")
   }
 
@@ -431,6 +481,7 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   if (cartId) {
     try {
       await updateCart({ region_id: region.id })
+      await ensureCartShippingCountry(cartId, countryCode, null, null)
       revalidateTag(CACHE_TAGS.products, "max")
     } catch (error: any) {
       const message = String(error?.message || "")

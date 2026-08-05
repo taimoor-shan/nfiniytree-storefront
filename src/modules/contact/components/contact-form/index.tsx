@@ -78,7 +78,7 @@ export default function ContactForm() {
           <label htmlFor="email" className="text-sm font-medium text-ink">
             {t("contact.form.email")} <span className="text-error">*</span>
           </label>
-          <Input id="email" name="email" placeholder={t("contact.form.emailPlaceholder")} />
+          <Input id="email" name="email" size="base" placeholder={t("contact.form.emailPlaceholder")} />
         </div>
       </div>
 

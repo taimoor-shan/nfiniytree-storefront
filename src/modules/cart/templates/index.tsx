@@ -44,7 +44,7 @@ const CartTemplate = async ({
               <div className="flex flex-col gap-y-8 sticky top-24">
                 {cart && cart.region && (
                   <>
-                    <div className="bg-canvas p-4">
+                    <div className="bg-canvas p-6 border border-hairline rounded-sm">
                       <Summary cart={cart as any} />
                     </div>
                   </>

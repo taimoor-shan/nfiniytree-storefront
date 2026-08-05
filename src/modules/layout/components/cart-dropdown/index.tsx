@@ -37,7 +37,7 @@ const CartDropdown = ({
       return acc + item.quantity
     }, 0) || 0
 
-  const subtotal = cartState?.subtotal ?? 0
+  const subtotal = cartState?.item_subtotal ?? 0
 
   // Click outside & Escape to close
   useEffect(() => {

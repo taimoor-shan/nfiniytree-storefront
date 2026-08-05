@@ -33,7 +33,7 @@ export default async function ContactPage() {
     <>
       {/* <Hero page={heroData} /> */}
 
-      <div className="content-container py-24">
+      <div className="content-container lg:py-24 pb-14 pt-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 max-w-7xl mx-auto">
           {/* Left Column: Contact Information / Webcopy */}
           <div className="flex flex-col gap-y-8">
@@ -71,8 +71,8 @@ export default async function ContactPage() {
           </div>
 
           {/* Right Column: Contact Form */}
-          <div className="bg-canvas p-8 sm:p-10 rounded-2xl border border-hairline shadow-sm">
-            <h3 className="text-2xl font-display mb-6">{dict["contact.sendMessage"]}</h3>
+          <div className="bg-canvas py-6 px-8 sm:py-8 sm:px-10 rounded-sm border border-hairline">
+            <h2 className="text-2xl font-display mb-6">{dict["contact.sendMessage"]}</h2>
             <ContactForm />
           </div>
         </div>
