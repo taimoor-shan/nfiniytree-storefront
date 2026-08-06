@@ -50,7 +50,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
         </div>
 
         {/* Right Column - Product Details sticky wrapper */}
-        <div className="flex flex-col w-full small:w-[45%] pb-8 gap-y-12">
+        <div className="flex flex-col w-full small:w-[45%] pb-8 gap-y-10">
           <ProductInfo product={product} />
 
           <Suspense

@@ -266,7 +266,11 @@ export default function ProductActions({
               quantityExceedsStock
             }
             variant="secondary"
-            className="flex-1 h-10 !bg-surface-dark !text-on-dark hover:!bg-surface-dark-soft !shadow-none !border-none"
+            className={`flex-1 h-10 !shadow-none !border-none ${
+              !inStock || !isValidVariant
+                ? "!bg-red-400 !text-white"
+                : "!bg-surface-dark !text-on-dark hover:!bg-surface-dark-soft"
+            }`}
             isLoading={isAdding}
             data-testid="add-product-button"
           >

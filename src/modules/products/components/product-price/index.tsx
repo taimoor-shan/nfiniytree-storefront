@@ -29,10 +29,10 @@ export default function ProductPrice({
     selectedPrice.calculated_price_number < selectedPrice.original_price_number
 
   return (
-    <div className="flex flex-col gap-y-0.5">
+    <div className="flex gap-2 items-center mt-4 mb-2">
       <div className="flex items-center gap-x-2 text-ink">
         <span
-          className={clx("text-lg", {
+          className={clx("text-lg font-bold text-primary", {
             "text-primary": isDiscounted,
           })}
         >
