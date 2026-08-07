@@ -11,6 +11,7 @@ import PaymentDetails from "@modules/order/components/payment-details"
 import { HttpTypes } from "@medusajs/types"
 import { translate } from "@/lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
+import { getTaxRate } from "@lib/util/tax-rate"
 
 type OrderCompletedTemplateProps = {
   order: HttpTypes.StoreOrder
@@ -44,7 +45,7 @@ export default async function OrderCompletedTemplate({
             {await translate("order.summary", locale)}
           </Heading>
           <Items order={order} />
-          <CartTotals totals={order} />
+          <CartTotals totals={order} taxRate={getTaxRate(order)} />
           <ShippingDetails order={order} />
           <PaymentDetails order={order} />
           <Help />

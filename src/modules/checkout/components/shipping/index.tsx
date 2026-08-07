@@ -12,7 +12,7 @@ import Divider from "@modules/common/components/divider"
 import MedusaRadio from "@modules/common/components/radio"
 import { useTranslation } from "@/lib/i18n"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const PICKUP_OPTION_ON = "__PICKUP_ON"
 const PICKUP_OPTION_OFF = "__PICKUP_OFF"
@@ -108,6 +108,14 @@ const Shipping: React.FC<ShippingProps> = ({
     }
   }, [availableShippingMethods])
 
+  // Keep shippingMethodId in sync with the cart — when the country changes on
+  // the address step, Medusa may re-price or clear the shipping method server-side.
+  useEffect(() => {
+    const cartMethodId =
+      cart.shipping_methods?.at(-1)?.shipping_option_id || null
+    setShippingMethodId(cartMethodId)
+  }, [cart.shipping_methods])
+
   const handleEdit = () => {
     router.push(pathname + "?step=delivery", { scroll: false })
   }
@@ -152,6 +160,28 @@ const Shipping: React.FC<ShippingProps> = ({
   useEffect(() => {
     setError(null)
   }, [isOpen])
+
+  // Auto-select when there's exactly one available shipping option and none
+  // is currently selected (e.g. after a country change clears the old method).
+  const hasAutoSelected = useRef(false)
+  useEffect(() => {
+    if (!isOpen) {
+      hasAutoSelected.current = false
+      return
+    }
+    if (hasAutoSelected.current) return
+
+    const cartMethodId =
+      cart.shipping_methods?.at(-1)?.shipping_option_id
+    if (
+      !cartMethodId &&
+      _shippingMethods?.length === 1 &&
+      !hasPickupOptions
+    ) {
+      hasAutoSelected.current = true
+      handleSetShippingMethod(_shippingMethods[0].id, "shipping")
+    }
+  }, [isOpen, cart.shipping_methods, _shippingMethods, hasPickupOptions])
 
   return (
     <div className="bg-canvas">

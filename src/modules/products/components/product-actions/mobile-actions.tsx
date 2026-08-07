@@ -10,6 +10,7 @@ import X from "@modules/common/icons/x"
 
 import { getProductPrice } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
+import NotifyMeForm from "@modules/products/components/notify-me-form"
 import { HttpTypes } from "@medusajs/types"
 import { isSimpleProduct } from "@lib/util/product"
 import { useTranslation } from "@/lib/i18n"
@@ -26,6 +27,7 @@ type MobileActionsProps = {
   optionsDisabled: boolean
   /** IDs of option values where ALL matching variants are out of stock */
   unavailableValueIds?: Set<string>
+  customerEmail?: string
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
@@ -39,6 +41,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   show,
   optionsDisabled,
   unavailableValueIds,
+  customerEmail,
 }) => {
   const { state, open, close } = useToggleState()
   const { t } = useTranslation()
@@ -128,20 +131,32 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   <ChevronDown />
                 </div>
               </Button>}
-              <Button
-                onClick={handleAddToCart}
-                disabled={!inStock || !variant}
-                variant="primary"
-                className="w-full"
-                isLoading={isAdding}
-                data-testid="mobile-cart-button"
-              >
-                {!variant
-                  ? t("product.selectVariant")
-                  : !inStock
-                  ? t("product.outOfStock")
-                  : t("product.addToCart")}
-              </Button>
+              {variant && !inStock ? (
+                <NotifyMeForm
+                  key={variant.id}
+                  productId={product.id}
+                  productTitle={product.title}
+                  variantId={variant.id}
+                  variantTitle={variant.title}
+                  defaultEmail={customerEmail}
+                  className="col-span-2"
+                />
+              ) : (
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={!inStock || !variant}
+                  variant="primary"
+                  className="w-full"
+                  isLoading={isAdding}
+                  data-testid="mobile-cart-button"
+                >
+                  {!variant
+                    ? t("product.selectVariant")
+                    : !inStock
+                    ? t("product.outOfStock")
+                    : t("product.addToCart")}
+                </Button>
+              )}
             </div>
           </div>
         </Transition>

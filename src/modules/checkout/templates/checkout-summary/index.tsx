@@ -4,6 +4,7 @@ import ItemsPreviewTemplate from "@modules/cart/templates/preview"
 import DiscountCode from "@modules/checkout/components/discount-code"
 import CartTotals from "@modules/common/components/cart-totals"
 import Divider from "@modules/common/components/divider"
+import { getTaxRate } from "@lib/util/tax-rate"
 
 const CheckoutSummary = ({ cart }: { cart: any }) => {
   return (
@@ -17,7 +18,7 @@ const CheckoutSummary = ({ cart }: { cart: any }) => {
           In your Cart
         </Heading>
         <Divider className="my-6" />
-        <CartTotals totals={cart} />
+        <CartTotals totals={cart} taxRate={getTaxRate(cart)} />
         <ItemsPreviewTemplate cart={cart} />
         <div className="my-6">
           <DiscountCode cart={cart} />

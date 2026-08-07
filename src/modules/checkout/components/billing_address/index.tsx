@@ -67,6 +67,7 @@ const BillingAddress = ({ cart }: { cart: HttpTypes.StoreCart | null }) => {
           value={formData["billing_address.company"]}
           onChange={handleChange}
           autoComplete="organization"
+          required
           data-testid="billing-company-input"
         />
         <Input

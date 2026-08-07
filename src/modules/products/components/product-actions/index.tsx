@@ -11,6 +11,7 @@ import { useParams, usePathname, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
+import NotifyMeForm from "@modules/products/components/notify-me-form"
 import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
 
@@ -18,6 +19,7 @@ type ProductActionsProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   disabled?: boolean
+  customerEmail?: string
 }
 
 const optionsAsKeymap = (
@@ -42,6 +44,7 @@ const isVariantAvailable = (
 export default function ProductActions({
   product,
   disabled,
+  customerEmail,
 }: ProductActionsProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -224,65 +227,81 @@ export default function ProductActions({
 
         <ProductPrice product={product} variant={selectedVariant} />
 
-        {quantityExceedsStock && (
+        {quantityExceedsStock && inStock && (
           <p className="text-error text-xs">
             {maxQuantity === 1
               ? t("product.onlyLeft").replace("{count}", String(maxQuantity))
               : t("product.onlyLeftPlural").replace("{count}", String(maxQuantity))}
           </p>
         )}
-        <div className="flex gap-x-3">
-          <div className="flex items-center border border-hairline rounded-md">
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              disabled={isAdding || !!disabled || !inStock || !selectedVariant}
-              className="btn-icon-circular w-10 h-10 rounded-l-md text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={t("product.decreaseQuantity")}
-            >
-              −
-            </button>
-            <span className="w-10 h-10 flex items-center justify-center text-sm font-medium text-ink select-none">
-              {quantity}
-            </span>
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => q + 1)}
-              disabled={isAdding || !!disabled || !inStock || !selectedVariant || quantity >= maxQuantity}
-              className="btn-icon-circular w-10 h-10 rounded-r-md text-xs disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={t("product.increaseQuantity")}
-            >
-              +
-            </button>
+        {selectedVariant && !inStock ? (
+          <div className="max-w-[350px]">
+            <div className="flex flex-col gap-y-4" data-testid="oos-status">
+              <h3 className="text-xl text-error font-medium" role="status">
+                {t("product.notifyMe.outOfStock")}
+              </h3>
+              <p className="text-sm text-body">
+                {t("product.notifyMe.description")}
+              </p>
+              <NotifyMeForm
+                key={selectedVariant.id}
+                productId={product.id}
+                productTitle={product.title}
+                variantId={selectedVariant.id}
+                variantTitle={selectedVariant.title}
+                defaultEmail={customerEmail}
+                disabled={!!disabled}
+              />
+            </div>
           </div>
-          <Button
-            onClick={handleAddToCart}
-            disabled={
-              !inStock ||
-              !selectedVariant ||
-              !!disabled ||
-              isAdding ||
-              !isValidVariant ||
-              quantityExceedsStock
-            }
-            variant="secondary"
-            className={`flex-1 h-10 !shadow-none !border-none ${
-              !inStock || !isValidVariant
-                ? "!bg-red-400 !text-white"
-                : "!bg-surface-dark !text-on-dark hover:!bg-surface-dark-soft"
-            }`}
-            isLoading={isAdding}
-            data-testid="add-product-button"
-          >
-            {!selectedVariant && !options
-              ? t("product.selectVariant")
-              : !inStock || !isValidVariant
-              ? t("product.outOfStock")
-              : quantityExceedsStock
-              ? t("product.notEnoughStock")
-              : t("product.addToCart")}
-          </Button>
-        </div>
+        ) : (
+          <div className="flex gap-x-3">
+            <div className="flex items-center border border-hairline rounded-md">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                disabled={isAdding || !!disabled || !inStock || !selectedVariant}
+                className="btn-icon-circular w-10 h-10 rounded-l-md text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={t("product.decreaseQuantity")}
+              >
+                −
+              </button>
+              <span className="w-10 h-10 flex items-center justify-center text-sm font-medium text-ink select-none">
+                {quantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => q + 1)}
+                disabled={isAdding || !!disabled || !inStock || !selectedVariant || quantity >= maxQuantity}
+                className="btn-icon-circular w-10 h-10 rounded-r-md text-xs disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label={t("product.increaseQuantity")}
+              >
+                +
+              </button>
+            </div>
+            <Button
+              onClick={handleAddToCart}
+              disabled={
+                !inStock ||
+                !selectedVariant ||
+                !!disabled ||
+                isAdding ||
+                !isValidVariant ||
+                quantityExceedsStock
+              }
+              variant="secondary"
+              className="flex-1 h-10 !shadow-none !border-none !bg-surface-dark !text-on-dark hover:!bg-surface-dark-soft"
+              isLoading={isAdding}
+              data-testid="add-product-button"
+            >
+              {!selectedVariant && !options
+                ? t("product.selectVariant")
+                : quantityExceedsStock
+                ? t("product.notEnoughStock")
+                : t("product.addToCart")}
+            </Button>
+          </div>
+        )}
         <MobileActions
           product={product}
           variant={selectedVariant}
@@ -294,6 +313,7 @@ export default function ProductActions({
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
           unavailableValueIds={unavailableOptionValueIds}
+          customerEmail={customerEmail}
         />
       </div>
     </>

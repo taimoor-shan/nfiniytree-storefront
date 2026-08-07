@@ -8,6 +8,7 @@ import DiscountCode from "@modules/checkout/components/discount-code"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@/lib/i18n"
+import { getTaxRate } from "@lib/util/tax-rate"
 
 type SummaryProps = {
   cart: HttpTypes.StoreCart & {
@@ -36,7 +37,7 @@ const Summary = ({ cart }: SummaryProps) => {
       </Heading>
       <DiscountCode cart={cart} />
       <Divider />
-      <CartTotals totals={cart} />
+      <CartTotals totals={cart} taxRate={getTaxRate(cart)} />
       <LocalizedClientLink
         href={"/checkout?step=" + step}
         data-testid="checkout-button"

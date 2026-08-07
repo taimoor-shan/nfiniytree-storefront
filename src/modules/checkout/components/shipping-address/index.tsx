@@ -6,6 +6,8 @@ import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import { useTranslation } from "@/lib/i18n"
 import { validateVatNumber, getVatFormatHint } from "@lib/util/vat"
+import { validatePhoneNumber, getPhoneFormatHint } from "@lib/util/phone"
+import { sdk } from "@lib/config"
 import { mapKeys } from "lodash"
 import React, {
   useCallback,
@@ -16,6 +18,7 @@ import React, {
 } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
+import { useRouter } from "next/navigation"
 
 const ShippingAddress = ({
   customer,
@@ -29,6 +32,7 @@ const ShippingAddress = ({
   onChange: () => void
 }) => {
   const { t } = useTranslation()
+  const router = useRouter()
   const [formData, setFormData] = useState<Record<string, any>>({
     "shipping_address.first_name": cart?.shipping_address?.first_name || "",
     "shipping_address.last_name": cart?.shipping_address?.last_name || "",
@@ -44,6 +48,7 @@ const ShippingAddress = ({
   })
 
   const [vatError, setVatError] = useState<string | null>(null)
+  const [phoneError, setPhoneError] = useState<string | null>(null)
 
   // Async VIES verification state
   const [vatVerificationStatus, setVatVerificationStatus] = useState<
@@ -64,11 +69,28 @@ const ShippingAddress = ({
     []
   )
 
-  // Re-validate VAT format when country changes
+  const validatePhone = useCallback(
+    (phone: string, countryCode: string) => {
+      const result = validatePhoneNumber(countryCode, phone)
+      if (result.valid) {
+        setPhoneError(null)
+      } else {
+        setPhoneError(
+          `${t("checkout.phoneInvalid")} ${t("checkout.phoneFormatHint")} ${result.example}`
+        )
+      }
+    },
+    [t]
+  )
+
+  // Re-validate VAT and phone format when country changes
   useEffect(() => {
     const countryCode = formData["shipping_address.country_code"]
     if (countryCode && formData.vat_number) {
       validateVat(formData.vat_number, countryCode)
+    }
+    if (countryCode && formData["shipping_address.phone"]) {
+      validatePhone(formData["shipping_address.phone"], countryCode)
     }
     // Reset async verification when country changes
     setVatVerificationStatus("idle")
@@ -196,6 +218,40 @@ const ShippingAddress = ({
     }
   }, [cart]) // Add cart as a dependency
 
+  const handleCountryChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const newCountry = e.target.value
+    setFormData({ ...formData, [e.target.name]: newCountry })
+
+    try {
+      await sdk.store.cart.update(cart.id, {
+        shipping_address: { country_code: newCountry },
+      })
+
+      // Auto-select shipping method when exactly one delivery option exists,
+      // so the order summary reactively shows the correct shipping cost.
+      const { shipping_options } = await sdk.client.fetch<{
+        shipping_options: { id: string; amount?: number }[]
+      }>(`/store/shipping-options?cart_id=${cart.id}`)
+
+      const deliveryOptions =
+        shipping_options?.filter(
+          (so: any) => so.service_zone?.fulfillment_set?.type !== "pickup"
+        ) ?? []
+
+      if (deliveryOptions.length === 1) {
+        await sdk.store.cart.addShippingMethod(cart.id, {
+          option_id: deliveryOptions[0].id,
+        })
+      }
+
+      router.refresh()
+    } catch {
+      // Fail silently — user can still submit the form normally
+    }
+  }
+
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLInputElement | HTMLSelectElement
@@ -210,6 +266,12 @@ const ShippingAddress = ({
     if (e.target.name === "vat_number") {
       const countryCode = formData["shipping_address.country_code"]
       validateVat(e.target.value, countryCode)
+    }
+
+    // Validate phone in real-time
+    if (e.target.name === "shipping_address.phone") {
+      const countryCode = formData["shipping_address.country_code"]
+      validatePhone(e.target.value, countryCode)
     }
   }
 
@@ -265,6 +327,7 @@ const ShippingAddress = ({
           value={formData["shipping_address.company"]}
           onChange={handleChange}
           autoComplete="organization"
+          required
           data-testid="shipping-company-input"
         />
         <Input
@@ -290,7 +353,7 @@ const ShippingAddress = ({
           autoComplete="country"
           region={cart?.region}
           value={formData["shipping_address.country_code"]}
-          onChange={handleChange}
+          onChange={handleCountryChange}
           required
           data-testid="shipping-country-select"
         />
@@ -324,59 +387,61 @@ const ShippingAddress = ({
           required
           data-testid="shipping-email-input"
         />
-        <Input
-          label={t("account.phone")}
-          name="shipping_address.phone"
-          autoComplete="tel"
-          value={formData["shipping_address.phone"]}
-          onChange={handleChange}
-          data-testid="shipping-phone-input"
-        />
-        <Input
-          label={t("addresses.vatNumber")}
-          name="vat_number"
-          autoComplete="off"
-          value={formData.vat_number}
-          onChange={handleChange}
-          required
-          data-testid="shipping-vat-input"
-          errors={vatError ? { vat_number: vatError } : undefined}
-        />
-        {getVatFormatHint(formData["shipping_address.country_code"]) && (
-          <Text className="text-xs text-ui-fg-subtle -mt-3 mb-2">
-            {t("checkout.vatFormatHint", {
-              format: getVatFormatHint(formData["shipping_address.country_code"]),
-            })}
-          </Text>
-        )}
-        {vatError && (
-          <Text className="text-xs text-red-500 -mt-3 mb-2">
-            {vatError}
-          </Text>
-        )}
+        <div>
+          <Input
+            label={t("account.phone")}
+            name="shipping_address.phone"
+            autoComplete="tel"
+            value={formData["shipping_address.phone"]}
+            onChange={handleChange}
+            data-testid="shipping-phone-input"
+          />
+          {phoneError && (
+            <Text className="text-xs text-red-500 mt-1 mb-2">
+              {phoneError}
+            </Text>
+          )}
+        </div>
+        <div>
+          <Input
+            label={t("addresses.vatNumber")}
+            name="vat_number"
+            autoComplete="off"
+            value={formData.vat_number}
+            onChange={handleChange}
+            required
+            data-testid="shipping-vat-input"
+            errors={vatError ? { vat_number: vatError } : undefined}
+          />
+          {vatError && (
+            <Text className="text-xs text-red-500 mt-1 mb-2">
+              {vatError}
+            </Text>
+          )}
 
-        {/* Async VIES verification status */}
-        {vatVerificationStatus === "checking" && (
-          <Text className="text-xs text-ui-fg-subtle -mt-3 mb-2">
-            {t("checkout.vatVerifying")}
-          </Text>
-        )}
-        {vatVerificationStatus === "active" && (
-          <Text className="text-xs text-green-600 -mt-3 mb-2">
-            ✓ {t("checkout.vatVerified")}
-            {vatCompanyName ? ` — ${vatCompanyName}` : ""}
-          </Text>
-        )}
-        {vatVerificationStatus === "invalid" && (
-          <Text className="text-xs text-red-500 -mt-3 mb-2">
-            ✗ {t("checkout.vatNotRegistered")}
-          </Text>
-        )}
-        {vatVerificationStatus === "service_unavailable" && (
-          <Text className="text-xs text-amber-600 -mt-3 mb-2">
-            ⚠ {t("checkout.vatServiceUnavailable")}
-          </Text>
-        )}
+          {/* Async VIES verification status */}
+          {vatVerificationStatus === "checking" && (
+            <Text className="text-xs text-ui-fg-subtle mt-1 mb-2">
+              {t("checkout.vatVerifying")}
+            </Text>
+          )}
+          {vatVerificationStatus === "active" && (
+            <Text className="text-xs text-green-600 mt-1 mb-2">
+              ✓ {t("checkout.vatVerified")}
+              {vatCompanyName ? ` — ${vatCompanyName}` : ""}
+            </Text>
+          )}
+          {vatVerificationStatus === "invalid" && (
+            <Text className="text-xs text-red-500 mt-1 mb-2">
+              ✗ {t("checkout.vatNotRegistered")}
+            </Text>
+          )}
+          {vatVerificationStatus === "service_unavailable" && (
+            <Text className="text-xs text-amber-600 mt-1 mb-2">
+              ⚠ {t("checkout.vatServiceUnavailable")}
+            </Text>
+          )}
+        </div>
       </div>
     </>
   )

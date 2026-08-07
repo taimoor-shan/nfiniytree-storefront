@@ -16,7 +16,9 @@ import { getRegion } from "./regions"
 import { getLocale } from "@lib/data/locale-actions"
 import { listCartShippingMethods } from "./fulfillment"
 import { validateVatNumber } from "@lib/util/vat"
+import { validatePhoneNumber } from "@lib/util/phone"
 import { verifyVatWithTaxID } from "@lib/util/taxid"
+import { translate } from "@/lib/i18n"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -26,7 +28,7 @@ import { verifyVatWithTaxID } from "@lib/util/taxid"
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId())
   fields ??=
-    "*items, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, *shipping_methods, *shipping_address"
+    "*items, *items.tax_lines, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, *shipping_methods, *shipping_methods.tax_lines, *shipping_address"
 
   if (!id) {
     return null
@@ -398,6 +400,47 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     }
     // service_unavailable: fail-open — allow checkout, no rejection
 
+    const locale = await getLocale()
+
+    // Company is required
+    const company = String(formData.get("shipping_address.company") ?? "").trim()
+    if (!company) {
+      throw new Error(await translate("checkout.companyRequired", locale))
+    }
+
+    const sameAsBilling = formData.get("same_as_billing")
+    if (sameAsBilling !== "on") {
+      const billingCompany = String(
+        formData.get("billing_address.company") ?? ""
+      ).trim()
+      if (!billingCompany) {
+        throw new Error(await translate("checkout.companyRequired", locale))
+      }
+    }
+
+    // Phone format validation (optional field, but validated when filled)
+    const phoneResult = validatePhoneNumber(
+      countryCode,
+      String(formData.get("shipping_address.phone") ?? "")
+    )
+    if (!phoneResult.valid) {
+      throw new Error(
+        `${await translate("checkout.phoneInvalid", locale)} ${await translate("checkout.phoneFormatHint", locale)} ${phoneResult.example}`
+      )
+    }
+
+    if (sameAsBilling !== "on") {
+      const billingPhoneResult = validatePhoneNumber(
+        countryCode,
+        String(formData.get("billing_address.phone") ?? "")
+      )
+      if (!billingPhoneResult.valid) {
+        throw new Error(
+          `${await translate("checkout.phoneInvalid", locale)} ${await translate("checkout.phoneFormatHint", locale)} ${billingPhoneResult.example}`
+        )
+      }
+    }
+
     const data = {
       shipping_address: {
         first_name: formData.get("shipping_address.first_name"),
@@ -420,7 +463,6 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       email: formData.get("email"),
     } as any
 
-    const sameAsBilling = formData.get("same_as_billing")
     if (sameAsBilling === "on") data.billing_address = data.shipping_address
 
     if (sameAsBilling !== "on")
