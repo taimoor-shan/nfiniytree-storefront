@@ -410,5 +410,10 @@
   "withdrawal.legalText": "Dieses Produkt wird nach Ihrer Bestellung auf Grundlage Ihrer gewählten Konfiguration individuell montiert und fertiggestellt. Da es sich um ein nicht vorgefertigtes, nach Ihren individuellen Vorgaben hergestelltes Produkt handelt, besteht das 14-tägige gesetzliche Widerrufsrecht gemäß {decree} nicht.",
   "withdrawal.decree": "§ 29 Abs. 1 Buchst. c der ungarischen Regierungsverordnung 45/2014 (II. 26.)",
   "withdrawal.seeOurDetails": "Weitere Einzelheiten finden Sie in unserer {policyLink}.",
-  "withdrawal.policyLinkLabel": "Rückgabe- und Erstattungsrichtlinie"
+  "withdrawal.policyLinkLabel": "Rückgabe- und Erstattungsrichtlinie",
+
+  "countryPopup.title": "Wählen Sie Ihr Lieferland",
+  "countryPopup.explanation": "Preise, Steuern, verfügbare Produkte und Versandoptionen richten sich nach dem von Ihnen gewählten Land.",
+  "countryPopup.continue": "Weiter",
+  "countryPopup.navHint": "Sie können Ihr Land jederzeit über das Menü ändern."
 }

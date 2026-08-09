@@ -15,12 +15,7 @@ import { useParams, usePathname } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@lib/i18n"
-
-type CountryOption = {
-  country: string
-  region: string
-  label: string
-}
+import { CountryOption, getCountryOptions } from "@lib/util/regions"
 
 type CountrySelectProps = {
   toggleState: StateType
@@ -56,18 +51,7 @@ const CountrySelect = ({
 
   const { state, close } = toggleState
 
-  const options = useMemo(() => {
-    return regions
-      ?.map((r) => {
-        return r.countries?.map((c) => ({
-          country: c.iso_2,
-          region: r.id,
-          label: c.display_name,
-        }))
-      })
-      .flat()
-      .sort((a, b) => (a?.label ?? "").localeCompare(b?.label ?? ""))
-  }, [regions])
+  const options = useMemo(() => getCountryOptions(regions), [regions])
 
   useEffect(() => {
     if (countryCode) {

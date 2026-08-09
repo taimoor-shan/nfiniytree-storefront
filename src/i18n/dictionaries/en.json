@@ -410,5 +410,10 @@
   "withdrawal.legalText": "This product is individually assembled and finalised after your order based on your selected configuration. As a non-prefabricated product produced according to your individual choices, the 14-day statutory right of withdrawal does not apply under {decree}.",
   "withdrawal.decree": "Section 29(1)(c) of Hungarian Government Decree 45/2014 (II. 26.)",
   "withdrawal.seeOurDetails": "See our {policyLink} for full details.",
-  "withdrawal.policyLinkLabel": "Returns & Refunds Policy"
+  "withdrawal.policyLinkLabel": "Returns & Refunds Policy",
+
+  "countryPopup.title": "Choose your shipping country",
+  "countryPopup.explanation": "Prices, taxes, available products and shipping options depend on your selected country.",
+  "countryPopup.continue": "Continue",
+  "countryPopup.navHint": "You can change your country anytime from the menu."
 }

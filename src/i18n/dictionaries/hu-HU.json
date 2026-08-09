@@ -412,5 +412,10 @@
   "withdrawal.legalText": "Ezt a terméket megrendelése után, az Ön által kiválasztott konfiguráció alapján egyedileg szerelik össze és készítik el. Mivel nem előregyártott, hanem az Ön egyedi döntései alapján készülő termékről van szó, a 14 napos törvényes elállási jog a {decree} alapján nem illeti meg Önt.",
   "withdrawal.decree": "a 45/2014. (II. 26.) Korm. rendelet 29. § (1) bekezdés c) pontja",
   "withdrawal.seeOurDetails": "A részletes feltételekért lásd {policyLink}.",
-  "withdrawal.policyLinkLabel": "Visszaküldési és visszatérítési szabályzat"
+  "withdrawal.policyLinkLabel": "Visszaküldési és visszatérítési szabályzat",
+
+  "countryPopup.title": "Válassza ki a szállítási országot",
+  "countryPopup.explanation": "Az árak, adók, elérhető termékek és szállítási lehetőségek a kiválasztott országtól függenek.",
+  "countryPopup.continue": "Tovább",
+  "countryPopup.navHint": "Országát bármikor megváltoztathatja a menüből."
 }
