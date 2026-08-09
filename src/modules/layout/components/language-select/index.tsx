@@ -18,21 +18,31 @@ type LanguageOption = {
   code: string
   name: string
   localizedName: string
-  countryCode: string
+  languageSubtag: string
 }
 
-const getCountryCodeFromLocale = (localeCode: string): string => {
+/**
+ * Extracts the language subtag from a BCP 47 locale code (e.g. "de-DE" → "de").
+ */
+const getLanguageSubtag = (localeCode: string): string => {
   try {
-    const locale = new Intl.Locale(localeCode)
-    if (locale.region) {
-      return locale.region.toUpperCase()
-    }
-    const maximized = locale.maximize()
-    return maximized.region?.toUpperCase() ?? localeCode.toUpperCase()
+    return new Intl.Locale(localeCode).language
   } catch {
-    const parts = localeCode.split(/[-_]/)
-    return parts.length > 1 ? parts[1].toUpperCase() : parts[0].toUpperCase()
+    return localeCode.split(/[-_]/)[0] ?? localeCode
   }
+}
+
+/**
+ * Strips the parenthetical country portion from a Medusa locale display name.
+ *
+ * Medusa's /store/locales returns names like "German (Germany)" or
+ * "English (United States)".  This regex removes the trailing " (…)"
+ * so only the language name remains.
+ *
+ * This is a last-resort fallback — the primary path uses `Intl.DisplayNames`.
+ */
+const stripCountryFromName = (name: string): string => {
+  return name.replace(/\s*\([^)]*\)\s*$/, "").trim()
 }
 
 type LanguageSelectProps = {
@@ -51,19 +61,34 @@ type LanguageSelectProps = {
   dropdownWrapperClassName?: string
 }
 
-const getCountryName = (
+/**
+ * Returns the localized language name for a given locale code.
+ *
+ * Uses `Intl.DisplayNames` with `type: "language"` to derive the display
+ * name from the locale's language subtag (e.g. "de-DE" → "de" → "German").
+ *
+ * The `displayLocale` parameter is guarded with `||` (not `??`) because
+ * the cookie-stored locale can be an empty string (English default),
+ * which would cause `Intl.DisplayNames([""])` to throw RangeError.
+ *
+ * Falls back to stripping the parenthetical country from the Medusa display
+ * name if `Intl.DisplayNames` is unavailable.
+ */
+const getLocalizedLanguageName = (
   localeCode: string,
   fallbackName: string,
   displayLocale: string = "en-US"
 ): string => {
   try {
-    const region = getCountryCodeFromLocale(localeCode)
-    const displayNames = new Intl.DisplayNames([displayLocale], {
-      type: "region",
+    const lang = getLanguageSubtag(localeCode)
+    // || not ?? — empty string is a valid cookie value (English default)
+    const locale = displayLocale || "en-US"
+    const displayNames = new Intl.DisplayNames([locale], {
+      type: "language",
     })
-    return displayNames.of(region) ?? fallbackName
+    return displayNames.of(lang) ?? stripCountryFromName(fallbackName)
   } catch {
-    return fallbackName
+    return stripCountryFromName(fallbackName)
   }
 }
 
@@ -71,7 +96,7 @@ const DEFAULT_OPTION: LanguageOption = {
   code: "",
   name: "English",
   localizedName: "English",
-  countryCode: "",
+  languageSubtag: "",
 }
 
 const LanguageSelect = ({
@@ -102,12 +127,12 @@ const LanguageSelect = ({
       .map((locale) => ({
         code: locale.code,
         name: locale.name,
-        localizedName: getCountryName(
+        localizedName: getLocalizedLanguageName(
           locale.code,
           locale.name,
-          currentLocale ?? "en-US"
+          currentLocale || "en-US"
         ),
-        countryCode: getCountryCodeFromLocale(locale.code),
+        languageSubtag: getLanguageSubtag(locale.code),
       }))
     return [DEFAULT_OPTION, ...localeOptions]
   }, [locales, currentLocale])

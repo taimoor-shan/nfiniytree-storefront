@@ -114,9 +114,7 @@ export default async function ProductPage(props: Props) {
     queryParams: { handle: params.handle },
   }).then(({ response }) => response.products[0])
 
-  // TODO: Temporarily disabled variant-based image switching.
-  // Re-enable by reverting to: getImagesForVariant(pricedProduct, selectedVariantId)
-  const images = pricedProduct.images
+  const images = getImagesForVariant(pricedProduct, selectedVariantId)
 
   if (!pricedProduct) {
     notFound()
