@@ -8,6 +8,7 @@ import { useTranslation } from "@/lib/i18n"
 import { validateVatNumber, getVatFormatHint } from "@lib/util/vat"
 import { validatePhoneNumber, getPhoneFormatHint } from "@lib/util/phone"
 import { sdk } from "@lib/config"
+import { getCountryOptions } from "@lib/util/regions"
 import { mapKeys } from "lodash"
 import React, {
   useCallback,
@@ -25,11 +26,13 @@ const ShippingAddress = ({
   cart,
   checked,
   onChange,
+  regions,
 }: {
   customer: HttpTypes.StoreCustomer | null
   cart: HttpTypes.StoreCart | null
   checked: boolean
   onChange: () => void
+  regions: HttpTypes.StoreRegion[]
 }) => {
   const { t } = useTranslation()
   const router = useRouter()
@@ -49,6 +52,13 @@ const ShippingAddress = ({
 
   const [vatError, setVatError] = useState<string | null>(null)
   const [phoneError, setPhoneError] = useState<string | null>(null)
+  const [isSwitchingRegion, setIsSwitchingRegion] = useState(false)
+
+  // Flat list of all countries across all regions, with their region ids
+  const countryOptions = useMemo(
+    () => getCountryOptions(regions),
+    [regions]
+  )
 
   // Async VIES verification state
   const [vatVerificationStatus, setVatVerificationStatus] = useState<
@@ -221,16 +231,35 @@ const ShippingAddress = ({
   const handleCountryChange = async (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
+    // Prevent concurrent region-switch requests
+    if (isSwitchingRegion || !cart) return
+
     const newCountry = e.target.value
     setFormData({ ...formData, [e.target.name]: newCountry })
 
+    const option = countryOptions.find((o) => o.country === newCountry)
+    const needsRegionSwitch =
+      option && option.region !== cart?.region?.id
+
+    if (needsRegionSwitch) {
+      setIsSwitchingRegion(true)
+    }
+
     try {
+      if (needsRegionSwitch) {
+        // Step 1: update the cart's region before writing the address
+        // (Medusa rejects country_code if it's not in the current region)
+        await sdk.store.cart.update(cart.id, {
+          region_id: option!.region,
+        })
+      }
+
+      // Step 2: set the shipping address country (now valid in the region)
       await sdk.store.cart.update(cart.id, {
         shipping_address: { country_code: newCountry },
       })
 
-      // Auto-select shipping method when exactly one delivery option exists,
-      // so the order summary reactively shows the correct shipping cost.
+      // Auto-select shipping method when exactly one delivery option exists
       const { shipping_options } = await sdk.client.fetch<{
         shipping_options: { id: string; amount?: number }[]
       }>(`/store/shipping-options?cart_id=${cart.id}`)
@@ -248,7 +277,11 @@ const ShippingAddress = ({
 
       router.refresh()
     } catch {
-      // Fail silently — user can still submit the form normally
+      // Let the user retry — the select re-enables
+    } finally {
+      if (needsRegionSwitch) {
+        setIsSwitchingRegion(false)
+      }
     }
   }
 
@@ -351,7 +384,8 @@ const ShippingAddress = ({
         <CountrySelect
           name="shipping_address.country_code"
           autoComplete="country"
-          region={cart?.region}
+          regions={regions}
+          disabled={isSwitchingRegion}
           value={formData["shipping_address.country_code"]}
           onChange={handleCountryChange}
           required

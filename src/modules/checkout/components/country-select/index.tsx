@@ -4,13 +4,15 @@ import NativeSelect, {
   NativeSelectProps,
 } from "@modules/common/components/native-select"
 import { HttpTypes } from "@medusajs/types"
+import { getCountryOptions } from "@lib/util/regions"
 
 const CountrySelect = forwardRef<
   HTMLSelectElement,
   NativeSelectProps & {
     region?: HttpTypes.StoreRegion
+    regions?: HttpTypes.StoreRegion[]
   }
->(({ placeholder = "Country", region, defaultValue, ...props }, ref) => {
+>(({ placeholder = "Country", region, regions, defaultValue, ...props }, ref) => {
   const innerRef = useRef<HTMLSelectElement>(null)
 
   useImperativeHandle<HTMLSelectElement | null, HTMLSelectElement | null>(
@@ -19,15 +21,26 @@ const CountrySelect = forwardRef<
   )
 
   const countryOptions = useMemo(() => {
-    if (!region) {
-      return []
+    // Multi-region: show all countries from all regions (checkout use case)
+    if (regions?.length) {
+      return getCountryOptions(regions).map((o) => ({
+        value: o.country,
+        label: o.label,
+      }))
     }
 
-    return region.countries?.map((country) => ({
-      value: country.iso_2,
-      label: country.display_name,
-    }))
-  }, [region])
+    // Single region: existing behavior (account forms)
+    if (region) {
+      return (
+        region.countries?.map((country) => ({
+          value: country.iso_2,
+          label: country.display_name,
+        })) ?? []
+      )
+    }
+
+    return []
+  }, [region, regions])
 
   return (
     <NativeSelect

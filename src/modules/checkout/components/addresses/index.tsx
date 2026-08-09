@@ -18,9 +18,11 @@ import { SubmitButton } from "../submit-button"
 const Addresses = ({
   cart,
   customer,
+  regions,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
+  regions: HttpTypes.StoreRegion[]
 }) => {
   const { t } = useTranslation()
   const searchParams = useSearchParams()
@@ -71,6 +73,7 @@ const Addresses = ({
               checked={sameAsBilling}
               onChange={toggleSameAsBilling}
               cart={cart}
+              regions={regions}
             />
 
             {!sameAsBilling && (
@@ -82,7 +85,7 @@ const Addresses = ({
                   {t("checkout.billingAddress")}
                 </Heading>
 
-                <BillingAddress cart={cart} />
+                <BillingAddress cart={cart} regions={regions} />
               </div>
             )}
             <SubmitButton className="mt-6" data-testid="submit-address-button">
