@@ -31,15 +31,15 @@ const ProductInfo = async ({ product }: ProductInfoProps) => {
           {product.title}
          
         </Heading>
-          <Heading
-          level="h3"
-          className="text-md tracking-wide text-primary uppercase mb-6"
-          data-testid="product-subtitle"
-        >
-
-          {product.subtitle}
-
-          </Heading> 
+          {product.categories && product.categories.length > 0 && (
+            <LocalizedClientLink
+              href={`/categories/${product.categories[0].handle}`}
+              className="text-md tracking-wide text-primary uppercase mb-6 block hover:text-body"
+              data-testid="product-subtitle"
+            >
+              {product.categories[0].name}
+            </LocalizedClientLink>
+          )}
         
         <Text
           className="text-body text-base whitespace-pre-line"

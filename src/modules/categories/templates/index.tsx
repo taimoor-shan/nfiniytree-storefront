@@ -38,15 +38,15 @@ export default function CategoryTemplate({
 
   return (
     <div
-      className="flex flex-col small:flex-row small:items-start py-6 content-container"
+      className="flex flex-col py-10 content-container"
       data-testid="category-container"
     >
-      <RefinementList sortBy={sort} data-testid="sort-by-container" />
-      <div className="w-full">
-        <div className="flex flex-row mb-8 text-2xl-semi gap-4">
+      {/* Top bar: breadcrumbs + title on left, filters on right */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-4 gap-4">
+        <div className="flex flex-row items-center text-2xl sm:text-3xl font-display text-ink gap-4">
           {parents &&
             parents.map((parent) => (
-              <span key={parent.id} className="text-body">
+              <span key={parent.id} className="text-body font-normal">
                 <LocalizedClientLink
                   className="mr-4 hover:text-ink"
                   href={`/categories/${parent.handle}`}
@@ -59,12 +59,17 @@ export default function CategoryTemplate({
             ))}
           <h1 data-testid="category-page-title">{category.name}</h1>
         </div>
-        {category.description && (
+        <RefinementList sortBy={sort} data-testid="sort-by-container" />
+      </div>
+
+      {/* Content: description, subcategories, product grid */}
+      <div className="w-full">
+        {/* {category.description && (
           <div className="mb-8 text-base-regular">
             <p>{category.description}</p>
           </div>
-        )}
-        {category.category_children && (
+        )} */}
+        {/* {category.category_children && (
           <div className="mb-8 text-base-large">
             <ul className="grid grid-cols-1 gap-2">
               {category.category_children?.map((c) => (
@@ -76,7 +81,7 @@ export default function CategoryTemplate({
               ))}
             </ul>
           </div>
-        )}
+        )} */}
         <Suspense
           fallback={
             <SkeletonProductGrid
