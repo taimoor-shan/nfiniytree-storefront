@@ -37,17 +37,17 @@ const ShippingAddress = ({
   const { t } = useTranslation()
   const router = useRouter()
   const [formData, setFormData] = useState<Record<string, any>>({
-    "shipping_address.first_name": cart?.shipping_address?.first_name || "",
-    "shipping_address.last_name": cart?.shipping_address?.last_name || "",
+    "shipping_address.first_name": cart?.shipping_address?.first_name || customer?.first_name || "",
+    "shipping_address.last_name": cart?.shipping_address?.last_name || customer?.last_name || "",
     "shipping_address.address_1": cart?.shipping_address?.address_1 || "",
     "shipping_address.company": cart?.shipping_address?.company || "",
     "shipping_address.postal_code": cart?.shipping_address?.postal_code || "",
     "shipping_address.city": cart?.shipping_address?.city || "",
     "shipping_address.country_code": cart?.shipping_address?.country_code || "",
     "shipping_address.province": cart?.shipping_address?.province || "",
-    "shipping_address.phone": cart?.shipping_address?.phone || "",
+    "shipping_address.phone": cart?.shipping_address?.phone || customer?.phone || "",
     vat_number: (cart?.shipping_address?.metadata as any)?.vat_number || "",
-    email: cart?.email || "",
+    email: cart?.email || customer?.email || "",
   })
 
   const [vatError, setVatError] = useState<string | null>(null)
@@ -236,8 +236,24 @@ const ShippingAddress = ({
       setFormAddress(cart?.shipping_address, cart?.email)
     }
 
-    if (cart && !cart.email && customer?.email) {
-      setFormAddress(undefined, customer.email)
+    if (cart && customer) {
+      setFormData((prevState: Record<string, any>) => ({
+        ...prevState,
+        ...(customer.email && !cart.email
+          ? { email: customer.email }
+          : undefined),
+        ...(customer.first_name &&
+        !cart?.shipping_address?.first_name
+          ? { "shipping_address.first_name": customer.first_name }
+          : undefined),
+        ...(customer.last_name &&
+        !cart?.shipping_address?.last_name
+          ? { "shipping_address.last_name": customer.last_name }
+          : undefined),
+        ...(customer.phone && !cart?.shipping_address?.phone
+          ? { "shipping_address.phone": customer.phone }
+          : undefined),
+      }))
     }
   }, [cart]) // Add cart as a dependency
 
