@@ -73,7 +73,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
       {/* <div className="content-container my-16 small:my-32">
         <ProductInfoBlocks product={product} locale={locale} />
       </div> */}
-      <Features />
+      <Features
+        categoryName={product.categories?.[0]?.name}
+        categoryDescription={product.categories?.[0]?.description}
+      />
       <div
         className="content-container my-16 small:my-32"
         data-testid="related-products-container"

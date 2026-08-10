@@ -55,14 +55,14 @@ export async function generateStaticParams() {
 function getImagesForVariant(
   product: HttpTypes.StoreProduct,
   selectedVariantId?: string
-) {
+): HttpTypes.StoreProductImage[] {
   if (!selectedVariantId || !product.variants) {
-    return product.images
+    return product.images ?? []
   }
 
-  const variant = product.variants!.find((v) => v.id === selectedVariantId)
+  const variant = product.variants.find((v) => v.id === selectedVariantId)
   if (!variant) {
-    return product.images
+    return product.images ?? []
   }
 
   // Return variant images directly. Medusa core getVariantImages()
@@ -73,11 +73,11 @@ function getImagesForVariant(
   // So variant.images is already correctly filtered by the backend.
   // We return it directly rather than cross-referencing product.images.
   if (variant.images?.length) {
-    return variant.images
+    return variant.images as HttpTypes.StoreProductImage[]
   }
 
   // Fallback: variant has no images → show product-level images
-  return product.images
+  return product.images ?? []
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {

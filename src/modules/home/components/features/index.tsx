@@ -3,14 +3,21 @@
 import { Sparkles, Droplets, TreePine, Building2 } from "lucide-react"
 import { useTranslation } from "@lib/i18n/client"
 
-const Features = () => {
+type FeaturesProps = {
+  /** Category name — when provided, replaces the first feature's title. */
+  categoryName?: string
+  /** Category description — when provided, replaces the first feature's description. */
+  categoryDescription?: string
+}
+
+const Features = ({ categoryName, categoryDescription }: FeaturesProps) => {
   const { t } = useTranslation()
 
   const features = [
     {
       icon: Sparkles,
-      title: t("features.oneOfAKind.title"),
-      description: t("features.oneOfAKind.description"),
+      title: categoryName || t("features.oneOfAKind.title"),
+      description: categoryDescription || t("features.oneOfAKind.description"),
     },
     {
       icon: Droplets,
