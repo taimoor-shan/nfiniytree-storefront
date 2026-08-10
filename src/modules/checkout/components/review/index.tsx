@@ -32,7 +32,8 @@ const Review = ({ cart }: { cart: any }) => {
     cart.shipping_methods.length > 0 &&
     (cart.payment_collection || paidByGiftcard)
 
-  const showWithdrawalCheckbox = hasConfiguredItems(cart)
+  // const showWithdrawalCheckbox = hasConfiguredItems(cart)
+  const showWithdrawalCheckbox = true
   const canPlaceOrder = !showWithdrawalCheckbox || acknowledged
 
   return (

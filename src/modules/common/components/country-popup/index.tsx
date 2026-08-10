@@ -102,7 +102,7 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
         {t("countryPopup.title", "Choose your shipping country")}
       </Modal.Title>
 
-      <p className="text-sm text-body max-w-xs text-center mx-auto mt-4 mb-6">
+      <p className="text-sm text-body max-w-xs text-start mt-4 mb-6">
         {t(
           "countryPopup.explanation",
           "Prices, taxes, available products and shipping options depend on your selected country."

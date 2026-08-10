@@ -66,6 +66,7 @@ const ShippingAddress = ({
   >("idle")
   const [vatCompanyName, setVatCompanyName] = useState<string>("")
   const abortControllerRef = useRef<AbortController | null>(null)
+  const lastVerifiedRef = useRef<{ country: string; vat: string } | null>(null)
 
   const validateVat = useCallback(
     (vat: string, countryCode: string) => {
@@ -105,6 +106,7 @@ const ShippingAddress = ({
     // Reset async verification when country changes
     setVatVerificationStatus("idle")
     setVatCompanyName("")
+    lastVerifiedRef.current = null
     // Cancel any in-flight verification
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
@@ -127,6 +129,15 @@ const ShippingAddress = ({
     if (formatErr) {
       setVatVerificationStatus("idle")
       setVatCompanyName("")
+      return
+    }
+
+    // Skip if this exact (country, VAT) pair was already verified
+    if (
+      lastVerifiedRef.current &&
+      lastVerifiedRef.current.country === countryCode &&
+      lastVerifiedRef.current.vat === vatNumber
+    ) {
       return
     }
 
@@ -158,6 +169,8 @@ const ShippingAddress = ({
         if (data.company_name) {
           setVatCompanyName(data.company_name)
         }
+        // Memoize to avoid re-verifying the same pair
+        lastVerifiedRef.current = { country: countryCode, vat: vatNumber }
       } catch (err: any) {
         if (err?.name === "AbortError") return // stale request, ignore
         setVatVerificationStatus("service_unavailable")

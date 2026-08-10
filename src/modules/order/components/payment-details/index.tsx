@@ -24,7 +24,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
     setDownloading(true)
     try {
       const response = await fetch(`/api/orders/${order.id}/invoice`)
-      if (!response.ok) throw new Error("Failed to download invoice")
+      if (!response.ok) throw new Error("Failed to download pro forma invoice")
       const blob = await response.blob()
       const url = URL.createObjectURL(blob)
       const a = document.createElement("a")
@@ -35,7 +35,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
     } catch (err) {
-      console.error("Invoice download failed:", err)
+      console.error("Pro forma invoice download failed:", err)
     } finally {
       setDownloading(false)
     }

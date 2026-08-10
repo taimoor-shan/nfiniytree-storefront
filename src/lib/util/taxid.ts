@@ -30,6 +30,8 @@ export interface TaxIDResult {
   cached?: boolean
 }
 
+import { EU_COUNTRY_CODES } from "./vat"
+
 // ---------------------------------------------------------------------------
 // Cache
 // ---------------------------------------------------------------------------
@@ -88,6 +90,11 @@ export async function verifyVatWithTaxID(
   // Check cache first
   const cached = cacheGet(key)
   if (cached) return cached
+
+  // VIES only covers EU-27 member states — skip API call for non-EU countries
+  if (!EU_COUNTRY_CODES.has(country.toLowerCase())) {
+    return { status: "service_unavailable" }
+  }
 
   const apiKey = process.env.TAXID_API_KEY
   if (!apiKey) {

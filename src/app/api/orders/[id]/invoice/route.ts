@@ -20,7 +20,7 @@ export async function GET(
   })
 
   if (!response.ok) {
-    return new Response("Failed to download invoice", { status: response.status })
+    return new Response("Failed to download pro forma invoice", { status: response.status })
   }
 
   const pdfBuffer = await response.arrayBuffer()
