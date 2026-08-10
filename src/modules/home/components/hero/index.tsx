@@ -47,7 +47,7 @@ const Hero = ({ page }: HeroProps) => {
           </Heading>
           <Heading
             level="h2"
-            className="text-lg font-normal text-white max-w-md mx-auto"
+            className="text-lg font-normal text-white max-w-lg mx-auto"
           >
             {excerpt}
           </Heading>

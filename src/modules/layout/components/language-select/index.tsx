@@ -13,36 +13,16 @@ import { useRouter } from "next/navigation"
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { updateLocale } from "@lib/data/locale-actions"
 import { Locale } from "@lib/data/locales"
+import {
+  getLanguageSubtag,
+  getLocalizedLanguageName,
+} from "@lib/util/locale-name"
 
 type LanguageOption = {
   code: string
   name: string
   localizedName: string
   languageSubtag: string
-}
-
-/**
- * Extracts the language subtag from a BCP 47 locale code (e.g. "de-DE" → "de").
- */
-const getLanguageSubtag = (localeCode: string): string => {
-  try {
-    return new Intl.Locale(localeCode).language
-  } catch {
-    return localeCode.split(/[-_]/)[0] ?? localeCode
-  }
-}
-
-/**
- * Strips the parenthetical country portion from a Medusa locale display name.
- *
- * Medusa's /store/locales returns names like "German (Germany)" or
- * "English (United States)".  This regex removes the trailing " (…)"
- * so only the language name remains.
- *
- * This is a last-resort fallback — the primary path uses `Intl.DisplayNames`.
- */
-const stripCountryFromName = (name: string): string => {
-  return name.replace(/\s*\([^)]*\)\s*$/, "").trim()
 }
 
 type LanguageSelectProps = {
@@ -59,37 +39,6 @@ type LanguageSelectProps = {
    */
   buttonClassName?: string
   dropdownWrapperClassName?: string
-}
-
-/**
- * Returns the localized language name for a given locale code.
- *
- * Uses `Intl.DisplayNames` with `type: "language"` to derive the display
- * name from the locale's language subtag (e.g. "de-DE" → "de" → "German").
- *
- * The `displayLocale` parameter is guarded with `||` (not `??`) because
- * the cookie-stored locale can be an empty string (English default),
- * which would cause `Intl.DisplayNames([""])` to throw RangeError.
- *
- * Falls back to stripping the parenthetical country from the Medusa display
- * name if `Intl.DisplayNames` is unavailable.
- */
-const getLocalizedLanguageName = (
-  localeCode: string,
-  fallbackName: string,
-  displayLocale: string = "en-US"
-): string => {
-  try {
-    const lang = getLanguageSubtag(localeCode)
-    // || not ?? — empty string is a valid cookie value (English default)
-    const locale = displayLocale || "en-US"
-    const displayNames = new Intl.DisplayNames([locale], {
-      type: "language",
-    })
-    return displayNames.of(lang) ?? stripCountryFromName(fallbackName)
-  } catch {
-    return stripCountryFromName(fallbackName)
-  }
 }
 
 const DEFAULT_OPTION: LanguageOption = {

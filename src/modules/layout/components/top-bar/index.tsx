@@ -4,6 +4,7 @@ import { useMemo, useTransition, useState } from "react"
 import { useParams, usePathname, useRouter } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
+import { getLocalizedLanguageName } from "@lib/util/locale-name"
 import SimpleDropdown from "./simple-dropdown"
 import { Phone, Mail } from "lucide-react"
 import { Locale } from "@lib/data/locales"
@@ -97,35 +98,6 @@ function CurrencyIcon() {
 }
 
 /* ------------------------------------------------------------------ */
-/* Locale display helper                                               */
-/* ------------------------------------------------------------------ */
-
-/** Extract the bare language subtag, e.g. "de" from "de-DE". */
-function getLanguageSubtag(localeCode: string): string {
-  try {
-    return new Intl.Locale(localeCode).language
-  } catch {
-    return localeCode.split(/[-_]/)[0] ?? localeCode
-  }
-}
-
-function getLocalizedLanguageName(
-  code: string,
-  fallback: string,
-  displayLocale?: string
-): string {
-  try {
-    const lang = getLanguageSubtag(code)
-    const displayNames = new Intl.DisplayNames([displayLocale ?? "en-US"], {
-      type: "language",
-    })
-    return displayNames.of(lang) ?? fallback
-  } catch {
-    return fallback
-  }
-}
-
-/* ------------------------------------------------------------------ */
 /* TopBar component                                                    */
 /* ------------------------------------------------------------------ */
 export default function TopBar({
@@ -153,7 +125,7 @@ export default function TopBar({
       })
       .map((l) => ({
         code: l.code,
-        label: getLocalizedLanguageName(l.code, l.name, currentLocale ?? "en-US"),
+        label: getLocalizedLanguageName(l.code, l.name, currentLocale || "en-US"),
       }))
   }, [locales, currentLocale])
 
@@ -163,7 +135,7 @@ export default function TopBar({
       (l) => l.code.toLowerCase() === currentLocale.toLowerCase()
     )
     return found
-      ? getLocalizedLanguageName(found.code, found.name, currentLocale ?? "en-US")
+      ? getLocalizedLanguageName(found.code, found.name, currentLocale || "en-US")
       : "English"
   }, [currentLocale, locales])
 
