@@ -65,19 +65,12 @@ function getImagesForVariant(
     return product.images ?? []
   }
 
-  // Return variant images directly. Medusa core getVariantImages()
-  // scopes by product_variant_product_image pivot table:
-  //   - Images with zero variant links → "general" (all variants)
-  //   - Images linked to this variant → included
-  //   - Images linked to other variants → excluded
-  // So variant.images is already correctly filtered by the backend.
-  // We return it directly rather than cross-referencing product.images.
-  if (variant.images?.length) {
-    return variant.images as HttpTypes.StoreProductImage[]
+  if (!variant.images?.length) {
+    return product.images ?? []
   }
 
-  // Fallback: variant has no images → show product-level images
-  return product.images ?? []
+  const imageIdsMap = new Map(variant.images.map((i) => [i.id, true]))
+  return (product.images ?? []).filter((i) => imageIdsMap.has(i.id))
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
