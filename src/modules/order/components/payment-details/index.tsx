@@ -50,9 +50,9 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
         {payment && (
           <div className="flex items-start gap-x-1 w-full">
             <div className="flex flex-col w-1/3">
-              <Text className="txt-medium-plus text-ink mb-1">
+              {/* <Text className="txt-medium-plus text-ink mb-1">
                 {t("checkout.payment")}
-              </Text>
+              </Text> */}
               <Text
                 className="txt-medium text-body"
                 data-testid="payment-method"
@@ -76,18 +76,18 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
         {/* Download Invoice Button */}
         <div className="mt-6">
           <Button
-            variant="secondary"
+            variant="primary"
             onClick={handleDownloadInvoice}
             disabled={downloading}
             data-testid="download-invoice-button"
           >
             {downloading ? (
-              <span className="flex items-center gap-x-2">
+              <span className="flex items-center gap-x-2 gap-y-2">
                 <DocumentText />
                 {t("order.downloadingInvoice")}
               </span>
             ) : (
-              <span className="flex items-center gap-x-2">
+              <span className="flex items-center gap-x-2 ">
                 <ArrowDownTray />
                 {t("order.downloadInvoice")}
               </span>

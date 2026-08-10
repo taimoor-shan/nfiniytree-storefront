@@ -256,7 +256,7 @@ const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProp
                   {key}
                 </span>
                 
-                <p className="text-body">{value}</p>
+                <p className="text-body">{value} cm</p>
                 </div>
               </div>
             ))}
