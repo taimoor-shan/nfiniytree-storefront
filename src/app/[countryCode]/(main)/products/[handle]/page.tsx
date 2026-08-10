@@ -54,23 +54,11 @@ export async function generateStaticParams() {
 
 function getImagesForVariant(
   product: HttpTypes.StoreProduct,
-  selectedVariantId?: string
+  _selectedVariantId?: string
 ): HttpTypes.StoreProductImage[] {
-  if (!selectedVariantId || !product.variants) {
-    return product.images ?? []
-  }
-
-  const variant = product.variants.find((v) => v.id === selectedVariantId)
-  if (!variant) {
-    return product.images ?? []
-  }
-
-  if (!variant.images?.length) {
-    return product.images ?? []
-  }
-
-  const imageIdsMap = new Map(variant.images.map((i) => [i.id, true]))
-  return (product.images ?? []).filter((i) => imageIdsMap.has(i.id))
+  // TODO: Re-enable variant-scoped images once per-variant image
+  // assignments are fixed in the Medusa admin.
+  return product.images ?? []
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
