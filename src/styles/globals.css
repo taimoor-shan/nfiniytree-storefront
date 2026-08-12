@@ -164,6 +164,19 @@
     @apply bg-primary-disabled text-muted cursor-not-allowed;
   }
 
+/*Outlined Primary Button*/
+.btn-primary-outlined {
+  @apply border border-primary bg-transparent text-primary font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
+}
+
+.btn-primary-outlined:hover:not(:disabled) {
+  @apply bg-primary text-on-primary;
+}
+
+.btn-primary-outlined:disabled {
+  @apply border-primary-disabled text-primary-disabled cursor-not-allowed;
+}
+
   .btn-secondary {
     @apply bg-canvas text-ink font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center border border-hairline transition-colors;
   }

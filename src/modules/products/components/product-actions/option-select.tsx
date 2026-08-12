@@ -42,11 +42,12 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               onClick={() => updateOption(option.id, value.value)}
               key={value.id}
               className={clx(
-                "btn-secondary h-10 py-2 px-4 text-xs",
+                "h-9 py-2 px-6 text-xs",
                 {
-                  "border-primary": value.value === current && !isUnavailable,
-                  "line-through opacity-60": isUnavailable,
-                  "hover:shadow-elevation-card-rest transition-shadow ease-in-out duration-150":
+                  "btn-primary": value.value === current && !isUnavailable,
+                  "btn-primary-outlined": value.value !== current && !isUnavailable,
+                  "btn-secondary": isUnavailable,
+                  "hover:shadow-elevation-card-rest transition-shadow duration-150 ease-in-out":
                     value.value !== current && !isUnavailable,
                 }
               )}
