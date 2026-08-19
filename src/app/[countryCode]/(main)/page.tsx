@@ -1,7 +1,9 @@
 import { Metadata } from "next"
+import { Suspense } from "react"
 
 import AllProducts from "@modules/home/components/all-products"
 import FeaturedProducts from "@modules/home/components/featured-products"
+import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-grid"
 import Hero from "@modules/home/components/hero"
 import About from "@modules/home/components/about"
 import Features from "@modules/home/components/features"
@@ -36,15 +38,21 @@ export default async function Home(props: {
   const { sortBy, page } = searchParams
   const { countryCode } = params
 
-  const region = await getRegion(countryCode)
+  // These ran one after another, so the homepage produced no HTML until all of
+  // them had resolved. `getLocale()` is only a cookie read, so it costs nothing
+  // to await first; the two network calls then go out together.
+  // `retrieveStore()` used to be awaited here too, but its `storeName` result
+  // was never referenced in the markup — `generateMetadata` fetches the store
+  // separately — so it was a roundtrip the page paid for and discarded.
   const locale = (await getLocale()) || "en"
 
-  const { collections } = await listCollections({
-    fields: "id, handle, title",
-  })
-  const store = await retrieveStore()
-  const storeName = store?.name || "Infinytree"
-  const homePage = await retrievePageBySlug("home", locale)
+  const [region, collectionsResult, homePage] = await Promise.all([
+    getRegion(countryCode),
+    listCollections({ fields: "id, handle, title" }),
+    retrievePageBySlug("home", locale),
+  ])
+
+  const { collections } = collectionsResult
 
   if (!collections || !region) {
     return null
@@ -55,7 +63,13 @@ export default async function Home(props: {
       <Hero page={homePage} />
       {/* <About content={homePage?.content} /> */}
       <Features />
-          <FeaturedProducts collections={collections} region={region} />
+          {/* Each rail issues its own `listProducts` call. Awaited inline, that
+              held back the entire homepage HTML — including the hero, which is
+              the LCP element. Streaming it behind Suspense lets the hero ship
+              immediately and the rails fill in. */}
+          <Suspense fallback={<SkeletonProductGrid />}>
+            <FeaturedProducts collections={collections} region={region} />
+          </Suspense>
 
       <div className="">
           <AllProducts sortBy={sortBy} page={page} countryCode={countryCode} />

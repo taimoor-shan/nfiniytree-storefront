@@ -96,6 +96,7 @@
   "product.selectVariant": "Variante wählen",
   "product.outOfStock": "Nicht vorrätig",
   "product.notEnoughStock": "Nicht genügend Bestand",
+  "product.addToCartError": "Der Artikel konnte nicht in den Warenkorb gelegt werden. Bitte versuchen Sie es erneut.",
   "product.decreaseQuantity": "Menge verringern",
   "product.increaseQuantity": "Menge erhöhen",
   "product.previousImage": "Vorheriges Bild",

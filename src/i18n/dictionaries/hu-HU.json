@@ -96,6 +96,7 @@
   "product.selectVariant": "Változat kiválasztása",
   "product.outOfStock": "Nincs raktáron",
   "product.notEnoughStock": "Nincs elegendő készlet",
+  "product.addToCartError": "A kosárba helyezés nem sikerült. Kérjük, próbálja újra.",
   "product.decreaseQuantity": "Mennyiség csökkentése",
   "product.increaseQuantity": "Mennyiség növelése",
   "product.previousImage": "Előző kép",

@@ -12,7 +12,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import ProductPrice from "../product-price"
 import MobileActions from "./mobile-actions"
 import NotifyMeForm from "@modules/products/components/notify-me-form"
-import { useRouter } from "next/navigation"
 import { useTranslation } from "@/lib/i18n"
 
 type ProductActionsProps = {
@@ -46,13 +45,13 @@ export default function ProductActions({
   disabled,
   customerEmail,
 }: ProductActionsProps) {
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const { t } = useTranslation()
 
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
   const [quantity, setQuantity] = useState(1)
   const countryCode = useParams().countryCode as string
 
@@ -140,7 +139,14 @@ export default function ProductActions({
       params.delete("v_id")
     }
 
-    router.replace(pathname + "?" + params.toString(), { scroll: false })
+    // `router.replace` used to be called here, which triggers a full RSC
+    // roundtrip — on mount (the preselect effect always sets a variant) and
+    // again on every option change, each one re-rendering the whole route on
+    // the server. Nothing on the server consumes `v_id`:
+    // `getImagesForVariant` takes it and ignores it. `replaceState` keeps the
+    // URL shareable and the back/forward history identical without the
+    // roundtrip.
+    window.history.replaceState(null, "", pathname + "?" + params.toString())
   }, [selectedVariant, isValidVariant])
 
   // check if the selected variant is in stock
@@ -182,21 +188,38 @@ export default function ProductActions({
 
   const inView = useIntersection(actionsRef, "0px")
 
-  // add the selected variant to the cart
+  // Add the selected variant to the cart.
+  //
+  // There is no `router.refresh()` at the end any more: `addToCart` calls
+  // `refresh()` server-side, so the action's own response already carries a
+  // freshly rendered tree with the server's cart totals. The client refresh
+  // was a second full RSC roundtrip for the same result.
   const handleAddToCart = async () => {
     if (!selectedVariant?.id) return null
 
+    setAddError(null)
     setIsAdding(true)
 
-    await addToCart({
-      variantId: selectedVariant.id,
-      quantity,
-      countryCode,
-    })
-
-    setIsAdding(false)
-    setQuantity(1)
-    router.refresh()
+    try {
+      await addToCart({
+        variantId: selectedVariant.id,
+        quantity,
+        countryCode,
+      })
+      setQuantity(1)
+    } catch (err) {
+      // There was no catch here at all, so a rejected `addToCart` skipped
+      // `setIsAdding(false)` and left the button spinning indefinitely with no
+      // explanation — "loading feels broken", exactly as reported.
+      //
+      // The message shown is the localized one rather than `err.message`:
+      // Next.js redacts server-action errors in production to an opaque
+      // digest, so the underlying text is only useful in the console.
+      console.error("Add to cart failed", err)
+      setAddError(t("product.addToCartError"))
+    } finally {
+      setIsAdding(false)
+    }
   }
 
   return (
@@ -302,6 +325,11 @@ export default function ProductActions({
             </Button>
           </div>
         )}
+        {addError && (
+          <p className="text-error text-xs" role="alert">
+            {addError}
+          </p>
+        )}
         <MobileActions
           product={product}
           variant={selectedVariant}
@@ -310,6 +338,7 @@ export default function ProductActions({
           inStock={inStock}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}
+          addError={addError}
           show={!inView}
           optionsDisabled={!!disabled || isAdding}
           unavailableValueIds={unavailableOptionValueIds}

@@ -28,7 +28,14 @@ export const retrieveCustomer =
       .fetch<{ customer: HttpTypes.StoreCustomer }>(`/store/customers/me`, {
         method: "GET",
         query: {
-          fields: "*orders",
+          // `*orders` pulled the customer's entire order history — with all its
+          // relations — on every request, including the store layout that runs
+          // on every page. Nothing reads `customer.orders`; the account
+          // dashboard fetches orders separately via `listOrders()`.
+          // `customer.addresses` *is* read (account overview, addresses and
+          // profile pages, checkout), so that is the relation to expand.
+          // A `*`-prefixed field is additive to Medusa's default selection.
+          fields: "*addresses",
         },
         headers,
         cache: "no-store",

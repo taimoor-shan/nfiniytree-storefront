@@ -3,7 +3,7 @@
 import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { HttpTypes } from "@medusajs/types"
-import { revalidatePath, revalidateTag } from "next/cache"
+import { refresh, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
   getAuthHeaders,
@@ -94,7 +94,6 @@ async function ensureCartShippingCountry(
       {},
       headers
     )
-    revalidateTag(CACHE_TAGS.products, "max")
   }
 }
 
@@ -123,7 +122,6 @@ export async function getOrSetCart(countryCode: string) {
     await setCartId(cart.id)
 
     await ensureCartShippingCountry(cart.id, countryCode)
-    revalidateTag(CACHE_TAGS.products, "max")
   }
 
   if (cart && cart?.region_id !== region.id) {
@@ -134,7 +132,6 @@ export async function getOrSetCart(countryCode: string) {
       cart.shipping_address,
       cart.shipping_methods
     )
-    revalidateTag(CACHE_TAGS.products, "max")
   }
 
   return cart
@@ -154,8 +151,23 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
   return sdk.store.cart
     .update(cartId, data, {}, headers)
     .then(async ({ cart }: { cart: HttpTypes.StoreCart }) => {
-      revalidateTag(CACHE_TAGS.products, "max")
-      revalidatePath("/", "layout")
+      // Every cart mutation used to call `revalidateTag(products, "max")` plus
+      // `revalidatePath("/", "layout")`. Neither describes what happened:
+      // changing a cart does not change the catalogue, and `revalidatePath("/",
+      // "layout")` invalidates the `_N_T_/layout` soft tag that *every* route
+      // inherits — so one add-to-cart dropped the cached product data for the
+      // whole site and, client-side, evicted the entire prefetch cache
+      // (`invalidateEntirePrefetchCache`, only reached by the
+      // StaticAndDynamic revalidation kind).
+      //
+      // What the UI actually needs is the current route re-rendered on the
+      // server so the cart badge and totals come back fresh. That is exactly
+      // `refresh()`: it marks the action DynamicOnly, so the action response
+      // still carries a freshly rendered RSC payload — cart reads are
+      // `cache: "no-store"`, so those totals are re-fetched from Medusa and
+      // stay server-authoritative — while leaving cached data and the prefetch
+      // cache alone.
+      refresh()
       return cart
     })
     .catch((err) => {
@@ -197,8 +209,9 @@ export async function addToCart({
       headers
     )
     .then(async () => {
-      revalidateTag(CACHE_TAGS.products, "max")
-      revalidatePath("/", "layout")
+      // See `updateCart` above for why this is `refresh()` and not
+      // `revalidateTag(products) + revalidatePath("/", "layout")`.
+      refresh()
     })
     .catch(medusaError)
 }
@@ -227,8 +240,8 @@ export async function updateLineItem({
   await sdk.store.cart
     .updateLineItem(cartId, lineId, { quantity }, {}, headers)
     .then(async () => {
-      revalidateTag(CACHE_TAGS.products, "max")
-      revalidatePath("/", "layout")
+      // See `updateCart` above.
+      refresh()
     })
     .catch(medusaError)
 }
@@ -251,8 +264,8 @@ export async function deleteLineItem(lineId: string) {
   await sdk.store.cart
     .deleteLineItem(cartId, lineId, {}, headers)
     .then(async () => {
-      revalidateTag(CACHE_TAGS.products, "max")
-      revalidatePath("/", "layout")
+      // See `updateCart` above.
+      refresh()
     })
     .catch(medusaError)
 }
@@ -545,6 +558,9 @@ export async function updateRegion(countryCode: string, currentPath: string) {
     try {
       await updateCart({ region_id: region.id })
       await ensureCartShippingCountry(cartId, countryCode, null, null)
+      // Region switching genuinely does invalidate cached product data —
+      // prices are region-scoped. Unlike the cart mutations above, this
+      // `revalidateTag` is load-bearing: keep it.
       revalidateTag(CACHE_TAGS.products, "max")
     } catch (error: any) {
       const message = String(error?.message || "")

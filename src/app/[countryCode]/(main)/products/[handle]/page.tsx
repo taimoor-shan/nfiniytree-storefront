@@ -4,6 +4,7 @@ import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
+import { normalizeImageUrl } from "@lib/util/image-url"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -85,32 +86,39 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     openGraph: {
       title: `${product.title} | Infinytree`,
       description: `${product.title}`,
-      images: product.thumbnail ? [product.thumbnail] : [],
+      // Relative `/static/...`, resolved against `metadataBase` in the root
+      // layout. Keeps social crawlers on the public storefront origin instead
+      // of whatever origin Medusa's file provider happens to emit.
+      images: product.thumbnail ? [normalizeImageUrl(product.thumbnail)] : [],
     },
   }
 }
 
 export default async function ProductPage(props: Props) {
   const params = await props.params
-  const region = await getRegion(params.countryCode)
-  const searchParams = await props.searchParams
 
-  const selectedVariantId = searchParams.v_id
+  // `searchParams.v_id` used to be read here and handed to
+  // `getImagesForVariant`, which ignores it (see the TODO in that function).
+  // Reading searchParams opts the route out of static rendering, so this was a
+  // dead read with a cost. `v_id` is now written client-side only, via
+  // `history.replaceState`.
+  const [region, pricedProduct] = await Promise.all([
+    getRegion(params.countryCode),
+    listProducts({
+      countryCode: params.countryCode,
+      queryParams: { handle: params.handle },
+    }).then(({ response }) => response.products[0]),
+  ])
 
   if (!region) {
     notFound()
   }
 
-  const pricedProduct = await listProducts({
-    countryCode: params.countryCode,
-    queryParams: { handle: params.handle },
-  }).then(({ response }) => response.products[0])
-
-  const images = getImagesForVariant(pricedProduct, selectedVariantId)
-
   if (!pricedProduct) {
     notFound()
   }
+
+  const images = getImagesForVariant(pricedProduct)
 
   return (
     <ProductTemplate

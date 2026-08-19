@@ -96,6 +96,7 @@
   "product.selectVariant": "Select variant",
   "product.outOfStock": "Out of stock",
   "product.notEnoughStock": "Not enough stock",
+  "product.addToCartError": "Could not add to cart. Please try again.",
   "product.decreaseQuantity": "Decrease quantity",
   "product.increaseQuantity": "Increase quantity",
   "product.previousImage": "Previous image",

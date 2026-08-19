@@ -23,6 +23,10 @@ type MobileActionsProps = {
   inStock?: boolean
   handleAddToCart: () => void
   isAdding?: boolean
+  /** Surfaced here too — the sticky bar is the only add-to-cart control
+   *  visible on mobile, so a failure reported only in the desktop block
+   *  would be invisible to the shopper who triggered it. */
+  addError?: string | null
   show: boolean
   optionsDisabled: boolean
   /** IDs of option values where ALL matching variants are out of stock */
@@ -38,6 +42,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   inStock,
   handleAddToCart,
   isAdding,
+  addError,
   show,
   optionsDisabled,
   unavailableValueIds,
@@ -113,6 +118,11 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                 <div></div>
               )}
             </div>
+            {addError && (
+              <p className="text-error text-xs w-full" role="alert">
+                {addError}
+              </p>
+            )}
             <div className={clx("grid grid-cols-2 w-full gap-x-4", {
               "!grid-cols-1": isSimple
             })}>

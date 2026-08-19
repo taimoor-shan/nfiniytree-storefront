@@ -72,10 +72,13 @@ export default async function PaginatedProducts({
         className="grid grid-cols-1 w-full small:grid-cols-3 medium:grid-cols-3 gap-x-6 gap-y-8"
         data-testid="products-list"
       >
-        {products.map((p) => {
+        {products.map((p, index) => {
           return (
             <li key={p.id}>
-              <ProductPreview product={p} region={region} />
+              {/* First row is above the fold on every breakpoint (1 col on
+                  mobile, 3 on desktop) — load those eagerly so the LCP
+                  candidate is not deferred behind lazy loading. */}
+              <ProductPreview product={p} region={region} eager={index < 3} />
             </li>
           )
         })}

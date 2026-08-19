@@ -12,10 +12,13 @@ export default async function ProductPreview({
   product,
   isFeatured,
   region,
+  eager,
 }: {
   product: HttpTypes.StoreProduct
   isFeatured?: boolean
   region: HttpTypes.StoreRegion
+  /** Above the fold — load the thumbnail immediately instead of lazily. */
+  eager?: boolean
 }) {
   // const pricedProduct = await listProducts({
   //   regionId: region.id,
@@ -41,6 +44,7 @@ export default async function ProductPreview({
           images={product.images}
           size="full"
           isFeatured={isFeatured}
+          eager={eager}
         />
         {product.categories && product.categories.length > 0 && (
           <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-surface-card/90 text-body backdrop-blur-sm border border-hairline">

@@ -183,7 +183,7 @@
 }
 
 .btn-dark:hover:not(:disabled) {
-  @apply bg-ink-soft;
+  @apply bg-ink;
 }
 
 .btn-dark:disabled {

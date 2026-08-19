@@ -2,13 +2,13 @@ import React, { Suspense } from "react"
 import Features from "@modules/home/components/features"
 
 import ImageGallery from "@modules/products/components/image-gallery"
-import ProductActions from "@modules/products/components/product-actions"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductInfoBlocks from "@modules/products/components/product-info-blocks"
 import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
 import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-related-products"
+import SkeletonProductActions from "@modules/skeletons/components/skeleton-product-actions"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import { getLocale } from "@lib/data/locale-actions"
@@ -53,16 +53,8 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
         <div className="flex flex-col w-full small:w-[45%] pb-8 gap-y-10">
           <ProductInfo product={product} />
 
-          <Suspense
-            fallback={
-              <ProductActions
-                disabled={true}
-                product={product}
-                region={region}
-              />
-            }
-          >
-            <ProductActionsWrapper id={product.id} region={region} />
+          <Suspense fallback={<SkeletonProductActions />}>
+            <ProductActionsWrapper product={product} region={region} />
           </Suspense>
 
           <ProductTabs product={product} locale={locale} />
