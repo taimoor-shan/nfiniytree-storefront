@@ -103,14 +103,6 @@ async function getCountryCode(
  * Proxy to handle region selection and onboarding status.
  */
 export async function proxy(request: NextRequest) {
-  let redirectUrl = request.nextUrl.href
-
-  let response = NextResponse.redirect(redirectUrl, 307)
-
-  let cacheIdCookie = request.cookies.get("_medusa_cache_id")
-
-  let cacheId = cacheIdCookie?.value || crypto.randomUUID()
-
   const regionMap = await getRegionMap()
 
   const countryCode = regionMap && (await getCountryCode(request, regionMap))
@@ -118,18 +110,9 @@ export async function proxy(request: NextRequest) {
   const urlHasCountryCode =
     countryCode && request.nextUrl.pathname.split("/")[1].includes(countryCode)
 
-  // if one of the country codes is in the url and the cache id is set, return next
-  if (urlHasCountryCode && cacheIdCookie) {
+  // if one of the country codes is in the url, serve the page directly
+  if (urlHasCountryCode) {
     return NextResponse.next()
-  }
-
-  // if one of the country codes is in the url and the cache id is not set, set the cache id and redirect
-  if (urlHasCountryCode && !cacheIdCookie) {
-    response.cookies.set("_medusa_cache_id", cacheId, {
-      maxAge: 60 * 60 * 24,
-    })
-
-    return response
   }
 
   // check if the url is a static asset
@@ -143,18 +126,18 @@ export async function proxy(request: NextRequest) {
   const queryString = request.nextUrl.search ? request.nextUrl.search : ""
 
   // If no country code is set, we redirect to the relevant region.
-  if (!urlHasCountryCode && countryCode) {
-    redirectUrl = `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`
-    response = NextResponse.redirect(`${redirectUrl}`, 307)
-  } else if (!urlHasCountryCode && !countryCode) {
-    // Handle case where no valid country code exists (empty regions)
-    return new NextResponse(
-      "No valid regions configured. Please set up regions with countries in your Medusa Admin.",
-      { status: 500 }
+  if (countryCode) {
+    return NextResponse.redirect(
+      `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`,
+      307
     )
   }
 
-  return response
+  // Handle case where no valid country code exists (empty regions)
+  return new NextResponse(
+    "No valid regions configured. Please set up regions with countries in your Medusa Admin.",
+    { status: 500 }
+  )
 }
 
 export const config = {
