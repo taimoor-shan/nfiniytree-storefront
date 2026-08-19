@@ -10,6 +10,7 @@ import {
   getCartId,
   removeCartId,
   setCartId,
+  setSelectedCountry,
 } from "./cookies"
 import { CACHE_TAGS } from "./cache"
 import { getRegion } from "./regions"
@@ -535,6 +536,10 @@ export async function updateRegion(countryCode: string, currentPath: string) {
   if (!region) {
     throw new Error(`Region not found for country code: ${countryCode}`)
   }
+
+  // Persist the user's country choice so the middleware can honor it on
+  // subsequent visits to unprefixed URLs.
+  await setSelectedCountry(countryCode)
 
   if (cartId) {
     try {

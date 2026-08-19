@@ -79,8 +79,14 @@ async function getCountryCode(
 
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
 
+    const selectedCountryCookie = request.cookies
+      .get("selected-country")
+      ?.value?.toLowerCase()
+
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode
+    } else if (selectedCountryCookie && regionMap.has(selectedCountryCookie)) {
+      countryCode = selectedCountryCookie
     } else if (vercelCountryCode && regionMap.has(vercelCountryCode)) {
       countryCode = vercelCountryCode
     } else if (regionMap.has(DEFAULT_REGION)) {

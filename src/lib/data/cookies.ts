@@ -56,3 +56,13 @@ export const removeCartId = async () => {
     maxAge: -1,
   })
 }
+
+export const setSelectedCountry = async (countryCode: string) => {
+  const cookies = await nextCookies()
+  cookies.set("selected-country", countryCode, {
+    maxAge: 60 * 60 * 24 * 365,
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV === "production",
+  })
+}
