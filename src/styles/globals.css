@@ -177,6 +177,19 @@
   @apply border-primary-disabled text-primary-disabled cursor-not-allowed;
 }
 
+/*Dark Button*/
+.btn-dark {
+  @apply bg-ink text-canvas font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
+}
+
+.btn-dark:hover:not(:disabled) {
+  @apply bg-ink-soft;
+}
+
+.btn-dark:disabled {
+  @apply bg-ink-disabled text-muted cursor-not-allowed;
+}
+
   .btn-secondary {
     @apply bg-canvas text-ink font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center border border-hairline transition-colors;
   }
