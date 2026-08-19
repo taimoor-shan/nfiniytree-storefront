@@ -28,7 +28,7 @@ const Hero = ({ page }: HeroProps) => {
       className="h-[600px] lg:h-[calc(100vh-125px)] w-full border-b border-hairline relative bg-surface-card bg-center bg-cover flex items-end justify-center px-6 sm:px-28"
       style={backgroundImage ? { backgroundImage } : undefined}
     >
-       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" />
+       {/* <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" /> */}
       {/* <Image
           src="/logo.png"
           alt="Logo"
