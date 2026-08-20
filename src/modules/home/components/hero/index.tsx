@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useTranslation } from "@lib/i18n/client"
 import Image from "next/image"
+import { normalizeImageUrl } from "@lib/util/image-url"
 
 type HeroProps = {
   page?: {
@@ -19,16 +20,35 @@ const Hero = ({ page }: HeroProps) => {
   const title = page?.title || t("hero.fallbackTitle")
   const excerpt = page?.excerpt || t("hero.fallbackExcerpt")
 
-  const backgroundImage = page?.featured_image
-    ? `url(${page.featured_image})`
-    : undefined
+  const heroImage = normalizeImageUrl(page?.featured_image)
 
   return (
     <div
       className="h-[600px] lg:h-[calc(100vh-125px)] w-full border-b border-hairline relative bg-surface-card bg-center bg-cover flex items-end justify-center px-6 sm:px-28"
-      style={backgroundImage ? { backgroundImage } : undefined}
     >
-       <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" />
+      {/* Was an inline `background-image`, which the preload scanner cannot see
+          and next/image cannot optimize — so the homepage's largest asset (a
+          1.6MB JPEG) was discovered late and downloaded at full size. As a real
+          <img> it is preloadable and served resized in AVIF/WebP.
+          `object-cover object-center` reproduces `bg-cover bg-center`, and
+          `fill` makes it absolutely positioned, so it sits behind the existing
+          z-10 content without affecting the flex layout. */}
+      {heroImage && (
+        <Image
+          src={heroImage}
+          alt=""
+          aria-hidden
+          fill
+          // The homepage LCP element, and a single candidate at every viewport
+          // (one source image, full-bleed) — which is exactly the case `preload`
+          // is documented for.
+          preload
+          sizes="100vw"
+          quality={75}
+          className="object-cover object-center"
+        />
+      )}
+       {/* <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" /> */}
       {/* <Image
           src="/logo.png"
           alt="Logo"
@@ -54,7 +74,7 @@ const Hero = ({ page }: HeroProps) => {
         </span>
         <LocalizedClientLink href="/store" passHref>
           <Button size="large" className="mt-2">
-            Shop the collection
+            {t("hero.shopCollection")}
           </Button>
         </LocalizedClientLink>
       </div>

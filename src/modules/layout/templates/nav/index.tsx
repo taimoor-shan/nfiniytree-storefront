@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import Image from "next/image"
 
 import { listRegions } from "@lib/data/regions"
 import { listLocales } from "@lib/data/locales"
@@ -43,7 +44,19 @@ export default async function Nav() {
               className="flex items-center gap-3"
               data-testid="nav-store-link"
             >
-              <img src="/logo-full.png" alt="Logo" className="w-48 object-contain" />
+              {/* Explicit dimensions reserve the box before the PNG arrives —
+                  the raw <img> here had none, so the header shifted on every
+                  page load. 256x49 is 768x147 (the asset's intrinsic size)
+                  reduced exactly, so `w-48` still renders it at 192x36.75.
+                  Eager because it is above the fold on every route. */}
+              <Image
+                src="/logo-full.png"
+                alt={dict["common.logo"]}
+                width={256}
+                height={49}
+                loading="eager"
+                className="w-48 object-contain"
+              />
               {/* <h1 className="font-display text-ink text-3xl leading-none">{storeName}</h1> */}
             </LocalizedClientLink>
           </div>

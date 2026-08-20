@@ -68,7 +68,10 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="password-input"
           />
         </div>
-        <ErrorMessage error={message} data-testid="register-error" />
+        <ErrorMessage
+          error={typeof message === "string" ? message : null}
+          data-testid="register-error"
+        />
         <span className="text-center text-ink text-small-regular mt-6">
           {t("account.agreeTo")}{" "}
           <LocalizedClientLink

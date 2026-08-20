@@ -1,17 +1,53 @@
+"use client"
+
 import { Container, clx } from "@medusajs/ui"
 import Image from "next/image"
 import React from "react"
 
 import PlaceholderImage from "@modules/common/icons/placeholder-image"
+import { normalizeImageUrl } from "@lib/util/image-url"
+import { useTranslation } from "@lib/i18n/client"
+
+type ThumbnailSize = "small" | "medium" | "large" | "full" | "square"
 
 type ThumbnailProps = {
   thumbnail?: string | null
   // TODO: Fix image typings
   images?: any[] | null
-  size?: "small" | "medium" | "large" | "full" | "square"
+  size?: ThumbnailSize
   isFeatured?: boolean
   className?: string
+  /**
+   * Load immediately instead of lazily. Set this on above-the-fold cards (the
+   * first grid row) so the LCP candidate is not deferred. Next 16 deprecated
+   * `priority` in favour of `preload`, but `preload` is explicitly not for
+   * cases with several possible LCP elements depending on viewport — which is
+   * exactly a responsive product grid — so this uses eager + high fetch
+   * priority instead.
+   */
+  eager?: boolean
+  /** Override the default `sizes` for an unusual layout. */
+  sizes?: string
   "data-testid"?: string
+}
+
+/**
+ * What the image actually occupies on screen, per `size` variant. These must
+ * track the container widths below (and, for `full`, the product grid's
+ * columns) or the browser picks a candidate that is too large — which is what
+ * the previous hardcoded `800px` did on a ~448px card.
+ */
+const DEFAULT_SIZES: Record<ThumbnailSize, string> = {
+  // Fixed-width variants: the container class pins the width.
+  small: "180px",
+  medium: "290px",
+  large: "440px",
+  // Cart line items and order rows: w-12 / w-16 / w-24.
+  square: "96px",
+  // Product grid: 1 col below 1024px, 3 cols above, inside a 1440px
+  // max-width container with 24px page padding and 24px gutters — so a card
+  // tops out at (1392 - 48) / 3 = 448px however wide the viewport gets.
+  full: "(max-width: 1023px) 100vw, (max-width: 1440px) 31vw, 448px",
 }
 
 const Thumbnail: React.FC<ThumbnailProps> = ({
@@ -20,6 +56,8 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   size = "small",
   isFeatured,
   className,
+  eager,
+  sizes,
   "data-testid": dataTestid,
 }) => {
   const initialImage = thumbnail || images?.[0]?.url
@@ -41,23 +79,33 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
       )}
       data-testid={dataTestid}
     >
-      <ImageOrPlaceholder image={initialImage} size={size} />
+      <ImageOrPlaceholder
+        image={initialImage}
+        size={size}
+        eager={eager}
+        sizes={sizes}
+      />
     </Container>
   )
 }
 
 const ImageOrPlaceholder = ({
   image,
-  size,
-}: Pick<ThumbnailProps, "size"> & { image?: string }) => {
+  size = "small",
+  eager,
+  sizes,
+}: Pick<ThumbnailProps, "size" | "eager" | "sizes"> & { image?: string }) => {
+  const { t } = useTranslation()
+
   return image ? (
     <Image
-      src={image}
-      alt="Thumbnail"
+      src={normalizeImageUrl(image)}
+      alt={t("product.productImage")}
       className="absolute inset-0 object-cover object-center"
       draggable={false}
-      quality={50}
-      sizes="(max-width: 576px) 280px, (max-width: 768px) 360px, (max-width: 992px) 480px, 800px"
+      sizes={sizes ?? DEFAULT_SIZES[size]}
+      loading={eager ? "eager" : undefined}
+      fetchPriority={eager ? "high" : undefined}
       fill
     />
   ) : (

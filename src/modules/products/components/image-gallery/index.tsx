@@ -3,14 +3,21 @@
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Image from "next/image"
+import dynamic from "next/dynamic"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import Lightbox from "yet-another-react-lightbox"
-import Zoom from "yet-another-react-lightbox/plugins/zoom"
-import Thumbnails from "yet-another-react-lightbox/plugins/thumbnails"
-import "yet-another-react-lightbox/styles.css"
-import "yet-another-react-lightbox/plugins/thumbnails.css"
 import { useTranslation } from "@/lib/i18n"
+import { normalizeImageUrl } from "@lib/util/image-url"
+
+/**
+ * The lightbox is ~180kb of JS + CSS that only matters after a click, so it is
+ * split out of the PDP bundle. It is mounted on first pointer intent (see
+ * `lightboxMounted`) rather than on click, so the chunk is normally already
+ * fetched by the time the click lands.
+ */
+const ProductLightbox = dynamic(() => import("./product-lightbox"), {
+  ssr: false,
+})
 
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
@@ -21,6 +28,9 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   const [activeIndex, setActiveIndex] = useState(0)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
+  // Once true, stays true — so the close animation plays out and re-opening is
+  // instant instead of re-triggering a chunk load.
+  const [lightboxMounted, setLightboxMounted] = useState(false)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
 
@@ -64,7 +74,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
   }
 
   const activeImage = images[activeIndex]
-  const slides = images.map((img) => ({ src: img.url }))
+  const slides = images.map((img) => ({ src: normalizeImageUrl(img.url) }))
 
   return (
     <>
@@ -84,7 +94,7 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
             >
               {!!image.url && (
                 <Image
-                  src={image.url}
+                  src={normalizeImageUrl(image.url)}
                   alt={t("product.thumbnail").replace("{index}", String(index + 1))}
                   fill
                   sizes="100px"
@@ -101,21 +111,33 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
         className="relative aspect-[4/5] w-full max-w-[600px] overflow-hidden bg-surface-card cursor-pointer"
         id={activeImage.id}
         onClick={() => {
+          setLightboxMounted(true)
           setLightboxIndex(activeIndex)
           setLightboxOpen(true)
         }}
+        // Warm the lazy lightbox chunk before the click actually happens.
+        onPointerEnter={() => setLightboxMounted(true)}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
         {!!activeImage.url && (
           <Image
-            src={activeImage.url}
-            priority={true}
+            src={normalizeImageUrl(activeImage.url)}
+            // The PDP hero image and the page's LCP element. `priority` is
+            // deprecated in Next 16; `preload` is its explicit replacement and
+            // is appropriate here because there is exactly one candidate.
+            preload
+            // Higher than the 75 used for grid thumbnails — this is the image
+            // shoppers zoom into. Both values are declared in
+            // next.config.js `images.qualities`.
+            quality={85}
             className="absolute inset-0 rounded-md"
             alt={t("product.productImage")}
             fill
-            sizes="(max-width: 576px) 100vw, (max-width: 992px) 50vw, 800px"
+            // Container is `w-full max-w-[600px]`, and the left column only
+            // becomes a 55% flex child at the `small` (1024px) breakpoint.
+            sizes="(max-width: 1023px) 100vw, 600px"
             style={{ objectFit: "cover" }}
           />
         )}
@@ -156,17 +178,15 @@ const ImageGallery = ({ images }: ImageGalleryProps) => {
         )}
       </Container>
     </div>
-    <Lightbox
-      open={lightboxOpen}
-      close={() => setLightboxOpen(false)}
-      index={lightboxIndex}
-      slides={slides}
-      plugins={[Zoom, Thumbnails]}
-      carousel={{ imageFit: "contain" }}
-      zoom={{ scrollToZoom: true }}
-      thumbnails={{ position: "bottom", width: 80, height: 80, gap: 8 }}
-      on={{ view: ({ index: i }) => setLightboxIndex(i) }}
-    />
+    {lightboxMounted && (
+      <ProductLightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={lightboxIndex}
+        slides={slides}
+        onView={setLightboxIndex}
+      />
+    )}
   </>
   )
 }

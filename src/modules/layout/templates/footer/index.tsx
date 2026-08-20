@@ -4,6 +4,7 @@ import { retrieveStore } from "@lib/data/store"
 import { getLocale } from "@lib/data/locale-actions"
 import { getDictionary } from "@lib/i18n/dictionaries"
 import { clx } from "@medusajs/ui"
+import Image from "next/image"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import NewsletterForm from "@modules/layout/components/newsletter-form"
@@ -25,7 +26,16 @@ export default async function Footer() {
       <div className="pt-16 lg:grid lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:gap-x-8 max-w-[1440px] mx-auto content-container">
         <div className="lg:mt-0 lg:col-span-4 lg:row-span-1">
           <LocalizedClientLink href="/" className="inline-flex items-center gap-3 text-3xl font-display text-ink hover:text-ink">
-            <img src="/logo-full.png" alt="Logo" className="w-48 object-contain" />
+            {/* Below the fold, so this keeps next/image's default lazy
+                loading — but with dimensions, so it no longer shifts the
+                footer when it arrives. See nav for the 256x49 reasoning. */}
+            <Image
+              src="/logo-full.png"
+              alt={dict["common.logo"]}
+              width={256}
+              height={49}
+              className="w-48 object-contain"
+            />
           </LocalizedClientLink>
           <p className="text-base mb-2 mt-4 text-body">
             {dict["footer.stayUpdated"].replace("{storeName}", storeName)}

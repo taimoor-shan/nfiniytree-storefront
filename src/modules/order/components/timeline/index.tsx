@@ -3,12 +3,14 @@
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import { getOrderProgress } from "@lib/util/order-progress"
+import { useTranslation } from "@lib/i18n/client"
 
 type TimelineProps = {
   order: HttpTypes.StoreOrder
 }
 
 const Timeline = ({ order }: TimelineProps) => {
+  const { t } = useTranslation()
   const { steps, currentStep, fulfillments } = getOrderProgress(order)
 
   return (
@@ -54,7 +56,7 @@ const Timeline = ({ order }: TimelineProps) => {
                   step.completed ? "text-ink font-medium" : "text-muted"
                 )}
               >
-                {step.label}
+                {t(step.labelKey)}
               </p>
               {step.date && (
                 <p className="text-xs text-muted mt-0.5">
@@ -71,13 +73,15 @@ const Timeline = ({ order }: TimelineProps) => {
 
       {/* ── Current step highlight ────────────────────────── */}
       <div className="bg-ui-bg-subtle rounded-sm p-4 mb-6">
-        <p className="text-sm text-muted">Current status</p>
+        <p className="text-sm text-muted">{t("order.timeline.currentStatus")}</p>
         <p className="text-base text-ink font-medium">
-          {steps.find((s) => s.id === currentStep)?.label}
+          {t(steps.find((s) => s.id === currentStep)?.labelKey || "")}
         </p>
         {steps.find((s) => s.id === "shipped")?.tracking && (
           <div className="mt-3 pt-3 border-t border-hairline">
-            <p className="text-xs text-muted mb-1">Tracking number</p>
+            <p className="text-xs text-muted mb-1">
+              {t("order.timeline.trackingNumber")}
+            </p>
             <p className="text-sm text-ink font-mono">
               {steps.find((s) => s.id === "shipped")!.tracking!.number}
             </p>
@@ -88,14 +92,14 @@ const Timeline = ({ order }: TimelineProps) => {
                 rel="noopener noreferrer"
                 className="inline-block mt-2 text-sm text-primary hover:underline"
               >
-                Track Shipment &rarr;
+                {t("order.timeline.trackShipment")} &rarr;
               </a>
             )}
           </div>
         )}
         {currentStep === "shipped" && !steps.find((s) => s.id === "shipped")?.tracking && (
           <p className="mt-2 text-xs text-muted">
-            Estimated delivery: 3–10 business days within Europe
+            {t("order.timeline.estimatedDelivery")}
           </p>
         )}
       </div>
@@ -103,7 +107,9 @@ const Timeline = ({ order }: TimelineProps) => {
       {/* ── Per-fulfillment detail (if multiple) ──────────── */}
       {fulfillments.length > 1 && (
         <div>
-          <p className="text-sm text-ink font-medium mb-3">Shipments</p>
+          <p className="text-sm text-ink font-medium mb-3">
+            {t("order.timeline.shipments")}
+          </p>
           <div className="space-y-3">
             {fulfillments.map((f) => (
               <div
@@ -112,7 +118,7 @@ const Timeline = ({ order }: TimelineProps) => {
               >
                 <div>
                   <p className="text-compact-small text-ink font-medium">
-                    {f.status}
+                    {t(f.status, f.status)}
                   </p>
                   {f.tracking_number && (
                     <p className="text-xs text-muted font-mono mt-0.5">
@@ -123,7 +129,7 @@ const Timeline = ({ order }: TimelineProps) => {
                 <div className="text-right">
                   {f.shipped_at && (
                     <p className="text-xs text-muted">
-                      Shipped{" "}
+                      {t("order.progress.shipped")}{" "}
                       {new Date(f.shipped_at).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
@@ -132,7 +138,7 @@ const Timeline = ({ order }: TimelineProps) => {
                   )}
                   {f.delivered_at && (
                     <p className="text-xs text-muted">
-                      Delivered{" "}
+                      {t("order.progress.delivered")}{" "}
                       {new Date(f.delivered_at).toLocaleDateString(undefined, {
                         month: "short",
                         day: "numeric",
@@ -146,7 +152,7 @@ const Timeline = ({ order }: TimelineProps) => {
                       rel="noopener noreferrer"
                       className="text-xs text-primary hover:underline"
                     >
-                      Track &rarr;
+                      {t("order.timeline.track")} &rarr;
                     </a>
                   )}
                 </div>

@@ -1,4 +1,5 @@
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import Image from "next/image"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import { retrieveStore } from "@lib/data/store"
 import { translate } from "@/lib/i18n"
@@ -35,7 +36,16 @@ export default async function CheckoutLayout({
               className="flex items-center gap-3"
               data-testid="nav-store-link"
             >
-              <img src="/logo-full.png" alt="Logo" className="w-48 object-contain" />
+              {/* Dimensions prevent the checkout header from shifting.
+                  See nav for the 256x49 reasoning. */}
+              <Image
+                src="/logo-full.png"
+                alt="Logo"
+                width={256}
+                height={49}
+                loading="eager"
+                className="w-48 object-contain"
+              />
               {/* <h1 className="font-display text-ink text-3xl leading-none">{storeName}</h1> */}
             </LocalizedClientLink>
           <div className="flex-1 basis-0" />

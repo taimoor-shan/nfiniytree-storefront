@@ -24,15 +24,15 @@ const ProfilePassword: React.FC<MyInformationProps> = ({ customer }) => {
     const confirmPassword = formData.get("confirm_password") as string
 
     if (!oldPassword || !newPassword || !confirmPassword) {
-      return { success: false, error: "All fields are required" }
+      return { success: false, error: t("account.allFieldsRequired") }
     }
 
     if (newPassword !== confirmPassword) {
-      return { success: false, error: "Passwords do not match" }
+      return { success: false, error: t("account.passwordsDoNotMatch") }
     }
 
     if (newPassword.length < 8) {
-      return { success: false, error: "Password must be at least 8 characters" }
+      return { success: false, error: t("account.passwordMinLength") }
     }
 
     try {

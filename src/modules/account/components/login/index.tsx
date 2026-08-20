@@ -34,7 +34,7 @@ const Login = ({ setCurrentView }: Props) => {
             label={t("account.email")}
             name="email"
             type="email"
-            title="Enter a valid email address."
+            title={t("common.emailNotValid")}
             autoComplete="email"
             required
             data-testid="email-input"

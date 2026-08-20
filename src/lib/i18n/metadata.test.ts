@@ -18,7 +18,13 @@
  *   cd nfiniytree-storefront && npx tsx src/lib/i18n/metadata.test.ts
  */
 
-import { getLocalizedMetadata, getLocalizedField } from "./metadata"
+import {
+  getLocalizedMetadata,
+  getLocalizedField,
+  resolvePotLabel,
+  resolvePotSpecs,
+  resolveSpecField,
+} from "./metadata"
 
 // ---------------------------------------------------------------------------
 // Tiny test harness (no framework dependency)
@@ -360,6 +366,209 @@ section("12. Locale object with mixed scalar and array values")
   assert(
     result.care_instructions === "Dust gently.",
     "resolves scalar-valued locale field"
+  )
+}
+
+// -- Case 13: resolveSpecField -------------------------------------------------
+section("13. resolveSpecField")
+
+{
+  assert(
+    deepEqual(
+      resolveSpecField({ value: 40, label: "Breite" }, "Width"),
+      { label: "Breite", value: "40" }
+    ),
+    "structured field resolves label and value"
+  )
+  assert(
+    deepEqual(resolveSpecField({ value: 40 }, "Width"), {
+      label: "Width",
+      value: "40",
+    }),
+    "structured field without label falls back to the key"
+  )
+  assert(
+    deepEqual(resolveSpecField(40, "Width"), {
+      label: "Width",
+      value: "40",
+    }),
+    "flat scalar resolves with fallback label"
+  )
+  assert(
+    resolveSpecField(null, "Width") === null,
+    "null field resolves to null"
+  )
+  assert(
+    resolveSpecField(undefined, "Width") === null,
+    "undefined field resolves to null"
+  )
+  assert(
+    resolveSpecField({ label: "Breite" }, "Width") === null,
+    "structured field without value resolves to null"
+  )
+  assert(
+    resolveSpecField({ value: "" }, "Width") === null,
+    "structured field with empty value resolves to null"
+  )
+}
+
+// -- Case 14: resolvePotSpecs with backend-managed labels ---------------------
+section("14. resolvePotSpecs with structured { value, label } shape")
+
+{
+  const rawPot = {
+    width: {
+      value: 40,
+      label: { en: "Width", "de-AT": "Breite", "de-DE": "Breite", "hu-HU": "Szélesség" },
+    },
+    depth: {
+      value: 40,
+      label: { en: "Depth", "de-AT": "Tiefe", "de-DE": "Tiefe", "hu-HU": "Mélység" },
+    },
+    height: {
+      value: 80,
+      label: { en: "Height", "de-AT": "Höhe", "de-DE": "Höhe", "hu-HU": "Magasság" },
+    },
+    unit: { en: "cm", "de-AT": "cm", "de-DE": "cm", "hu-HU": "cm" },
+    material: {
+      label: { en: "Material", "de-AT": "Material", "de-DE": "Material", "hu-HU": "Anyag" },
+      value: {
+        en: "High-quality luxury glossy acrylic",
+        "de-AT": "Hochwertiges, luxuriöses Hochglanz-Acryl",
+        "de-DE": "Hochwertiges, luxuriöses Hochglanz-Acryl",
+        "hu-HU": "Kiváló minőségű, fényes prémium akril",
+      },
+    },
+  }
+
+  const metadata = getLocalizedMetadata({ pot: rawPot }, "de-AT")
+  const specs = resolvePotSpecs(metadata.pot)
+
+  assert(
+    deepEqual(specs, [
+      { label: "Höhe", value: "80 cm" },
+      { label: "Breite", value: "40 cm" },
+      { label: "Tiefe", value: "40 cm" },
+      { label: "Material", value: "Hochwertiges, luxuriöses Hochglanz-Acryl" },
+    ]),
+    "resolves structured pot fields to localized label/value pairs (de-AT)"
+  )
+
+  const specsHu = resolvePotSpecs(
+    getLocalizedMetadata({ pot: rawPot }, "hu-HU").pot
+  )
+  assert(
+    deepEqual(specsHu, [
+      { label: "Magasság", value: "80 cm" },
+      { label: "Szélesség", value: "40 cm" },
+      { label: "Mélység", value: "40 cm" },
+      { label: "Anyag", value: "Kiváló minőségű, fényes prémium akril" },
+    ]),
+    "resolves structured pot fields for hu-HU"
+  )
+}
+
+// -- Case 15: resolvePotSpecs with legacy flat shape --------------------------
+section("15. resolvePotSpecs with legacy flat shape")
+
+{
+  const specs = resolvePotSpecs({
+    width: 20,
+    depth: 15,
+    height: 18,
+    unit: "cm",
+    material: "Acrylic",
+    finish: "Glossy",
+  })
+
+  assert(
+    deepEqual(specs, [
+      { label: "Height", value: "18 cm" },
+      { label: "Width", value: "20 cm" },
+      { label: "Depth", value: "15 cm" },
+      { label: "Material", value: "Acrylic" },
+      { label: "Finish", value: "Glossy" },
+    ]),
+    "flat pot fields resolve with key fallback labels and unit suffix"
+  )
+
+  assert(
+    deepEqual(resolvePotSpecs({ height: 80 }), [
+      { label: "Height", value: "80 cm" },
+    ]),
+    "missing unit defaults to cm"
+  )
+}
+
+// -- Case 16: resolvePotSpecs edge cases --------------------------------------
+section("16. resolvePotSpecs edge cases")
+
+{
+  assert(deepEqual(resolvePotSpecs(undefined), []), "undefined pot → empty list")
+  assert(deepEqual(resolvePotSpecs(null), []), "null pot → empty list")
+  assert(deepEqual(resolvePotSpecs({}), []), "empty pot → empty list")
+  assert(
+    deepEqual(resolvePotSpecs("not an object" as any), []),
+    "non-object pot → empty list"
+  )
+  assert(
+    deepEqual(
+      resolvePotSpecs({ width: { value: 40, label: "Breite" }, size: "Medium" }),
+      [{ label: "Breite", value: "40 cm" }]
+    ),
+    "size is excluded from spec rows (rendered in the heading instead)"
+  )
+}
+
+// -- Case 17: fallback label localization --------------------------------------
+section("17. resolvePotSpecs with fallback label localization")
+
+{
+  // Dictionary stub for de-AT
+  const deDict: Record<string, string> = {
+    "product.width": "Breite",
+    "product.depth": "Tiefe",
+    "product.height": "Höhe",
+    "product.material": "Material",
+    "product.finish": "Oberfläche",
+    "product.care": "Pflege",
+  }
+  const deT = (key: string, fallback?: string) =>
+    deDict[key] ?? fallback ?? key
+  const localize = (label: string) => resolvePotLabel(deT, label)
+
+  assert(
+    deepEqual(
+      resolvePotSpecs(
+        { width: 20, depth: 15, height: 18, unit: "cm", material: "Acrylic" },
+        localize
+      ),
+      [
+        { label: "Höhe", value: "18 cm" },
+        { label: "Breite", value: "20 cm" },
+        { label: "Tiefe", value: "15 cm" },
+        { label: "Material", value: "Acrylic" },
+      ]
+    ),
+    "flat pot fields resolve to translated fallback labels (de-AT)"
+  )
+
+  assert(
+    deepEqual(
+      resolvePotSpecs(
+        { width: { value: 40, label: "Szélesség" }, unit: "cm" },
+        localize
+      ),
+      [{ label: "Szélesség", value: "40 cm" }]
+    ),
+    "backend-provided labels pass through untouched even with a localizer"
+  )
+
+  assert(
+    resolvePotLabel(deT, "Width") === "Breite" &&
+      resolvePotLabel(deT, "Breite") === "Breite" &&
+      resolvePotLabel(deT, "Custom label") === "Custom label",
+    "resolvePotLabel translates known labels and passes through the rest"
   )
 }
 

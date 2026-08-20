@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { HttpTypes } from "@medusajs/types"
-import { getLocalizedMetadata } from "@lib/i18n/metadata"
+import {
+  getLocalizedMetadata,
+  resolvePotLabel,
+  resolvePotSpecs,
+  resolveSpecField,
+} from "@lib/i18n/metadata"
 import { useTranslation } from "@/lib/i18n"
 
 type ProductInfoBlocksProps = {
@@ -90,20 +95,7 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
     }
   }
 
-  // Map English spec labels → translation keys
-  const specLabelKey: Record<string, string> = {
-    Height: "product.height",
-    Width: "product.width",
-    Depth: "product.depth",
-    Weight: "product.weight",
-    Material: "product.material",
-    "Country of origin": "product.countryOfOrigin",
-    Size: "product.size",
-    Finish: "product.finish",
-    Care: "product.care",
-  }
-
-  // Build tree specs (keys are English labels, translated at render time)
+  // Build tree specs (labels are managed by the backend)
   const treeSpecs: Record<string, string> = {}
   if (product.height) treeSpecs["Height"] = `${product.height}`
   if (product.width) treeSpecs["Width"] = `${product.width}`
@@ -113,27 +105,15 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
   if (product.origin_country)
     treeSpecs["Country of origin"] = product.origin_country
 
-  // Build pot specs
-  const potSpecs: Record<string, string> = {}
-  if (parsedPot) {
-    const unit = parsedPot.unit || "cm"
-    if (parsedPot.width && parsedPot.depth) {
-      potSpecs["Size"] = `${parsedPot.width} ${unit} × ${parsedPot.depth} ${unit}`
-    } else {
-      if (parsedPot.width) potSpecs["Width"] = `${parsedPot.width} ${unit}`
-      if (parsedPot.depth) potSpecs["Depth"] = `${parsedPot.depth} ${unit}`
-    }
-    if (parsedPot.height)
-      potSpecs["Height"] = `${parsedPot.height} ${unit}`
-    if (parsedPot.material) potSpecs["Material"] = parsedPot.material
-    if (parsedPot.finish) potSpecs["Finish"] = parsedPot.finish
-    if (parsedPot.care) potSpecs["Care"] = parsedPot.care
-  }
+  // Build pot specs — backend-provided labels are used as-is; fields
+  // without a label fall back to the translated field key.
+  const potSpecs = resolvePotSpecs(parsedPot, (label) => resolvePotLabel(t, label))
+  const potSize = resolveSpecField(parsedPot?.size, "Size")?.value
 
   const hasKeyFeatures = parsedKeyFeatures.length > 0
   const hasCare = Boolean(care)
   const hasTreeSpecs = Object.keys(treeSpecs).length > 0
-  const hasPotSpecs = Object.keys(potSpecs).length > 0
+  const hasPotSpecs = potSpecs.length > 0
 
   return (
     <div className="flex flex-col small:flex-row gap-x-12 gap-y-8">
@@ -168,7 +148,7 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
                 {Object.entries(treeSpecs).map(([key, value], i) => (
                   <div key={i} className="flex gap-x-2">
                     <span className="font-semibold text-ink">
-                      {t(specLabelKey[key] || key)}:
+                      {key}:
                     </span>
                     <span className="text-body">{value}</span>
                   </div>
@@ -179,15 +159,15 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
           {hasPotSpecs && (
             <div className={hasTreeSpecs ? "mt-4 pt-4 border-t border-hairline" : ""}>
               <span className="font-semibold text-ink text-sm block mb-2">
-                {parsedPot?.size ? `${t("product.potOnly")} (${parsedPot.size})` : t("product.potOnly")}
+                {potSize ? `${t("product.potOnly")} (${potSize})` : t("product.potOnly")}
               </span>
               <div className="flex flex-col gap-y-2 text-sm">
-                {Object.entries(potSpecs).map(([key, value], i) => (
+                {potSpecs.map((spec, i) => (
                   <div key={i} className="flex gap-x-2">
                     <span className="font-semibold text-ink">
-                      {t(specLabelKey[key] || key)}:
+                      {spec.label}:
                     </span>
-                    <span className="text-body">{value}</span>
+                    <span className="text-body">{spec.value}</span>
                   </div>
                 ))}
               </div>

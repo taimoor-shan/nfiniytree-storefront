@@ -11,6 +11,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server"
+import { getLocale } from "@lib/data/locale-actions"
+import { translate } from "@lib/i18n/dictionaries"
 
 export async function GET(
   req: NextRequest,
@@ -18,10 +20,11 @@ export async function GET(
 ) {
   const { displayId } = await params
   const token = req.nextUrl.searchParams.get("token")
+  const locale = await getLocale()
 
   if (!token) {
     return NextResponse.json(
-      { error: "Token is required" },
+      { error: await translate("invoice.tokenRequired", locale) },
       { status: 400 }
     )
   }
@@ -39,8 +42,8 @@ export async function GET(
       // Forward the backend's status — typically 404 for bad token / unknown order
       return new NextResponse(
         backendRes.status === 404
-          ? "Invoice not found"
-          : "Failed to download invoice",
+          ? await translate("invoice.notFound", locale)
+          : await translate("invoice.downloadFailed", locale),
         { status: backendRes.status }
       )
     }
@@ -61,7 +64,7 @@ export async function GET(
     })
   } catch {
     return NextResponse.json(
-      { error: "Failed to reach invoice service" },
+      { error: await translate("invoice.serviceUnavailable", locale) },
       { status: 502 }
     )
   }
