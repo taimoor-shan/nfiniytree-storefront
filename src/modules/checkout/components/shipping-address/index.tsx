@@ -1,12 +1,15 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
-import { Container, Text } from "@medusajs/ui"
+import { Container, Heading, Text } from "@medusajs/ui"
+import { Radio, RadioGroup } from "@headlessui/react"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
+import MedusaRadio from "@modules/common/components/radio"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useTranslation } from "@/lib/i18n"
-import { validateVatNumber, getVatFormatHint } from "@lib/util/vat"
-import { validatePhoneNumber, getPhoneFormatHint } from "@lib/util/phone"
+import { validateVatNumber } from "@lib/util/vat"
+import { validatePhoneNumber } from "@lib/util/phone"
 import { sdk } from "@lib/config"
 import { getCountryOptions } from "@lib/util/regions"
 import { mapKeys } from "lodash"
@@ -19,7 +22,13 @@ import React, {
 } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
-import { useRouter } from "next/navigation"
+import { usePathname, useRouter, useSearchParams } from "next/navigation"
+
+const SALUTATIONS = [
+  { value: "MS", label: "Ms" },
+  { value: "MR", label: "Mr" },
+  { value: "MX", label: "Mx" },
+] as const
 
 const ShippingAddress = ({
   customer,
@@ -36,19 +45,85 @@ const ShippingAddress = ({
 }) => {
   const { t } = useTranslation()
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const customerMetadata = (customer?.metadata || {}) as Record<string, any>
+  const cartAddressMetadata = (cart?.shipping_address?.metadata ||
+    {}) as Record<string, any>
+
+  // Fallback address for prefilling a signed-in customer's checkout form:
+  // their default shipping address (or the first saved one) when the cart
+  // doesn't carry an address yet.
+  const defaultShippingAddress =
+    customer?.addresses?.find((a) => a.is_default_shipping) ||
+    customer?.addresses?.[0]
+
   const [formData, setFormData] = useState<Record<string, any>>({
-    "shipping_address.first_name": cart?.shipping_address?.first_name || customer?.first_name || "",
-    "shipping_address.last_name": cart?.shipping_address?.last_name || customer?.last_name || "",
-    "shipping_address.address_1": cart?.shipping_address?.address_1 || "",
-    "shipping_address.company": cart?.shipping_address?.company || "",
-    "shipping_address.postal_code": cart?.shipping_address?.postal_code || "",
-    "shipping_address.city": cart?.shipping_address?.city || "",
-    "shipping_address.country_code": cart?.shipping_address?.country_code || "",
-    "shipping_address.province": cart?.shipping_address?.province || "",
-    "shipping_address.phone": cart?.shipping_address?.phone || customer?.phone || "",
-    vat_number: (cart?.shipping_address?.metadata as any)?.vat_number || "",
+    "shipping_address.first_name":
+      cart?.shipping_address?.first_name ||
+      defaultShippingAddress?.first_name ||
+      customer?.first_name ||
+      "",
+    "shipping_address.last_name":
+      cart?.shipping_address?.last_name ||
+      defaultShippingAddress?.last_name ||
+      customer?.last_name ||
+      "",
+    "shipping_address.address_1":
+      cart?.shipping_address?.address_1 ||
+      defaultShippingAddress?.address_1 ||
+      "",
+    "shipping_address.address_2":
+      cart?.shipping_address?.address_2 ||
+      defaultShippingAddress?.address_2 ||
+      "",
+    "shipping_address.company":
+      cart?.shipping_address?.company ||
+      defaultShippingAddress?.company ||
+      customer?.company_name ||
+      "",
+    "shipping_address.postal_code":
+      cart?.shipping_address?.postal_code ||
+      defaultShippingAddress?.postal_code ||
+      "",
+    "shipping_address.city":
+      cart?.shipping_address?.city || defaultShippingAddress?.city || "",
+    "shipping_address.country_code":
+      cart?.shipping_address?.country_code ||
+      defaultShippingAddress?.country_code ||
+      "",
+    "shipping_address.province":
+      cart?.shipping_address?.province ||
+      defaultShippingAddress?.province ||
+      "",
+    "shipping_address.phone":
+      cart?.shipping_address?.phone ||
+      defaultShippingAddress?.phone ||
+      customer?.phone ||
+      "",
+    // Person-level attributes: the signed-in customer's record is the source
+    // of truth — a stale cart address must not override it.
+    salutation:
+      customerMetadata.salutation || cartAddressMetadata.salutation || "",
+    customer_type:
+      customerMetadata.customer_type ||
+      cartAddressMetadata.customer_type ||
+      // Legacy accounts created before customer_type existed: a stored VAT
+      // number means a business account.
+      (customerMetadata.vat_number ? "b2b" : "") ||
+      "b2c",
+    vat_number:
+      cartAddressMetadata.vat_number || customerMetadata.vat_number || "",
     email: cart?.email || customer?.email || "",
   })
+
+  const [createAccount, setCreateAccount] = useState(false)
+  const [password, setPassword] = useState("")
+  const [passwordRepeat, setPasswordRepeat] = useState("")
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  const isBusiness = formData.customer_type === "b2b"
 
   const [vatError, setVatError] = useState<string | null>(null)
   const [phoneError, setPhoneError] = useState<string | null>(null)
@@ -71,13 +146,13 @@ const ShippingAddress = ({
   const validateVat = useCallback(
     (vat: string, countryCode: string) => {
       if (!vat || !vat.trim()) {
-        setVatError("VAT number is required")
+        setVatError(t("checkout.vatNumberRequired"))
       } else {
         const err = validateVatNumber(countryCode, vat)
         setVatError(err)
       }
     },
-    []
+    [t]
   )
 
   const validatePhone = useCallback(
@@ -97,7 +172,7 @@ const ShippingAddress = ({
   // Re-validate VAT and phone format when country changes
   useEffect(() => {
     const countryCode = formData["shipping_address.country_code"]
-    if (countryCode && formData.vat_number) {
+    if (countryCode && isBusiness && formData.vat_number) {
       validateVat(formData.vat_number, countryCode)
     }
     if (countryCode && formData["shipping_address.phone"]) {
@@ -111,6 +186,7 @@ const ShippingAddress = ({
     if (abortControllerRef.current) {
       abortControllerRef.current.abort()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData["shipping_address.country_code"]])
 
   // Async VIES verification (debounced) when VAT or country changes
@@ -118,7 +194,7 @@ const ShippingAddress = ({
     const countryCode = formData["shipping_address.country_code"]
     const vatNumber = formData.vat_number?.trim()
 
-    if (!countryCode || !vatNumber) {
+    if (!isBusiness || !countryCode || !vatNumber) {
       setVatVerificationStatus("idle")
       setVatCompanyName("")
       return
@@ -180,7 +256,7 @@ const ShippingAddress = ({
     return () => {
       clearTimeout(timer)
     }
-  }, [formData.vat_number, formData["shipping_address.country_code"]])
+  }, [formData.vat_number, formData["shipping_address.country_code"], isBusiness])
 
   // Cleanup abort controller on unmount
   useEffect(() => {
@@ -215,6 +291,7 @@ const ShippingAddress = ({
         "shipping_address.first_name": address?.first_name || "",
         "shipping_address.last_name": address?.last_name || "",
         "shipping_address.address_1": address?.address_1 || "",
+        "shipping_address.address_2": address?.address_2 || "",
         "shipping_address.company": address?.company || "",
         "shipping_address.postal_code": address?.postal_code || "",
         "shipping_address.city": address?.city || "",
@@ -231,8 +308,15 @@ const ShippingAddress = ({
   }
 
   useEffect(() => {
-    // Ensure cart is not null and has a shipping_address before setting form data
-    if (cart && cart.shipping_address) {
+    // Sync the form with the cart's shipping address. The middleware writes a
+    // minimal `{ country_code }` shipping address onto fresh carts — don't let
+    // that wipe the customer-profile prefill; only sync when the cart address
+    // carries real data.
+    if (
+      cart &&
+      cart.shipping_address &&
+      (cart.shipping_address.first_name || cart.shipping_address.address_1)
+    ) {
       setFormAddress(cart?.shipping_address, cart?.email)
     }
 
@@ -242,12 +326,10 @@ const ShippingAddress = ({
         ...(customer.email && !cart.email
           ? { email: customer.email }
           : undefined),
-        ...(customer.first_name &&
-        !cart?.shipping_address?.first_name
+        ...(customer.first_name && !cart?.shipping_address?.first_name
           ? { "shipping_address.first_name": customer.first_name }
           : undefined),
-        ...(customer.last_name &&
-        !cart?.shipping_address?.last_name
+        ...(customer.last_name && !cart?.shipping_address?.last_name
           ? { "shipping_address.last_name": customer.last_name }
           : undefined),
         ...(customer.phone && !cart?.shipping_address?.phone
@@ -267,8 +349,7 @@ const ShippingAddress = ({
     setFormData({ ...formData, [e.target.name]: newCountry })
 
     const option = countryOptions.find((o) => o.country === newCountry)
-    const needsRegionSwitch =
-      option && option.region !== cart?.region?.id
+    const needsRegionSwitch = option && option.region !== cart?.region?.id
 
     if (needsRegionSwitch) {
       setIsSwitchingRegion(true)
@@ -337,12 +418,25 @@ const ShippingAddress = ({
     }
   }
 
+  const handlePasswordChange = (value: string) => {
+    setPassword(value)
+    setPasswordError(null)
+  }
+
+  const handlePasswordRepeatChange = (value: string) => {
+    setPasswordRepeat(value)
+    setPasswordError(null)
+  }
+
+  const loginReturnUrl = `${pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ""
+    }`
+
   return (
     <>
       {customer && (addressesInRegion?.length || 0) > 0 && (
         <Container className="mb-6 flex flex-col gap-y-4 p-5">
           <p className="text-small-regular">
-            {t("checkout.useSaved").replace("{name}", customer.first_name)}
+            {t("checkout.useSaved").replace("{name}", customer.first_name ?? "")}
           </p>
           <AddressSelect
             addresses={customer.addresses}
@@ -355,7 +449,67 @@ const ShippingAddress = ({
           />
         </Container>
       )}
-      <div className="grid grid-cols-2 gap-4">
+
+      <div className="grid lg:grid-cols-2 gap-4 mb-8">
+        {/* E-Mail — first field, with an inline login link (Vitra order) */}
+        <div className="col-span-2 flex flex-col gap-y-2 mb-6">
+        <Input
+          label={t("account.email")}
+          name="email"
+          type="email"
+          title={t("common.emailNotValid")}
+          autoComplete="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          data-testid="shipping-email-input"
+        />
+        {!customer && (
+          <div className="">
+            <span className="txt-compact-medium text-ink/70">Already have an account? </span>
+            <LocalizedClientLink
+              href={`/account?returnUrl=${encodeURIComponent(loginReturnUrl)}`}
+              className="text-link hover:underline"
+              data-testid="checkout-login-link"
+            >
+              {t("checkout.logIn")}
+            </LocalizedClientLink>
+          </div>
+        )}
+        </div>
+
+        {/* Salutation */}
+        <div className="flex flex-col gap-y-2 col-span-2">
+          <span className="txt-compact-medium-plus text-ink">
+            {t("checkout.salutation")}
+          </span>
+          <RadioGroup
+            value={formData.salutation}
+            onChange={(value) =>
+              setFormData((prev) => ({ ...prev, salutation: value }))
+            }
+            className="flex flex-row gap-x-6"
+          >
+            {SALUTATIONS.map((option) => (
+              <Radio
+                key={option.value}
+                value={option.value}
+                data-testid={`salutation-${option.value}`}
+                className="flex items-center gap-x-2 text-base-regular cursor-pointer"
+              >
+                <MedusaRadio checked={formData.salutation === option.value} />
+                <span>{option.label}</span>
+              </Radio>
+            ))}
+          </RadioGroup>
+          <input
+            type="hidden"
+            name="salutation"
+            value={formData.salutation}
+          />
+        </div>
+
+        {/* First / Last name */}
         <Input
           label={t("account.firstName")}
           name="shipping_address.first_name"
@@ -374,6 +528,57 @@ const ShippingAddress = ({
           required
           data-testid="shipping-last-name-input"
         />
+
+        {/* Customer type — the B2C/B2B decision point */}
+        <div className="flex flex-col gap-y-2 col-span-2">
+          <span className="txt-compact-medium-plus text-ink">
+            {t("checkout.youAreA")}
+          </span>
+          <RadioGroup
+            value={formData.customer_type}
+            onChange={(value) =>
+              setFormData((prev) => ({ ...prev, customer_type: value }))
+            }
+            className="flex flex-row gap-x-6"
+          >
+            {(
+              [
+                { value: "b2c", label: t("checkout.privateCustomer") },
+                { value: "b2b", label: t("checkout.businessCustomer") },
+              ] as const
+            ).map((option) => (
+              <Radio
+                key={option.value}
+                value={option.value}
+                data-testid={`customer-type-${option.value}`}
+                className="flex items-center gap-x-2 text-base-regular cursor-pointer"
+              >
+                <MedusaRadio
+                  checked={formData.customer_type === option.value}
+                />
+                <span>{option.label}</span>
+              </Radio>
+            ))}
+          </RadioGroup>
+          <input
+            type="hidden"
+            name="customer_type"
+            value={formData.customer_type}
+          />
+        </div>
+
+        {/* Company name — optional for private, required for business */}
+        <Input
+          label={t("addresses.company")}
+          name="shipping_address.company"
+          value={formData["shipping_address.company"]}
+          onChange={handleChange}
+          autoComplete="organization"
+          required={isBusiness}
+          data-testid="shipping-company-input"
+        />
+
+        {/* Address — manual entry, Vitra field order */}
         <Input
           label={t("addresses.address")}
           name="shipping_address.address_1"
@@ -384,13 +589,12 @@ const ShippingAddress = ({
           data-testid="shipping-address-input"
         />
         <Input
-          label={t("addresses.company")}
-          name="shipping_address.company"
-          value={formData["shipping_address.company"]}
+          label={t("checkout.additionalAddressInfo")}
+          name="shipping_address.address_2"
+          autoComplete="address-line2"
+          value={formData["shipping_address.address_2"]}
           onChange={handleChange}
-          autoComplete="organization"
-          required
-          data-testid="shipping-company-input"
+          data-testid="shipping-address-2-input"
         />
         <Input
           label={t("addresses.postalCode")}
@@ -410,6 +614,14 @@ const ShippingAddress = ({
           required
           data-testid="shipping-city-input"
         />
+        <Input
+          label={t("addresses.provinceState")}
+          name="shipping_address.province"
+          autoComplete="address-level1"
+          value={formData["shipping_address.province"]}
+          onChange={handleChange}
+          data-testid="shipping-province-input"
+        />
         <CountrySelect
           name="shipping_address.country_code"
           autoComplete="country"
@@ -420,37 +632,9 @@ const ShippingAddress = ({
           required
           data-testid="shipping-country-select"
         />
-        <Input
-          label={t("addresses.provinceState")}
-          name="shipping_address.province"
-          autoComplete="address-level1"
-          value={formData["shipping_address.province"]}
-          onChange={handleChange}
-          data-testid="shipping-province-input"
-        />
-      </div>
-      <div className="my-8">
-        <Checkbox
-          label={t("checkout.sameAsBilling")}
-          name="same_as_billing"
-          checked={checked}
-          onChange={onChange}
-          data-testid="billing-address-checkbox"
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        <Input
-          label={t("account.email")}
-          name="email"
-          type="email"
-          title={t("common.emailNotValid")}
-          autoComplete="email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          data-testid="shipping-email-input"
-        />
-        <div>
+
+        {/* Phone — with the delivery-coordination rationale */}
+        <div className="flex flex-col gap-y-1">
           <Input
             label={t("account.phone")}
             name="shipping_address.phone"
@@ -459,52 +643,124 @@ const ShippingAddress = ({
             onChange={handleChange}
             data-testid="shipping-phone-input"
           />
+          <span className="text-xs text-ui-fg-subtle">
+            {t("checkout.phoneHelper")}
+          </span>
           {phoneError && (
             <Text className="text-xs text-red-500 mt-1 mb-2">
               {phoneError}
             </Text>
           )}
         </div>
-        <div>
-          <Input
-            label={t("addresses.vatNumber")}
-            name="vat_number"
-            autoComplete="off"
-            value={formData.vat_number}
-            onChange={handleChange}
-            required
-            data-testid="shipping-vat-input"
-            errors={vatError ? { vat_number: vatError } : undefined}
-          />
-          {vatError && (
-            <Text className="text-xs text-red-500 mt-1 mb-2">
-              {vatError}
-            </Text>
-          )}
 
-          {/* Async VIES verification status */}
-          {vatVerificationStatus === "checking" && (
-            <Text className="text-xs text-ui-fg-subtle mt-1 mb-2">
-              {t("checkout.vatVerifying")}
-            </Text>
-          )}
-          {vatVerificationStatus === "active" && (
-            <Text className="text-xs text-green-600 mt-1 mb-2">
-              ✓ {t("checkout.vatVerified")}
-              {vatCompanyName ? ` — ${vatCompanyName}` : ""}
-            </Text>
-          )}
-          {vatVerificationStatus === "invalid" && (
-            <Text className="text-xs text-red-500 mt-1 mb-2">
-              ✗ {t("checkout.vatNotRegistered")}
-            </Text>
-          )}
-          {vatVerificationStatus === "service_unavailable" && (
-            <Text className="text-xs text-amber-600 mt-1 mb-2">
-              ⚠ {t("checkout.vatServiceUnavailable")}
-            </Text>
-          )}
+        {/* VAT — business customers only */}
+        {isBusiness && (
+          <div>
+            <Input
+              label={t("addresses.vatNumber")}
+              name="vat_number"
+              autoComplete="off"
+              value={formData.vat_number}
+              onChange={handleChange}
+              required
+              data-testid="shipping-vat-input"
+              errors={vatError ? { vat_number: vatError } : undefined}
+            />
+            {vatError && (
+              <Text className="text-xs text-red-500 mt-1 mb-2">
+                {vatError}
+              </Text>
+            )}
+
+            {/* Async VIES verification status */}
+            {vatVerificationStatus === "checking" && (
+              <Text className="text-xs text-ui-fg-subtle mt-1 mb-2">
+                {t("checkout.vatVerifying")}
+              </Text>
+            )}
+            {vatVerificationStatus === "active" && (
+              <Text className="text-xs text-green-600 mt-1 mb-2">
+                ✓ {t("checkout.vatVerified")}
+                {vatCompanyName ? ` — ${vatCompanyName}` : ""}
+              </Text>
+            )}
+            {vatVerificationStatus === "invalid" && (
+              <Text className="text-xs text-red-500 mt-1 mb-2">
+                ✗ {t("checkout.vatNotRegistered")}
+              </Text>
+            )}
+            {vatVerificationStatus === "service_unavailable" && (
+              <Text className="text-xs text-amber-600 mt-1 mb-2">
+                ⚠ {t("checkout.vatServiceUnavailable")}
+              </Text>
+            )}
+          </div>
+        )}
+
+        <div className="my-8 col-span-2">
+          <Checkbox
+            label={t("checkout.sameAsBilling")}
+            name="same_as_billing"
+            checked={checked}
+            onChange={onChange}
+            data-testid="billing-address-checkbox"
+            
+          />
         </div>
+
+        {/* Account — dynamic sign-up: private customers opt in, business customers must create one */}
+        {!customer && (
+          <section className="flex flex-col gap-y-4 border-t pt-8">
+            <Heading level="h3" className="text-2xl-semi">
+              {t("checkout.account")}
+            </Heading>
+           
+            {!isBusiness && (
+              <Checkbox
+                label={t("checkout.createCustomerAccount")}
+                name="create_customer_account"
+                checked={createAccount}
+                onChange={() => setCreateAccount(!createAccount)}
+                data-testid="create-account-checkbox"
+              />
+            )}
+            {(isBusiness || createAccount) && (
+              <>
+                <p className="text-base-regular">
+                  {t("checkout.accountDescription")}
+                </p>
+                <Input
+                  label={t("checkout.newPassword")}
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
+                  required
+                  data-testid="checkout-password-input"
+                />
+                <span className="text-xs text-ui-fg-subtle -mt-2">
+                  {t("checkout.passwordRule")}
+                </span>
+                <Input
+                  label={t("checkout.repeatNewPassword")}
+                  name="password_repeat"
+                  type="password"
+                  autoComplete="new-password"
+                  value={passwordRepeat}
+                  onChange={(e) => handlePasswordRepeatChange(e.target.value)}
+                  required
+                  data-testid="checkout-password-repeat-input"
+                />
+                {passwordError && (
+                  <Text className="text-xs text-red-500 -mt-2">
+                    {passwordError}
+                  </Text>
+                )}
+              </>
+            )}
+          </section>
+        )}
       </div>
     </>
   )

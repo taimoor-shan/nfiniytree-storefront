@@ -2,7 +2,7 @@ import "server-only"
 import { cookies as nextCookies } from "next/headers"
 
 export const getAuthHeaders = async (): Promise<
-  { authorization: string } | {}
+  { authorization: string } | Record<string, never>
 > => {
   try {
     const cookies = await nextCookies()

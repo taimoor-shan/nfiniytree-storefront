@@ -83,7 +83,7 @@ const CountrySelect = ({
             {label !== null ? <span>{t("misc.shippingTo", label)}</span> : null}
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
-                {/* @ts-ignore */}
+                {}
                 <ReactCountryFlag
                   svg
                   style={{
@@ -123,7 +123,7 @@ const CountrySelect = ({
                     value={o}
                     className="py-2 hover:bg-surface-card px-3 cursor-pointer flex items-center gap-x-2"
                   >
-                    {/* @ts-ignore */}
+                    {}
                     <ReactCountryFlag
                       svg
                       style={{

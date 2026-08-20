@@ -7,7 +7,6 @@
   "nav.cart": "Kosár",
   "nav.menu": "Menü",
   "nav.search": "Keresés",
-
   "footer.shop": "Bolt",
   "footer.company": "Cég",
   "footer.stayUpdated": "Maradjon naprakész a {storeName} legfrissebb híreivel",
@@ -21,12 +20,10 @@
   "footer.instagram": "Instagram",
   "footer.tiktok": "TikTok",
   "footer.twitter": "Twitter",
-
   "hero.fallbackTitle": "Élő művészet időtlen belső terekbe",
   "hero.fallbackExcerpt": "Kézzel készített műnövények és botanikai remekművek — mindegyik egyedi. Nincs öntözés, nincs napfény, nincs gondozás. Csak tartós szépség luxus terekbe.",
   "hero.scrollDown": "Görgessen le",
   "hero.shopCollection": "Kollekció megtekintése",
-
   "features.oneOfAKind.title": "Kézzel készített",
   "features.oneOfAKind.description": "Minden darabot tapasztalt kézművesek gondosan készítenek, kivételes minőséget és karaktert biztosítva minden alkotásnak.",
   "features.maintenanceFree.title": "Gondozásmentes",
@@ -35,13 +32,11 @@
   "features.authenticMaterials.description": "Valódi fatörzsek, prémium műlombozat és luxus designer cserepek a tartós kifinomultságért.",
   "features.luxurySpaces.title": "Luxus terek",
   "features.luxurySpaces.description": "Hotelek, villák, butikok, irodák és exkluzív belső terek számára tervezve világszerte.",
-
   "about.handmadeCollection": "Kézzel készített kollekció",
   "about.thePromise": "Az Infinytree ígérete",
   "about.locationNote": "Kézzel készített darabjainkat Ausztriába, Németországba és Magyarországra szállítjuk — további európai célállomások igény szerint.",
   "about.fallbackTitle": "Rólunk",
   "about.fallbackDescription": "Kézzel készített botanikai remekművek luxus belső terekbe.",
-
   "contact.fallbackTitle": "Kapcsolat",
   "contact.fallbackExcerpt": "Itt vagyunk, hogy segítsünk. Vegye fel velünk a kapcsolatot botanikai darabjainkkal, egyedi rendelésekkel vagy belsőépítészeti együttműködésekkel kapcsolatban.",
   "contact.getInTouch": "Lépjen kapcsolatba velünk",
@@ -68,9 +63,7 @@
   "contact.form.successText": "Köszönjük, hogy kapcsolatba lépett velünk. Megkaptuk üzenetét, és hamarosan válaszolunk.",
   "contact.form.sendAnother": "Újabb üzenet küldése",
   "contact.form.error": "Hiba történt. Kérjük, próbálja újra.",
-
   "home.ourCollection": "{title} kollekciónk",
-
   "product.specifications": "Specifikációk",
   "product.keyFeatures": "Fő jellemzők",
   "product.maintenanceCare": "Karbantartás és gondozás",
@@ -119,12 +112,10 @@
   "product.notifyMe.rateLimited": "Már kért értesítést. Kérjük, ellenőrizze a postaládáját, vagy próbálja újra később.",
   "product.netPrice": "(+ÁFA)",
   "product.selectOption": "{title} kiválasztása",
-
   "newsletter.placeholder": "az.email@példa.hu",
   "newsletter.submit": "Feliratkozás",
   "newsletter.done": "Kész!",
   "newsletter.success": "Köszönjük a feliratkozást!",
-
   "store.sortBy": "Rendezés",
   "store.latestArrivals": "Legújabb",
   "store.priceLowToHigh": "Ár: Alacsony → Magas",
@@ -136,7 +127,6 @@
   "store.showing": "Mutat",
   "store.of": "/",
   "store.results": "találat",
-
   "cart.empty": "A kosár üres.",
   "cart.continueShopping": "Vásárlás folytatása",
   "cart.summary": "Kosár összesítő",
@@ -160,7 +150,6 @@
   "cart.inYourCart": "Az Ön kosarában",
   "cart.originalPrice": "Eredeti: ",
   "cart.notFoundText": "A keresett kosár nem létezik. Törölje a cookie-kat, és próbálja újra.",
-
   "checkout.shippingAddress": "Szállítási cím",
   "checkout.billingAddress": "Számlázási cím",
   "checkout.delivery": "Szállítás",
@@ -207,7 +196,6 @@
   "checkout.companyRequired": "Cégnév megadása kötelező",
   "checkout.phoneInvalid": "Érvénytelen telefonszám.",
   "checkout.phoneFormatHint": "Formátum:",
-
   "account.overview": "Áttekintés",
   "account.profile": "Profil",
   "account.addresses": "Címek",
@@ -275,7 +263,6 @@
   "account.transferRequested": "Átruházás kérve a(z) {id} rendeléshez",
   "account.transferEmailSent": "Átruházási kérelem e-mail elküldve: {email}",
   "account.requestTransfer": "Átruházás kérése",
-
   "account.backToLogin": "Vissza a bejelentkezéshez",
   "account.backToAccount": "Vissza a fiókomhoz",
   "account.checkEmail": "Ellenőrizze e-mailjeit",
@@ -299,8 +286,6 @@
   "account.orderIdRequired": "Rendelés-azonosító megadása kötelező",
   "account.addressIdRequired": "Cím-azonosító megadása kötelező",
   "account.invalidCredentials": "Érvénytelen e-mail-cím vagy jelszó",
-
-
   "addresses.newAddress": "Új cím",
   "addresses.addAddress": "Cím hozzáadása",
   "addresses.editAddress": "Cím szerkesztése",
@@ -312,7 +297,6 @@
   "addresses.postalCode": "Irányítószám",
   "addresses.city": "Város",
   "addresses.provinceState": "Megye / Állam",
-
   "order.details": "Rendelés részletei",
   "order.number": "Rendelésszám",
   "order.date": "Dátum",
@@ -352,7 +336,6 @@
   "order.timeline.estimatedDelivery": "Várható kézbesítés: 3–10 munkanap Európán belül",
   "order.timeline.shipments": "Szállítmányok",
   "order.timeline.track": "Követés",
-
   "transfer.requestHeading": "Átruházási kérelem a(z) {id} rendeléshez",
   "transfer.requestDescription": "Kérelmet kapott a(z) ({id}) rendelése tulajdonjogának átruházására. Ha egyetért ezzel a kérelemmel, az alábbi gombra kattintva jóváhagyhatja az átruházást.",
   "transfer.acceptDescription": "Ha elfogadja, az új tulajdonos átvesz minden felelősséget és jogosultságot, amely ehhez a rendeléshez kapcsolódik.",
@@ -368,7 +351,6 @@
   "transfer.transferredText": "A(z) {id} rendelés sikeresen átruházva az új tulajdonosra.",
   "transfer.declinedTitle": "Rendelés átruházása elutasítva!",
   "transfer.declinedText": "A(z) {id} rendelés átruházása sikeresen elutasítva.",
-
   "misc.freeShipping": "Ingyenes szállítás feloldva!",
   "misc.unlockFreeShipping": "Ingyenes szállítás feloldása",
   "misc.onlyAway": "Már csak {amount} hiányzik",
@@ -378,20 +360,17 @@
   "misc.closeCart": "Kosár bezárása",
   "misc.quantity": "Mennyiség:",
   "misc.emptyCart": "Az Ön kosara üres.",
-
   "onboarding.demoProductCreated": "A demó termék sikeresen létrehozva! 🎉",
   "onboarding.continueSetupText": "Most már folytathatja az áruház beállítását az adminban.",
   "onboarding.continueSetup": "Beállítás folytatása az adminban",
   "onboarding.testOrderCreated": "A tesztrendelés sikeresen létrehozva! 🎉",
   "onboarding.completeSetupText": "Most már befejezheti az áruház beállítását az adminban.",
   "onboarding.completeSetup": "Beállítás befejezése az adminban",
-
   "policy.pageBeingUpdated": "Ez az oldal frissítés alatt áll. Kérjük, nézzen vissza hamarosan.",
   "policy.forEnquiries": "Érdeklődés esetén vegye fel velünk a kapcsolatot:",
   "policy.forPrivacyRequests": "Adatvédelmi kérésekkel kapcsolatban vegye fel velünk a kapcsolatot:",
   "policy.forReturnRequests": "Visszaküldési kérelmekkel kapcsolatban vegye fel velünk a kapcsolatot:",
   "policy.forShippingQuestions": "Szállítással kapcsolatos kérdéseivel vegye fel velünk a kapcsolatot:",
-
   "metadata.homeDescription": "Kézzel készített botanikai remekművek luxus belső terekbe.",
   "metadata.storeTitle": "Bolt",
   "metadata.storeDescription": "Fedezze fel összes termékünket.",
@@ -422,7 +401,6 @@
   "metadata.resetPasswordDescription": "Adjon meg új jelszót Infinytree fiókjához.",
   "metadata.customerServiceTitle": "Ügyfélszolgálat | Infinytree",
   "metadata.customerServiceDescription": "Válaszok szállítással, visszaküldéssel, termékápolással és egyéb témákkal kapcsolatban.",
-
   "common.loading": "Betöltés...",
   "common.error": "Hiba történt.",
   "common.retry": "Újra",
@@ -442,17 +420,14 @@
   "common.select": "Kiválasztás...",
   "common.country": "Ország",
   "common.logo": "Logó",
-
   "topbar.defaultLanguage": "Alapértelmezett",
   "topbar.selectCountry": "Ország kiválasztása",
-
   "withdrawal.noticeTitle": "Tájékoztató az elállási jogról",
   "withdrawal.importantPrefix": "Fontos: ",
   "withdrawal.legalText": "Ezt a terméket megrendelése után, az Ön által kiválasztott konfiguráció alapján egyedileg szerelik össze és készítik el. Mivel nem előregyártott, hanem az Ön egyedi döntései alapján készülő termékről van szó, a 14 napos törvényes elállási jog a {decree} alapján nem illeti meg Önt.",
   "withdrawal.decree": "a 45/2014. (II. 26.) Korm. rendelet 29. § (1) bekezdés c) pontja",
   "withdrawal.seeOurDetails": "A részletes feltételekért lásd {policyLink}.",
   "withdrawal.policyLinkLabel": "Visszaküldési és visszatérítési szabályzat",
-
   "countryPopup.title": "Válassza ki a szállítási országot",
   "countryPopup.explanation": "Az árak, adók, elérhető termékek és szállítási lehetőségek a kiválasztott országtól függenek.",
   "countryPopup.continue": "Tovább",
@@ -461,5 +436,18 @@
   "invoice.notFound": "A számla nem található",
   "invoice.downloadFailed": "A számla letöltése nem sikerült",
   "invoice.serviceUnavailable": "A számlaszolgáltatás jelenleg nem érhető el",
-  "invoice.proformaDownloadFailed": "A pro forma számla letöltése nem sikerült"
+  "invoice.proformaDownloadFailed": "A pro forma számla letöltése nem sikerült",
+  "checkout.logIn": "Bejelentkezés",
+  "checkout.salutation": "Megszólítás",
+  "checkout.youAreA": "Ön:",
+  "checkout.privateCustomer": "Magánszemély",
+  "checkout.businessCustomer": "Üzleti ügyfél",
+  "checkout.additionalAddressInfo": "Kiegészítő címadat (pl.: lakás, épület)",
+  "checkout.phoneHelper": "A szállítócégnek helyes telefonszámra van szüksége a szállítási időpont egyeztetéséhez. Az adatot kizárólag erre a célra használjuk fel.",
+  "checkout.account": "Fiók",
+  "checkout.accountDescription": "Az üzleti ügyfélként való vásárláshoz vásárlói fiókot kell létrehoznia. Ez a vásárlói fiók egy országhoz van kötve, amelyet ezután nem lehet módosítani.",
+  "checkout.createCustomerAccount": "Vásárlói fiók létrehozása",
+  "checkout.newPassword": "Új jelszó",
+  "checkout.repeatNewPassword": "Új jelszó megerősítése",
+  "checkout.passwordRule": "Legalább 8 karakter, számokkal és betűkkel"
 }

@@ -8,22 +8,68 @@ import CountrySelect from "../country-select"
 
 const BillingAddress = ({
   cart,
+  customer,
   regions,
 }: {
   cart: HttpTypes.StoreCart | null
+  customer: HttpTypes.StoreCustomer | null
   regions: HttpTypes.StoreRegion[]
 }) => {
   const { t } = useTranslation()
+
+  // Fallback address for prefilling a signed-in customer's billing form:
+  // their default billing address (or any saved one) when the cart doesn't
+  // carry a billing address yet.
+  const defaultBillingAddress =
+    customer?.addresses?.find((a) => a.is_default_billing) ||
+    customer?.addresses?.find((a) => a.is_default_shipping) ||
+    customer?.addresses?.[0]
+
   const [formData, setFormData] = useState<any>({
-    "billing_address.first_name": cart?.billing_address?.first_name || "",
-    "billing_address.last_name": cart?.billing_address?.last_name || "",
-    "billing_address.address_1": cart?.billing_address?.address_1 || "",
-    "billing_address.company": cart?.billing_address?.company || "",
-    "billing_address.postal_code": cart?.billing_address?.postal_code || "",
-    "billing_address.city": cart?.billing_address?.city || "",
-    "billing_address.country_code": cart?.billing_address?.country_code || "",
-    "billing_address.province": cart?.billing_address?.province || "",
-    "billing_address.phone": cart?.billing_address?.phone || "",
+    "billing_address.first_name":
+      cart?.billing_address?.first_name ||
+      defaultBillingAddress?.first_name ||
+      customer?.first_name ||
+      "",
+    "billing_address.last_name":
+      cart?.billing_address?.last_name ||
+      defaultBillingAddress?.last_name ||
+      customer?.last_name ||
+      "",
+    "billing_address.address_1":
+      cart?.billing_address?.address_1 ||
+      defaultBillingAddress?.address_1 ||
+      "",
+    "billing_address.address_2":
+      cart?.billing_address?.address_2 ||
+      defaultBillingAddress?.address_2 ||
+      "",
+    "billing_address.company":
+      cart?.billing_address?.company ||
+      defaultBillingAddress?.company ||
+      customer?.company_name ||
+      "",
+    "billing_address.postal_code":
+      cart?.billing_address?.postal_code ||
+      defaultBillingAddress?.postal_code ||
+      "",
+    "billing_address.city":
+      cart?.billing_address?.city ||
+      defaultBillingAddress?.city ||
+      "",
+    "billing_address.country_code":
+      cart?.billing_address?.country_code ||
+      defaultBillingAddress?.country_code ||
+      "",
+    "billing_address.province":
+      cart?.billing_address?.province ||
+      defaultBillingAddress?.province ||
+      "",
+    "billing_address.phone":
+      cart?.billing_address?.phone ||
+      defaultBillingAddress?.phone ||
+      customer?.phone ||
+      "",
   })
 
   const handleChange = (
@@ -68,12 +114,19 @@ const BillingAddress = ({
           data-testid="billing-address-input"
         />
         <Input
+          label={t("checkout.additionalAddressInfo")}
+          name="billing_address.address_2"
+          autoComplete="address-line2"
+          value={formData["billing_address.address_2"]}
+          onChange={handleChange}
+          data-testid="billing-address-2-input"
+        />
+        <Input
           label={t("addresses.company")}
           name="billing_address.company"
           value={formData["billing_address.company"]}
           onChange={handleChange}
           autoComplete="organization"
-          required
           data-testid="billing-company-input"
         />
         <Input

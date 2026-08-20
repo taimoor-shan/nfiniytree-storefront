@@ -7,7 +7,6 @@
   "nav.cart": "Cart",
   "nav.menu": "Menu",
   "nav.search": "Search",
-
   "footer.shop": "Shop",
   "footer.company": "Company",
   "footer.stayUpdated": "Stay updated on the latest from {storeName}",
@@ -21,12 +20,10 @@
   "footer.instagram": "Instagram",
   "footer.tiktok": "TikTok",
   "footer.twitter": "Twitter",
-
   "hero.fallbackTitle": "Living Art for Timeless Interiors",
   "hero.fallbackExcerpt": "Handmade artificial trees and botanical masterpieces — each one of a kind. No watering, no sunlight, no care. Just enduring beauty for luxury spaces.",
   "hero.scrollDown": "Scroll down",
   "hero.shopCollection": "Shop the collection",
-
   "features.oneOfAKind.title": "Handmade",
   "features.oneOfAKind.description": "Each piece is meticulously handcrafted by skilled artisans, ensuring exceptional quality and character in every creation.",
   "features.maintenanceFree.title": "Maintenance-Free",
@@ -35,13 +32,11 @@
   "features.authenticMaterials.description": "Real wood trunks, premium artificial foliage, and luxury designer pots for lasting sophistication.",
   "features.luxurySpaces.title": "Luxury Spaces",
   "features.luxurySpaces.description": "Designed for hotels, villas, boutiques, offices, and exclusive interiors worldwide.",
-
   "about.handmadeCollection": "Handmade Collection",
   "about.thePromise": "The Infinytree Promise",
   "about.locationNote": "We ship handcrafted pieces to Austria, Germany, and Hungary — with more European destinations available on request.",
   "about.fallbackTitle": "About",
   "about.fallbackDescription": "Handmade artificial botanical masterpieces for luxury interiors.",
-
   "contact.fallbackTitle": "Contact Us",
   "contact.fallbackExcerpt": "We're here to help. Reach out with any questions about our botanical pieces, custom orders, or interior design collaborations.",
   "contact.getInTouch": "Get in Touch",
@@ -68,9 +63,7 @@
   "contact.form.successText": "Thank you for reaching out. We have received your message and will get back to you shortly.",
   "contact.form.sendAnother": "Send another message",
   "contact.form.error": "Something went wrong. Please try again.",
-
   "home.ourCollection": "Our {title}",
-
   "product.specifications": "Specifications",
   "product.keyFeatures": "Key Features",
   "product.maintenanceCare": "Maintenance & Care",
@@ -119,12 +112,10 @@
   "product.notifyMe.rateLimited": "You've already requested a notification. Please check your inbox or try again later.",
   "product.netPrice": "(+VAT)",
   "product.selectOption": "Select {title}",
-
   "newsletter.placeholder": "youremail@example.com",
   "newsletter.submit": "Submit",
   "newsletter.done": "Done!",
   "newsletter.success": "Thank you for subscribing!",
-
   "store.sortBy": "Sort by",
   "store.latestArrivals": "Latest Arrivals",
   "store.priceLowToHigh": "Price: Low → High",
@@ -136,7 +127,6 @@
   "store.showing": "Showing",
   "store.of": "of",
   "store.results": "results",
-
   "cart.empty": "Your cart is empty.",
   "cart.continueShopping": "Continue Shopping",
   "cart.summary": "Cart Summary",
@@ -160,7 +150,6 @@
   "cart.inYourCart": "In your Cart",
   "cart.originalPrice": "Original: ",
   "cart.notFoundText": "The cart you tried to access does not exist. Clear your cookies and try again.",
-
   "checkout.shippingAddress": "Shipping Address",
   "checkout.billingAddress": "Billing Address",
   "checkout.delivery": "Delivery",
@@ -207,7 +196,6 @@
   "checkout.companyRequired": "Company name is required",
   "checkout.phoneInvalid": "Invalid phone number.",
   "checkout.phoneFormatHint": "Format:",
-
   "account.overview": "Overview",
   "account.profile": "Profile",
   "account.addresses": "Addresses",
@@ -298,7 +286,6 @@
   "account.orderIdRequired": "Order ID is required",
   "account.addressIdRequired": "Address ID is required",
   "account.invalidCredentials": "Invalid email or password",
-
   "addresses.newAddress": "New address",
   "addresses.addAddress": "Add address",
   "addresses.editAddress": "Edit address",
@@ -310,7 +297,6 @@
   "addresses.postalCode": "Postal code",
   "addresses.city": "City",
   "addresses.provinceState": "Province / State",
-
   "order.details": "Order Details",
   "order.number": "Order Number",
   "order.date": "Date",
@@ -350,7 +336,6 @@
   "order.timeline.estimatedDelivery": "Estimated delivery: 3–10 business days within Europe",
   "order.timeline.shipments": "Shipments",
   "order.timeline.track": "Track",
-
   "transfer.requestHeading": "Transfer request for order {id}",
   "transfer.requestDescription": "You've received a request to transfer ownership of your order ({id}). If you agree to this request, you can approve the transfer by clicking the button below.",
   "transfer.acceptDescription": "If you accept, the new owner will take over all responsibilities and permissions associated with this order.",
@@ -366,7 +351,6 @@
   "transfer.transferredText": "Order {id} has been successfully transferred to the new owner.",
   "transfer.declinedTitle": "Order transfer declined!",
   "transfer.declinedText": "Transfer of order {id} has been successfully declined.",
-
   "misc.freeShipping": "Free Shipping unlocked!",
   "misc.unlockFreeShipping": "Unlock Free Shipping",
   "misc.onlyAway": "Only {amount} away",
@@ -376,20 +360,17 @@
   "misc.closeCart": "Close cart",
   "misc.quantity": "Quantity:",
   "misc.emptyCart": "Your shopping bag is empty.",
-
   "onboarding.demoProductCreated": "Your demo product was successfully created! 🎉",
   "onboarding.continueSetupText": "You can now continue setting up your store in the admin.",
   "onboarding.continueSetup": "Continue setup in admin",
   "onboarding.testOrderCreated": "Your test order was successfully created! 🎉",
   "onboarding.completeSetupText": "You can now complete setting up your store in the admin.",
   "onboarding.completeSetup": "Complete setup in admin",
-
   "policy.pageBeingUpdated": "This page is being updated. Please check back soon.",
   "policy.forEnquiries": "For enquiries, contact us at:",
   "policy.forPrivacyRequests": "For privacy-related requests, contact us at:",
   "policy.forReturnRequests": "For return requests, contact us at:",
   "policy.forShippingQuestions": "For shipping questions, contact us at:",
-
   "metadata.homeDescription": "Handmade artificial botanical masterpieces for luxury interiors.",
   "metadata.storeTitle": "Store",
   "metadata.storeDescription": "Explore all of our products.",
@@ -420,7 +401,6 @@
   "metadata.resetPasswordDescription": "Set a new password for your Infinytree account.",
   "metadata.customerServiceTitle": "Customer Service | Infinytree",
   "metadata.customerServiceDescription": "Find answers about shipping, returns, product care, and more.",
-
   "common.loading": "Loading...",
   "common.error": "Something went wrong.",
   "common.retry": "Try again",
@@ -440,17 +420,14 @@
   "common.select": "Select...",
   "common.country": "Country",
   "common.logo": "Logo",
-
   "topbar.defaultLanguage": "Default",
   "topbar.selectCountry": "Select country",
-
   "withdrawal.noticeTitle": "Withdrawal Right Notice",
   "withdrawal.importantPrefix": "Important: ",
   "withdrawal.legalText": "This product is individually assembled and finalised after your order based on your selected configuration. As a non-prefabricated product produced according to your individual choices, the 14-day statutory right of withdrawal does not apply under {decree}.",
   "withdrawal.decree": "Section 29(1)(c) of Hungarian Government Decree 45/2014 (II. 26.)",
   "withdrawal.seeOurDetails": "See our {policyLink} for full details.",
   "withdrawal.policyLinkLabel": "Returns & Refunds Policy",
-
   "countryPopup.title": "Choose your shipping country",
   "countryPopup.explanation": "Prices, taxes, available products and shipping options depend on your selected country.",
   "countryPopup.continue": "Continue",
@@ -459,5 +436,18 @@
   "invoice.notFound": "Invoice not found",
   "invoice.downloadFailed": "Failed to download invoice",
   "invoice.serviceUnavailable": "Failed to reach invoice service",
-  "invoice.proformaDownloadFailed": "Failed to download pro forma invoice"
+  "invoice.proformaDownloadFailed": "Failed to download pro forma invoice",
+  "checkout.logIn": "Log in",
+  "checkout.salutation": "Salutation",
+  "checkout.youAreA": "You are a:",
+  "checkout.privateCustomer": "Private customer",
+  "checkout.businessCustomer": "Business customer",
+  "checkout.additionalAddressInfo": "Apartment, suite, building, etc.",
+  "checkout.phoneHelper": "We need a correct telephone number for the shipping company to coordinate the delivery date. This information is used exclusively for this purpose",
+  "checkout.account": "Account",
+  "checkout.accountDescription": "To order as a business customer, a customer account must be created. This customer account is tied to a country, which can no longer be changed afterwards.",
+  "checkout.createCustomerAccount": "Create customer account",
+  "checkout.newPassword": "New password",
+  "checkout.repeatNewPassword": "Repeat new password",
+  "checkout.passwordRule": "At least 8 characters, including digits and letters"
 }

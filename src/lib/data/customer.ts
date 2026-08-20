@@ -84,45 +84,71 @@ export const updateCustomer = async (body: HttpTypes.StoreUpdateCustomer) => {
   return updateRes
 }
 
-export async function signup(_currentState: unknown, formData: FormData) {
-  const password = formData.get("password") as string
-  const customerForm = {
-    email: formData.get("email") as string,
-    first_name: formData.get("first_name") as string,
-    last_name: formData.get("last_name") as string,
-    phone: formData.get("phone") as string,
+/**
+ * Register, sign in and attach the guest cart to a brand-new customer
+ * account.  Used both by the account register form and by the dynamic
+ * account creation at checkout (business customers and the optional
+ * "Create customer account" checkbox).
+ */
+export async function createCustomerAccount({
+  email,
+  password,
+  first_name,
+  last_name,
+  phone,
+  company_name,
+  metadata,
+}: {
+  email: string
+  password: string
+  first_name: string
+  last_name: string
+  phone: string
+  company_name?: string
+  metadata?: Record<string, unknown>
+}) {
+  const token = await sdk.auth.register("customer", "emailpass", {
+    email,
+    password,
+  })
+
+  await setAuthToken(token as string)
+
+  const headers = {
+    ...(await getAuthHeaders()),
   }
 
+  const { customer: createdCustomer } = await sdk.store.customer.create(
+    { email, first_name, last_name, phone, company_name, metadata },
+    {},
+    headers
+  )
+
+  const loginToken = await sdk.auth.login("customer", "emailpass", {
+    email,
+    password,
+  })
+
+  await setAuthToken(loginToken as string)
+
+  revalidateTag(CACHE_TAGS.products, "max")
+
+  await transferCart()
+
+  return createdCustomer
+}
+
+export async function signup(_currentState: unknown, formData: FormData) {
+  const password = formData.get("password") as string
+
   try {
-    const token = await sdk.auth.register("customer", "emailpass", {
-      email: customerForm.email,
-      password: password,
-    })
-
-    await setAuthToken(token as string)
-
-    const headers = {
-      ...(await getAuthHeaders()),
-    }
-
-    const { customer: createdCustomer } = await sdk.store.customer.create(
-      customerForm,
-      {},
-      headers
-    )
-
-    const loginToken = await sdk.auth.login("customer", "emailpass", {
-      email: customerForm.email,
+    return await createCustomerAccount({
+      email: formData.get("email") as string,
       password,
+      first_name: formData.get("first_name") as string,
+      last_name: formData.get("last_name") as string,
+      phone: formData.get("phone") as string,
     })
-
-    await setAuthToken(loginToken as string)
-
-    revalidateTag(CACHE_TAGS.products, "max")
-
-    await transferCart()
-
-    return createdCustomer
   } catch (error: any) {
     return await localizeError(error)
   }
@@ -131,6 +157,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 export async function login(_currentState: unknown, formData: FormData) {
   const email = formData.get("email") as string
   const password = formData.get("password") as string
+  const returnUrl = (formData.get("returnUrl") as string) || ""
 
   try {
     await sdk.auth
@@ -147,6 +174,12 @@ export async function login(_currentState: unknown, formData: FormData) {
     await transferCart()
   } catch (error: any) {
     return await localizeError(error)
+  }
+
+  // Return the user to where they came from (e.g. checkout) — only for
+  // relative, same-site paths to prevent open redirects.
+  if (returnUrl.startsWith("/") && !returnUrl.startsWith("//")) {
+    redirect(returnUrl)
   }
 }
 

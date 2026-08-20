@@ -7,7 +7,7 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import { useActionState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useSearchParams } from "next/navigation"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
@@ -17,7 +17,9 @@ const Login = ({ setCurrentView }: Props) => {
   const [message, formAction] = useActionState(login, null)
   const { t } = useTranslation()
   const params = useParams()
+  const searchParams = useSearchParams()
   const countryCode = (params.countryCode as string) || "en"
+  const returnUrl = searchParams.get("returnUrl") || ""
 
   return (
     <div
@@ -29,6 +31,7 @@ const Login = ({ setCurrentView }: Props) => {
         {t("account.signInPrompt")}
       </p>
       <form className="w-full" action={formAction}>
+        {returnUrl && <input type="hidden" name="returnUrl" value={returnUrl} />}
         <div className="flex flex-col w-full gap-y-2">
           <Input
             label={t("account.email")}

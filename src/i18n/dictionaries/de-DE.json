@@ -7,7 +7,6 @@
   "nav.cart": "Warenkorb",
   "nav.menu": "Menü",
   "nav.search": "Suche",
-
   "footer.shop": "Shop",
   "footer.company": "Unternehmen",
   "footer.stayUpdated": "Bleiben Sie auf dem Laufenden über {storeName}",
@@ -21,12 +20,10 @@
   "footer.instagram": "Instagram",
   "footer.tiktok": "TikTok",
   "footer.twitter": "Twitter",
-
   "hero.fallbackTitle": "Lebendige Kunst für zeitlose Interieurs",
   "hero.fallbackExcerpt": "Handgefertigte künstliche Bäume und botanische Meisterwerke — jedes ein Unikat. Kein Gießen, kein Sonnenlicht, keine Pflege. Einfach dauerhafte Schönheit für luxuriöse Räume.",
   "hero.scrollDown": "Nach unten scrollen",
   "hero.shopCollection": "Zur Kollektion",
-
   "features.oneOfAKind.title": "Handgefertigt",
   "features.oneOfAKind.description": "Jedes Stück wird von erfahrenen Kunsthandwerkern sorgfältig gefertigt — für außergewöhnliche Qualität und Charakter.",
   "features.maintenanceFree.title": "Pflegefrei",
@@ -35,13 +32,11 @@
   "features.authenticMaterials.description": "Echte Holzstämme, hochwertiges künstliches Laub und luxuriöse Designer-Töpfe für dauerhafte Eleganz.",
   "features.luxurySpaces.title": "Luxus-Räume",
   "features.luxurySpaces.description": "Entworfen für Hotels, Villen, Boutiquen, Büros und exklusive Interieurs weltweit.",
-
   "about.handmadeCollection": "Handgefertigte Kollektion",
   "about.thePromise": "Das Infinytree Versprechen",
   "about.locationNote": "Wir versenden handgefertigte Stücke nach Österreich, Deutschland und Ungarn — mit weiteren europäischen Zielen auf Anfrage.",
   "about.fallbackTitle": "Über uns",
   "about.fallbackDescription": "Handgefertigte künstliche botanische Meisterwerke für luxuriöse Interieurs.",
-
   "contact.fallbackTitle": "Kontakt",
   "contact.fallbackExcerpt": "Wir sind für Sie da. Kontaktieren Sie uns bei Fragen zu unseren botanischen Stücken, Sonderanfertigungen oder Inneneinrichtungskooperationen.",
   "contact.getInTouch": "Kontaktieren Sie uns",
@@ -68,9 +63,7 @@
   "contact.form.successText": "Vielen Dank für Ihre Nachricht. Wir haben Ihre Nachricht erhalten und werden uns in Kürze bei Ihnen melden.",
   "contact.form.sendAnother": "Weitere Nachricht senden",
   "contact.form.error": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
-
   "home.ourCollection": "Unsere {title}",
-
   "product.specifications": "Spezifikationen",
   "product.keyFeatures": "Hauptmerkmale",
   "product.maintenanceCare": "Pflege & Wartung",
@@ -119,12 +112,10 @@
   "product.notifyMe.rateLimited": "Sie haben bereits eine Benachrichtigung angefordert. Bitte überprüfen Sie Ihren Posteingang oder versuchen Sie es später erneut.",
   "product.netPrice": "(+MwSt.)",
   "product.selectOption": "{title} auswählen",
-
   "newsletter.placeholder": "ihre.email@beispiel.com",
   "newsletter.submit": "Anmelden",
   "newsletter.done": "Fertig!",
   "newsletter.success": "Vielen Dank für Ihre Anmeldung!",
-
   "store.sortBy": "Sortieren nach",
   "store.latestArrivals": "Neueste",
   "store.priceLowToHigh": "Preis: Niedrig → Hoch",
@@ -136,7 +127,6 @@
   "store.showing": "Zeige",
   "store.of": "von",
   "store.results": "Ergebnissen",
-
   "cart.empty": "Ihr Warenkorb ist leer.",
   "cart.continueShopping": "Weiter einkaufen",
   "cart.summary": "Warenkorb-Übersicht",
@@ -160,7 +150,6 @@
   "cart.inYourCart": "In Ihrem Warenkorb",
   "cart.originalPrice": "Ursprünglich: ",
   "cart.notFoundText": "Der Warenkorb, auf den Sie zugreifen wollten, existiert nicht. Bitte löschen Sie Ihre Cookies und versuchen Sie es erneut.",
-
   "checkout.shippingAddress": "Lieferadresse",
   "checkout.billingAddress": "Rechnungsadresse",
   "checkout.delivery": "Lieferung",
@@ -207,7 +196,6 @@
   "checkout.companyRequired": "Firmenname ist erforderlich",
   "checkout.phoneInvalid": "Ungültige Telefonnummer.",
   "checkout.phoneFormatHint": "Format:",
-
   "account.overview": "Übersicht",
   "account.profile": "Profil",
   "account.addresses": "Adressen",
@@ -298,7 +286,6 @@
   "account.orderIdRequired": "Bestell-ID ist erforderlich",
   "account.addressIdRequired": "Adress-ID ist erforderlich",
   "account.invalidCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
-
   "addresses.newAddress": "Neue Adresse",
   "addresses.addAddress": "Adresse hinzufügen",
   "addresses.editAddress": "Adresse bearbeiten",
@@ -310,7 +297,6 @@
   "addresses.postalCode": "Postleitzahl",
   "addresses.city": "Stadt",
   "addresses.provinceState": "Bundesland / Kanton",
-
   "order.details": "Bestelldetails",
   "order.number": "Bestellnummer",
   "order.date": "Datum",
@@ -350,7 +336,6 @@
   "order.timeline.estimatedDelivery": "Voraussichtliche Lieferung: 3–10 Werktage innerhalb Europas",
   "order.timeline.shipments": "Sendungen",
   "order.timeline.track": "Verfolgen",
-
   "transfer.requestHeading": "Übertragungsanfrage für Bestellung {id}",
   "transfer.requestDescription": "Sie haben eine Anfrage zur Übertragung des Eigentums an Ihrer Bestellung ({id}) erhalten. Wenn Sie dieser Anfrage zustimmen, können Sie die Übertragung durch Klicken auf die Schaltfläche unten genehmigen.",
   "transfer.acceptDescription": "Wenn Sie akzeptieren, übernimmt der neue Eigentümer alle Verantwortlichkeiten und Berechtigungen im Zusammenhang mit dieser Bestellung.",
@@ -366,7 +351,6 @@
   "transfer.transferredText": "Bestellung {id} wurde erfolgreich an den neuen Eigentümer übertragen.",
   "transfer.declinedTitle": "Bestellungsübertragung abgelehnt!",
   "transfer.declinedText": "Übertragung der Bestellung {id} wurde erfolgreich abgelehnt.",
-
   "misc.freeShipping": "Kostenloser Versand freigeschaltet!",
   "misc.unlockFreeShipping": "Kostenlosen Versand freischalten",
   "misc.onlyAway": "Nur noch {amount} entfernt",
@@ -376,20 +360,17 @@
   "misc.closeCart": "Warenkorb schließen",
   "misc.quantity": "Menge:",
   "misc.emptyCart": "Ihr Warenkorb ist leer.",
-
   "onboarding.demoProductCreated": "Ihr Demo-Produkt wurde erfolgreich erstellt! 🎉",
   "onboarding.continueSetupText": "Sie können nun mit der Einrichtung Ihres Shops im Admin fortfahren.",
   "onboarding.continueSetup": "Einrichtung im Admin fortsetzen",
   "onboarding.testOrderCreated": "Ihre Testbestellung wurde erfolgreich erstellt! 🎉",
   "onboarding.completeSetupText": "Sie können nun die Einrichtung Ihres Shops im Admin abschließen.",
   "onboarding.completeSetup": "Einrichtung im Admin abschließen",
-
   "policy.pageBeingUpdated": "Diese Seite wird derzeit aktualisiert. Bitte schauen Sie bald wieder vorbei.",
   "policy.forEnquiries": "Für Anfragen kontaktieren Sie uns unter:",
   "policy.forPrivacyRequests": "Für datenschutzbezogene Anfragen kontaktieren Sie uns unter:",
   "policy.forReturnRequests": "Für Rücksendeanfragen kontaktieren Sie uns unter:",
   "policy.forShippingQuestions": "Bei Fragen zum Versand kontaktieren Sie uns unter:",
-
   "metadata.homeDescription": "Handgefertigte künstliche botanische Meisterwerke für luxuriöse Interieurs.",
   "metadata.storeTitle": "Shop",
   "metadata.storeDescription": "Entdecken Sie alle unsere Produkte.",
@@ -420,7 +401,6 @@
   "metadata.resetPasswordDescription": "Legen Sie ein neues Passwort für Ihr Infinytree-Konto fest.",
   "metadata.customerServiceTitle": "Kundenservice | Infinytree",
   "metadata.customerServiceDescription": "Antworten zu Versand, Rücksendungen, Produktpflege und mehr.",
-
   "common.loading": "Laden...",
   "common.error": "Etwas ist schief gelaufen.",
   "common.retry": "Erneut versuchen",
@@ -440,17 +420,14 @@
   "common.select": "Auswählen...",
   "common.country": "Land",
   "common.logo": "Logo",
-
   "topbar.defaultLanguage": "Standard",
   "topbar.selectCountry": "Land auswählen",
-
   "withdrawal.noticeTitle": "Hinweis zum Widerrufsrecht",
   "withdrawal.importantPrefix": "Wichtig: ",
   "withdrawal.legalText": "Dieses Produkt wird nach Ihrer Bestellung auf Grundlage Ihrer gewählten Konfiguration individuell montiert und fertiggestellt. Da es sich um ein nicht vorgefertigtes, nach Ihren individuellen Vorgaben hergestelltes Produkt handelt, besteht das 14-tägige gesetzliche Widerrufsrecht gemäß {decree} nicht.",
   "withdrawal.decree": "§ 29 Abs. 1 Buchst. c der ungarischen Regierungsverordnung 45/2014 (II. 26.)",
   "withdrawal.seeOurDetails": "Weitere Einzelheiten finden Sie in unserer {policyLink}.",
   "withdrawal.policyLinkLabel": "Rückgabe- und Erstattungsrichtlinie",
-
   "countryPopup.title": "Wählen Sie Ihr Lieferland",
   "countryPopup.explanation": "Preise, Steuern, verfügbare Produkte und Versandoptionen richten sich nach dem von Ihnen gewählten Land.",
   "countryPopup.continue": "Weiter",
@@ -459,5 +436,18 @@
   "invoice.notFound": "Rechnung nicht gefunden",
   "invoice.downloadFailed": "Die Rechnung konnte nicht heruntergeladen werden",
   "invoice.serviceUnavailable": "Der Rechnungsdienst ist derzeit nicht erreichbar",
-  "invoice.proformaDownloadFailed": "Die Pro-forma-Rechnung konnte nicht heruntergeladen werden"
+  "invoice.proformaDownloadFailed": "Die Pro-forma-Rechnung konnte nicht heruntergeladen werden",
+  "checkout.logIn": "Anmelden",
+  "checkout.salutation": "Anrede",
+  "checkout.youAreA": "Sie sind:",
+  "checkout.privateCustomer": "Privatkunde",
+  "checkout.businessCustomer": "Geschäftskunde",
+  "checkout.additionalAddressInfo": "Adresszusatz (z. B.: Wohnung, Gebäude)",
+  "checkout.phoneHelper": "Wir benötigen eine korrekte Telefonnummer, damit das Versandunternehmen den Liefertermin mit Ihnen abstimmen kann. Diese Information wird ausschließlich zu diesem Zweck verwendet.",
+  "checkout.account": "Konto",
+  "checkout.accountDescription": "Um als Geschäftskunde zu bestellen, muss ein Kundenkonto erstellt werden. Dieses Kundenkonto ist an ein Land gebunden, das anschließend nicht mehr geändert werden kann.",
+  "checkout.createCustomerAccount": "Kundenkonto erstellen",
+  "checkout.newPassword": "Neues Passwort",
+  "checkout.repeatNewPassword": "Neues Passwort wiederholen",
+  "checkout.passwordRule": "Mindestens 8 Zeichen, inklusive Ziffern und Buchstaben"
 }

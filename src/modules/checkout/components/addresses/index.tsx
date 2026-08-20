@@ -85,7 +85,11 @@ const Addresses = ({
                   {t("checkout.billingAddress")}
                 </Heading>
 
-                <BillingAddress cart={cart} regions={regions} />
+                <BillingAddress
+                  cart={cart}
+                  customer={customer}
+                  regions={regions}
+                />
               </div>
             )}
             <SubmitButton className="mt-6" data-testid="submit-address-button">

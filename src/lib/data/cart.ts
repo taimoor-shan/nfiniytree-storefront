@@ -18,8 +18,13 @@ import { getLocale } from "@lib/data/locale-actions"
 import { listCartShippingMethods } from "./fulfillment"
 import { validateVatNumber } from "@lib/util/vat"
 import { validatePhoneNumber } from "@lib/util/phone"
-import { verifyVatWithTaxID } from "@lib/util/taxid"
+import { verifyVatWithTaxID, type TaxIDResult } from "@lib/util/taxid"
 import { translate } from "@/lib/i18n"
+import {
+  createCustomerAccount,
+  retrieveCustomer,
+  updateCustomer,
+} from "./customer"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -391,44 +396,79 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       throw new Error("No existing cart found when setting addresses")
     }
 
-    const vatNumber = String(formData.get("vat_number") ?? "").trim()
-    if (!vatNumber) {
-      throw new Error("VAT number is required")
-    }
+    const locale = await getLocale()
+
+    const customerType = String(formData.get("customer_type") ?? "b2c")
+    const isBusiness = customerType === "b2b"
+    const salutation = String(formData.get("salutation") ?? "").trim()
 
     const countryCode = String(
       formData.get("shipping_address.country_code") ?? ""
     ).toLowerCase()
-    const vatError = validateVatNumber(countryCode, vatNumber)
-    if (vatError) {
-      throw new Error(vatError)
-    }
 
-    // VIES verification via TaxID.dev (shared cache — typically a cache hit
-    // when the client-side blur already verified this VAT before submit)
-    const verification = await verifyVatWithTaxID(countryCode, vatNumber)
-    if (verification.status === "invalid") {
-      throw new Error(
-        `VAT number is not registered in VIES for ${countryCode.toUpperCase()}`
-      )
-    }
-    // service_unavailable: fail-open — allow checkout, no rejection
+    const company = String(
+      formData.get("shipping_address.company") ?? ""
+    ).trim()
+    const sameAsBilling = formData.get("same_as_billing")
 
-    const locale = await getLocale()
-
-    // Company is required
-    const company = String(formData.get("shipping_address.company") ?? "").trim()
-    if (!company) {
+    // Company is required for business customers only (Vitra-style toggle)
+    if (isBusiness && !company) {
       throw new Error(await translate("checkout.companyRequired", locale))
     }
 
-    const sameAsBilling = formData.get("same_as_billing")
     if (sameAsBilling !== "on") {
       const billingCompany = String(
         formData.get("billing_address.company") ?? ""
       ).trim()
-      if (!billingCompany) {
+      if (isBusiness && !billingCompany) {
         throw new Error(await translate("checkout.companyRequired", locale))
+      }
+    }
+
+    // VAT is collected and verified for business customers only
+    let vatNumber = ""
+    let verification: TaxIDResult | null = null
+    if (isBusiness) {
+      vatNumber = String(formData.get("vat_number") ?? "").trim()
+      if (!vatNumber) {
+        throw new Error(await translate("checkout.vatNumberRequired", locale))
+      }
+
+      const vatError = validateVatNumber(countryCode, vatNumber)
+      if (vatError) {
+        throw new Error(vatError)
+      }
+
+      // VIES verification via TaxID.dev (shared cache — typically a cache hit
+      // when the client-side blur already verified this VAT before submit)
+      verification = await verifyVatWithTaxID(countryCode, vatNumber)
+      if (verification.status === "invalid") {
+        throw new Error(
+          `VAT number is not registered in VIES for ${countryCode.toUpperCase()}`
+        )
+      }
+      // service_unavailable: fail-open — allow checkout, no rejection
+    }
+
+    // Dynamic account creation: business customers must create an account,
+    // private customers can opt in via "Create customer account".
+    const createAccount = formData.get("create_customer_account") === "on"
+    const wantsAccount = isBusiness || createAccount
+    const password = String(formData.get("password") ?? "")
+    const passwordRepeat = String(formData.get("password_repeat") ?? "")
+
+    if (wantsAccount) {
+      if (
+        !password ||
+        password.length < 8 ||
+        !/\d/.test(password) ||
+        !/[a-zA-Z]/.test(password)
+      ) {
+        throw new Error(await translate("checkout.passwordRule", locale))
+      }
+
+      if (password !== passwordRepeat) {
+        throw new Error(await translate("account.passwordsDoNotMatch", locale))
       }
     }
 
@@ -455,12 +495,37 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       }
     }
 
+    // Person-level attributes collected at checkout — stored on the customer
+    // (metadata) and mirrored on the shipping address so order emails keep
+    // reading them from `shipping_address.metadata` as before.
+    const customerMetadata = {
+      salutation: salutation || null,
+      customer_type: customerType,
+      ...(isBusiness ? { vat_number: vatNumber } : {}),
+    }
+
+    // Keep the signed-in customer's record in sync with the checkout form.
+    const customer = await retrieveCustomer()
+    if (customer) {
+      const existingMetadata = (customer.metadata || {}) as Record<
+        string,
+        any
+      >
+      await updateCustomer({
+        first_name: formData.get("shipping_address.first_name") as string,
+        last_name: formData.get("shipping_address.last_name") as string,
+        phone: formData.get("shipping_address.phone") as string,
+        company_name: company || customer.company_name,
+        metadata: { ...existingMetadata, ...customerMetadata },
+      })
+    }
+
     const data = {
       shipping_address: {
         first_name: formData.get("shipping_address.first_name"),
         last_name: formData.get("shipping_address.last_name"),
         address_1: formData.get("shipping_address.address_1"),
-        address_2: "",
+        address_2: formData.get("shipping_address.address_2") ?? "",
         company: formData.get("shipping_address.company"),
         postal_code: formData.get("shipping_address.postal_code"),
         city: formData.get("shipping_address.city"),
@@ -469,9 +534,13 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         phone: formData.get("shipping_address.phone"),
         metadata: {
           vat_number: vatNumber,
-          vat_company_name: verification.company_name || "",
-          vat_validation_request_id: verification.request_id || "",
-          vat_validation_timestamp: new Date().toISOString(),
+          vat_company_name: verification?.company_name || "",
+          vat_validation_request_id: verification?.request_id || "",
+          vat_validation_timestamp: isBusiness
+            ? new Date().toISOString()
+            : "",
+          salutation,
+          customer_type: customerType,
         },
       },
       email: formData.get("email"),
@@ -484,7 +553,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         first_name: formData.get("billing_address.first_name"),
         last_name: formData.get("billing_address.last_name"),
         address_1: formData.get("billing_address.address_1"),
-        address_2: "",
+        address_2: formData.get("billing_address.address_2") ?? "",
         company: formData.get("billing_address.company"),
         postal_code: formData.get("billing_address.postal_code"),
         city: formData.get("billing_address.city"),
@@ -493,6 +562,110 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         phone: formData.get("billing_address.phone"),
       }
     await updateCart(data)
+
+    // Create the account after the cart addresses are set — the guest cart
+    // is transferred to the new customer inside createCustomerAccount.
+    if (!customer && wantsAccount) {
+      await createCustomerAccount({
+        email: String(formData.get("email") ?? ""),
+        password,
+        first_name: String(
+          formData.get("shipping_address.first_name") ?? ""
+        ),
+        last_name: String(formData.get("shipping_address.last_name") ?? ""),
+        phone: String(formData.get("shipping_address.phone") ?? ""),
+        company_name: company || undefined,
+        metadata: customerMetadata,
+      })
+
+      // Complete the freshly created profile: persist the checkout addresses
+      // in the customer's address book. Identical shipping/billing become a
+      // single address flagged as default for both.
+      const headers = { ...(await getAuthHeaders()) }
+
+      const shippingAddressPayload = {
+        first_name: String(
+          formData.get("shipping_address.first_name") ?? ""
+        ),
+        last_name: String(formData.get("shipping_address.last_name") ?? ""),
+        company: company || undefined,
+        address_1: String(formData.get("shipping_address.address_1") ?? ""),
+        address_2: String(formData.get("shipping_address.address_2") ?? ""),
+        postal_code: String(
+          formData.get("shipping_address.postal_code") ?? ""
+        ),
+        city: String(formData.get("shipping_address.city") ?? ""),
+        province: String(formData.get("shipping_address.province") ?? ""),
+        country_code: String(
+          formData.get("shipping_address.country_code") ?? ""
+        ),
+        phone: String(formData.get("shipping_address.phone") ?? ""),
+        metadata: {
+          vat_number: vatNumber,
+          salutation,
+          customer_type: customerType,
+        },
+      }
+
+      if (sameAsBilling === "on") {
+        await sdk.store.customer.createAddress(
+          {
+            ...shippingAddressPayload,
+            is_default_shipping: true,
+            is_default_billing: true,
+          },
+          {},
+          headers
+        )
+      } else {
+        await sdk.store.customer.createAddress(
+          {
+            ...shippingAddressPayload,
+            is_default_shipping: true,
+            is_default_billing: false,
+          },
+          {},
+          headers
+        )
+        await sdk.store.customer.createAddress(
+          {
+            first_name: String(
+              formData.get("billing_address.first_name") ?? ""
+            ),
+            last_name: String(
+              formData.get("billing_address.last_name") ?? ""
+            ),
+            company:
+              String(formData.get("billing_address.company") ?? "").trim() ||
+              undefined,
+            address_1: String(
+              formData.get("billing_address.address_1") ?? ""
+            ),
+            address_2: String(
+              formData.get("billing_address.address_2") ?? ""
+            ),
+            postal_code: String(
+              formData.get("billing_address.postal_code") ?? ""
+            ),
+            city: String(formData.get("billing_address.city") ?? ""),
+            province: String(formData.get("billing_address.province") ?? ""),
+            country_code: String(
+              formData.get("billing_address.country_code") ?? ""
+            ),
+            phone: String(formData.get("billing_address.phone") ?? ""),
+            metadata: {
+              vat_number: vatNumber,
+              salutation,
+              customer_type: customerType,
+            },
+            is_default_shipping: false,
+            is_default_billing: true,
+          },
+          {},
+          headers
+        )
+      }
+    }
   } catch (e: any) {
     return e.message
   }
