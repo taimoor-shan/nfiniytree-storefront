@@ -2,6 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
+import { translate } from "@lib/i18n/dictionaries"
 
 const SLUG = "customer-service"
 
@@ -10,11 +11,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const page = await retrievePageBySlug(SLUG, locale)
 
   return {
-    title: page?.seo_title || page?.title || "Customer Service | Infinytree",
+    title:
+      page?.seo_title ||
+      page?.title ||
+      (await translate("metadata.customerServiceTitle", locale)),
     description:
       page?.seo_description ||
       page?.excerpt ||
-      "Find answers about shipping, returns, product care, and more.",
+      (await translate("metadata.customerServiceDescription", locale)),
   }
 }
 

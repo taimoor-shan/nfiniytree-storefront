@@ -1,4 +1,6 @@
 import { getAuthHeaders } from "@lib/data/cookies"
+import { getLocale } from "@lib/data/locale-actions"
+import { translate } from "@lib/i18n/dictionaries"
 
 export async function GET(
   request: Request,
@@ -20,7 +22,11 @@ export async function GET(
   })
 
   if (!response.ok) {
-    return new Response("Failed to download pro forma invoice", { status: response.status })
+    const locale = await getLocale()
+    return new Response(
+      await translate("invoice.proformaDownloadFailed", locale),
+      { status: response.status }
+    )
   }
 
   const pdfBuffer = await response.arrayBuffer()

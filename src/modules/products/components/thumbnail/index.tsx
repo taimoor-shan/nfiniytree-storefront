@@ -1,9 +1,12 @@
+"use client"
+
 import { Container, clx } from "@medusajs/ui"
 import Image from "next/image"
 import React from "react"
 
 import PlaceholderImage from "@modules/common/icons/placeholder-image"
 import { normalizeImageUrl } from "@lib/util/image-url"
+import { useTranslation } from "@lib/i18n/client"
 
 type ThumbnailSize = "small" | "medium" | "large" | "full" | "square"
 
@@ -92,10 +95,12 @@ const ImageOrPlaceholder = ({
   eager,
   sizes,
 }: Pick<ThumbnailProps, "size" | "eager" | "sizes"> & { image?: string }) => {
+  const { t } = useTranslation()
+
   return image ? (
     <Image
       src={normalizeImageUrl(image)}
-      alt="Thumbnail"
+      alt={t("product.productImage")}
       className="absolute inset-0 object-cover object-center"
       draggable={false}
       sizes={sizes ?? DEFAULT_SIZES[size]}

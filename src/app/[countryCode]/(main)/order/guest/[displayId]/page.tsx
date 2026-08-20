@@ -8,15 +8,20 @@ import { HttpTypes } from "@medusajs/types"
 import OrderDetailsTemplate from "@modules/order/templates/order-details-template"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { translate } from "@lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
 type Props = {
   params: Promise<{ countryCode: string; displayId: string }>
   searchParams: Promise<{ token?: string }>
 }
 
-export const metadata: Metadata = {
-  title: "Order Details",
-  description: "View your order details",
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return {
+    title: await translate("metadata.orderDetailsTitle", locale),
+    description: await translate("metadata.viewOrderDetailsDescription", locale),
+  }
 }
 
 async function fetchGuestOrder(displayId: string, token: string) {

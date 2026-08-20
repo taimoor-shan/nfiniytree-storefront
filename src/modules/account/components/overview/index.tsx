@@ -20,6 +20,8 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
   const tOrderNumber = await translate("account.orderNumber", locale)
   const tTotalAmount = await translate("account.totalAmount", locale)
   const tGoToOrder = await translate("account.goToOrder", locale)
+  const tCompleted = await translate("account.completed", locale)
+  const tSaved = await translate("account.saved", locale)
 
   return (
     <div data-testid="overview-page-wrapper">
@@ -55,7 +57,7 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
                     {getProfileCompletion(customer)}%
                   </span>
                   <span className="uppercase text-base-regular text-body">
-                    Completed
+                    {tCompleted}
                   </span>
                 </div>
               </div>
@@ -71,7 +73,7 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
                     {customer?.addresses?.length || 0}
                   </span>
                   <span className="uppercase text-base-regular text-body">
-                    Saved
+                    {tSaved}
                   </span>
                 </div>
               </div>

@@ -47,7 +47,7 @@ export default async function ProductPreview({
           eager={eager}
         />
         {product.categories && product.categories.length > 0 && (
-          <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-surface-card/90 text-body backdrop-blur-sm border border-hairline">
+          <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-primary text-white uppercase tracking-wider border border-primary">
             {product.categories[0].name}
           </span>
         )}

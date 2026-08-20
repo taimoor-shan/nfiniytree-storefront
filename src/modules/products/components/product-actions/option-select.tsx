@@ -44,11 +44,9 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               className={clx(
                 "h-9 py-2 px-6 text-xs",
                 {
-                  "btn-primary": value.value === current && !isUnavailable,
+                  "btn-primary border border-primary hover:!bg-primary": value.value === current && !isUnavailable,
                   "btn-primary-outlined": value.value !== current && !isUnavailable,
                   "btn-secondary": isUnavailable,
-                  "hover:shadow-elevation-card-rest transition-shadow duration-150 ease-in-out":
-                    value.value !== current && !isUnavailable,
                 }
               )}
               disabled={disabled}

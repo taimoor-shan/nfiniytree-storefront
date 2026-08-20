@@ -51,7 +51,7 @@ export default async function Nav() {
                   Eager because it is above the fold on every route. */}
               <Image
                 src="/logo-full.png"
-                alt="Logo"
+                alt={dict["common.logo"]}
                 width={256}
                 height={49}
                 loading="eager"

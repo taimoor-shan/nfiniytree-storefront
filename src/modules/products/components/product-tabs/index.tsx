@@ -5,7 +5,12 @@ import { HttpTypes } from "@medusajs/types"
 import { ArrowLeftRight, ArrowUpDown, Move3d } from "lucide-react"
 import { isSimpleProduct } from "@lib/util/product"
 import { useTranslation } from "@lib/i18n/client"
-import { getLocalizedMetadata } from "@lib/i18n/metadata"
+import {
+  getLocalizedMetadata,
+  resolvePotLabel,
+  resolvePotSpecs,
+  resolveSpecField,
+} from "@lib/i18n/metadata"
 
 type ProductTabsProps = {
   product: HttpTypes.StoreProduct
@@ -176,70 +181,49 @@ type SpecificationsTabProps = {
 const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProps) => {
   const { t } = useTranslation()
 
-  // Dimension icons keyed by translation key
+  // Dimension icons keyed by label (labels are managed by the backend)
   const dimensionIcons: Record<string, React.ReactNode> = {
-    [t("product.height")]: <ArrowUpDown className="h-8 w-8" />,
-    [t("product.width")]: <ArrowLeftRight className="h-8 w-8" />,
-    [t("product.depth")]: <Move3d className="h-8 w-8" />,
+    Height: <ArrowUpDown className="h-8 w-8" />,
+    Width: <ArrowLeftRight className="h-8 w-8" />,
+    Depth: <Move3d className="h-8 w-8" />,
   }
 
-  // Build tree specs from native Medusa fields
+  // Build tree specs from native Medusa fields — labels are storefront keys
+  // translated at render, units live in the values.
   const treeSpecs: Record<string, string> = {}
 
   if (product.height) {
-    treeSpecs[t("product.height")] = `${product.height}`
+    treeSpecs["Height"] = `${product.height} cm`
   }
   if (product.width) {
-    treeSpecs[t("product.width")] = `${product.width}`
+    treeSpecs["Width"] = `${product.width} cm`
   }
   if (product.length) {
-    treeSpecs[t("product.depth")] = `${product.length}`
+    treeSpecs["Depth"] = `${product.length} cm`
   }
 
   if (product.weight) {
-    treeSpecs[t("product.weight")] = `${product.weight} g`
+    treeSpecs["Weight"] = `${product.weight} g`
   }
   if (product.material) {
-    treeSpecs[t("product.material")] = product.material
+    treeSpecs["Material"] = product.material
   }
   if (product.origin_country) {
-    treeSpecs[t("product.countryOfOrigin")] = product.origin_country
+    treeSpecs["Country of origin"] = product.origin_country
   }
 
-  // Build pot specs from metadata.pot
-  const potSpecs: Record<string, string> = {}
-  if (pot) {
-    const unit = pot.unit || "cm"
-    
-    // Combine width and depth into Size if both exist
-    if (pot.width && pot.depth) {
-      potSpecs["Size"] = `${pot.width} ${unit} × ${pot.depth} ${unit}`
-    } else {
-      if (pot.width) potSpecs["Width"] = `${pot.width} ${unit}`
-      if (pot.depth) potSpecs["Depth"] = `${pot.depth} ${unit}`
-    }
-
-    if (pot.height) {
-      potSpecs["Height"] = `${pot.height} ${unit}`
-    }
-    if (pot.material) {
-      potSpecs["Material"] = pot.material
-    }
-    if (pot.finish) {
-      potSpecs["Finish"] = pot.finish
-    }
-    if (pot.care) {
-      potSpecs["Care"] = pot.care
-    }
-  }
+  // Build pot specs from metadata.pot — backend-provided labels are used
+  // as-is; fields without a label fall back to the translated field key.
+  const potSpecs = resolvePotSpecs(pot, (label) => resolvePotLabel(t, label))
+  const potSize = resolveSpecField(pot?.size, "Size")?.value
 
   const hasTreeSpecs = Object.keys(treeSpecs).length > 0
-  const hasPotSpecs = Object.keys(potSpecs).length > 0
+  const hasPotSpecs = potSpecs.length > 0
 
   return (
     <div className="text-base py-4">
       {/* Tree specifications */}
-      {hasTreeSpecs && (
+      { hasTreeSpecs && (
         <div>
           {hasPotSpecs && (
             <span className="font-semibold text-primary text-base mb-4 block">
@@ -249,14 +233,13 @@ const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProp
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4 text-sm">
             {Object.entries(treeSpecs).map(([key, value], i) => (
               <div key={i} className="flex gap-x-2 items-center">
-                 {dimensionIcons[key]}
-                  <div key={i} className="flex flex-col gap-y-1">
-                <span className="font-semibold text-ink flex items-center gap-x-1.5">
-                 
-                  {key}
-                </span>
-                
-                <p className="text-body">{value} cm</p>
+                {dimensionIcons[key]}
+                <div key={i} className="flex flex-col gap-y-1">
+                  <span className="font-semibold text-ink flex items-center gap-x-1.5">
+                    {resolvePotLabel(t, key)}
+                  </span>
+
+                  <p className="text-body">{value}</p>
                 </div>
               </div>
             ))}
@@ -268,13 +251,13 @@ const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProp
       {hasPotSpecs && (
         <div className={hasTreeSpecs ? "mt-8 pt-8 border-t border-hairline" : ""}>
           <span className="font-semibold text-primary text-base mb-4 block">
-            {pot.size ? `${t("product.potOnly")} (${pot.size})` : t("product.potOnly")}
+            {potSize ? `${t("product.potOnly")} (${potSize})` : t("product.potOnly")}
           </span>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4 text-sm">
-            {Object.entries(potSpecs).map(([key, value], i) => (
+            {potSpecs.map((spec, i) => (
               <div key={i} className="flex flex-col gap-y-1">
-                <span className="font-semibold text-ink">{key}</span>
-                <p className="text-body text-base">{value}</p>
+                <span className="font-semibold text-ink">{spec.label}</span>
+                <p className="text-body text-base">{spec.value}</p>
               </div>
             ))}
           </div>

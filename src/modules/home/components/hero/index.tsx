@@ -74,7 +74,7 @@ const Hero = ({ page }: HeroProps) => {
         </span>
         <LocalizedClientLink href="/store" passHref>
           <Button size="large" className="mt-2">
-            Shop the collection
+            {t("hero.shopCollection")}
           </Button>
         </LocalizedClientLink>
       </div>

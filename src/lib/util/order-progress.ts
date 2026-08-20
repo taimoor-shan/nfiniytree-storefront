@@ -1,24 +1,26 @@
 import { HttpTypes } from "@medusajs/types"
 
 /**
- * Customer-facing status labels — never expose raw Medusa statuses.
+ * Customer-facing status labels as i18n keys — never expose raw Medusa
+ * statuses.  Consumers render them through their translation function.
  */
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Order Confirmed",
-  fulfilled: "In Progress",
-  shipped: "Shipped",
-  delivered: "Delivered",
-  not_fulfilled: "Order Confirmed",
-  partially_fulfilled: "In Progress",
-  partially_shipped: "Shipped",
-  partially_delivered: "Delivered",
-  canceled: "Canceled",
-  requires_action: "Action Required",
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  pending: "order.progress.confirmed",
+  fulfilled: "order.progress.inProgress",
+  shipped: "order.progress.shipped",
+  delivered: "order.progress.delivered",
+  not_fulfilled: "order.progress.confirmed",
+  partially_fulfilled: "order.progress.inProgress",
+  partially_shipped: "order.progress.shipped",
+  partially_delivered: "order.progress.delivered",
+  canceled: "order.progress.canceled",
+  requires_action: "order.progress.actionRequired",
 }
 
 export interface ProgressStep {
   id: "confirmed" | "in_progress" | "shipped" | "delivered"
-  label: string
+  /** i18n key for the step label (e.g. "order.progress.shipped"). */
+  labelKey: string
   completed: boolean
   date?: string | null
   tracking?: {
@@ -29,6 +31,7 @@ export interface ProgressStep {
 
 export interface FulfillmentInfo {
   id: string
+  /** i18n key for the fulfillment status label. */
   status: string
   shipped_at?: string | null
   delivered_at?: string | null
@@ -43,7 +46,7 @@ export interface OrderProgress {
 }
 
 function mapStatus(raw: string): string {
-  return STATUS_LABELS[raw] || raw
+  return STATUS_LABEL_KEYS[raw] || raw
 }
 
 /**
@@ -90,19 +93,19 @@ export function getOrderProgress(order: HttpTypes.StoreOrder): OrderProgress {
   const steps: ProgressStep[] = [
     {
       id: "confirmed",
-      label: "Order Confirmed",
+      labelKey: "order.progress.confirmed",
       completed: true,
       date: order.created_at,
     },
     {
       id: "in_progress",
-      label: "In Progress",
+      labelKey: "order.progress.inProgress",
       completed: currentStep !== "confirmed",
       date: rawFulfillments[0]?.packed_at || rawFulfillments[0]?.created_at,
     },
     {
       id: "shipped",
-      label: "Shipped",
+      labelKey: "order.progress.shipped",
       completed: currentStep === "shipped" || currentStep === "delivered",
       date: rawFulfillments.find((f: any) => f.shipped_at)?.shipped_at,
       tracking: fulfillments.find((f) => f.tracking_number)
@@ -114,7 +117,7 @@ export function getOrderProgress(order: HttpTypes.StoreOrder): OrderProgress {
     },
     {
       id: "delivered",
-      label: "Delivered",
+      labelKey: "order.progress.delivered",
       completed: currentStep === "delivered",
       date: rawFulfillments.find((f: any) => f.delivered_at)?.delivered_at,
     },

@@ -1,21 +1,31 @@
 import { Metadata } from "next"
 
 import InteractiveLink from "@modules/common/components/interactive-link"
+import { translate } from "@lib/i18n"
+import { getLocale } from "@lib/data/locale-actions"
 
-export const metadata: Metadata = {
-  title: "404",
-  description: "Something went wrong",
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale()
+  return {
+    title: "404",
+    description: await translate("common.somethingWentWrong", locale),
+  }
 }
 
-export default function NotFound() {
+export default async function NotFound() {
+  const locale = await getLocale()
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-64px)]">
-      <h1 className="text-2xl-semi text-ink">Page not found</h1>
+      <h1 className="text-2xl-semi text-ink">
+        {await translate("common.pageNotFound", locale)}
+      </h1>
       <p className="text-small-regular text-ink">
-        The cart you tried to access does not exist. Clear your cookies and try
-        again.
+        {await translate("cart.notFoundText", locale)}
       </p>
-      <InteractiveLink href="/">Go to frontpage</InteractiveLink>
+      <InteractiveLink href="/">
+        {await translate("common.goToFrontpage", locale)}
+      </InteractiveLink>
     </div>
   )
 }

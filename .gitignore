@@ -10,8 +10,9 @@
 /.pnp
 .pnp.js
 
-.agents
-.claude
+.agents/
+.claude/
+/skills-lock.json
 
 /graphify-out
 

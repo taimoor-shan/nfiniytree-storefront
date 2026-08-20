@@ -1,6 +1,9 @@
+"use client"
+
 import { convertToLocale } from "@lib/util/money"
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
+import { useTranslation } from "@lib/i18n/client"
 
 type LineItemUnitPriceProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
@@ -13,6 +16,7 @@ const LineItemUnitPrice = ({
   style = "default",
   currencyCode,
 }: LineItemUnitPriceProps) => {
+  const { t } = useTranslation()
   const { subtotal, original_subtotal } = item
   const hasReducedPrice = subtotal < (original_subtotal ?? subtotal)
 
@@ -26,7 +30,7 @@ const LineItemUnitPrice = ({
         <>
           <p>
             {style === "default" && (
-              <span className="text-muted">Original: </span>
+              <span className="text-muted">{t("cart.originalPrice")}</span>
             )}
             <span
               className="line-through"

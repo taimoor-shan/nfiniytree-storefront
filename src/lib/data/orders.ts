@@ -4,6 +4,8 @@ import { sdk } from "@lib/config"
 import medusaError from "@lib/util/medusa-error"
 import { getAuthHeaders } from "./cookies"
 import { HttpTypes } from "@medusajs/types"
+import { getLocale } from "./locale-actions"
+import { translate } from "@lib/i18n/dictionaries"
 
 export const retrieveOrder = async (id: string) => {
   const headers = {
@@ -65,7 +67,11 @@ export const createTransferRequest = async (
   const id = formData.get("order_id") as string
 
   if (!id) {
-    return { success: false, error: "Order ID is required", order: null }
+    return {
+      success: false,
+      error: await translate("account.orderIdRequired", await getLocale()),
+      order: null,
+    }
   }
 
   const headers = await getAuthHeaders()
@@ -80,7 +86,11 @@ export const createTransferRequest = async (
       headers
     )
     .then(({ order }) => ({ success: true, error: null, order }))
-    .catch((err) => ({ success: false, error: err.message, order: null }))
+    .catch(async () => ({
+      success: false,
+      error: await translate("account.errorOccurred", await getLocale()),
+      order: null,
+    }))
 }
 
 export const acceptTransferRequest = async (id: string, token: string) => {
@@ -89,7 +99,11 @@ export const acceptTransferRequest = async (id: string, token: string) => {
   return await sdk.store.order
     .acceptTransfer(id, { token }, {}, headers)
     .then(({ order }) => ({ success: true, error: null, order }))
-    .catch((err) => ({ success: false, error: err.message, order: null }))
+    .catch(async () => ({
+      success: false,
+      error: await translate("account.errorOccurred", await getLocale()),
+      order: null,
+    }))
 }
 
 export const declineTransferRequest = async (id: string, token: string) => {
@@ -98,5 +112,9 @@ export const declineTransferRequest = async (id: string, token: string) => {
   return await sdk.store.order
     .declineTransfer(id, { token }, {}, headers)
     .then(({ order }) => ({ success: true, error: null, order }))
-    .catch((err) => ({ success: false, error: err.message, order: null }))
+    .catch(async () => ({
+      success: false,
+      error: await translate("account.errorOccurred", await getLocale()),
+      order: null,
+    }))
 }

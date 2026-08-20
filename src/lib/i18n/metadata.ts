@@ -217,3 +217,132 @@ export function getLocalizedField(
   const resolved = getLocalizedMetadata(metadata, locale)
   return resolved[field]
 }
+
+// ---------------------------------------------------------------------------
+// Pot specification resolution
+// ---------------------------------------------------------------------------
+
+export type LocalizedSpec = { label: string; value: string }
+
+/**
+ * Map spec fallback labels (the field key, used when the backend provides
+ * no localized label) to translation keys.  Covers both pot specs and the
+ * native tree spec fields.
+ */
+export const POT_LABEL_KEYS: Record<string, string> = {
+  Size: "product.size",
+  Width: "product.width",
+  Depth: "product.depth",
+  Height: "product.height",
+  Weight: "product.weight",
+  Material: "product.material",
+  "Country of origin": "product.countryOfOrigin",
+  Finish: "product.finish",
+  Care: "product.care",
+}
+
+/**
+ * Localize a spec label: known English field keys resolve to their
+ * translation key; anything else (e.g. a backend-provided, already
+ * localized label) passes through unchanged.
+ */
+export function resolvePotLabel(
+  t: (key: string, fallback?: string) => string,
+  label: string
+): string {
+  return t(POT_LABEL_KEYS[label] || label, label)
+}
+
+/**
+ * Resolve a single pot spec field to { label, value } scalars.
+ *
+ * Structured shape (backend-managed labels, already locale-resolved by
+ * `getLocalizedMetadata`):
+ *
+ *   { "value": 40, "label": "Breite" }
+ *
+ * Legacy flat shape — the label falls back to the field key ("Width"),
+ * localized via `localizeFallback` when one is provided:
+ *
+ *   40
+ *
+ * @returns null when the field is absent or has no value
+ */
+export function resolveSpecField(
+  field: unknown,
+  fallbackLabel: string,
+  localizeFallback?: (label: string) => string
+): LocalizedSpec | null {
+  if (field === null || field === undefined || field === "") return null
+
+  if (typeof field === "object" && !Array.isArray(field)) {
+    const { value, label } = field as Record<string, any>
+    if (value === null || value === undefined || value === "") return null
+    const hasLabel = typeof label === "string" && label.trim() !== ""
+    return {
+      label: hasLabel
+        ? label
+        : localizeFallback
+          ? localizeFallback(fallbackLabel)
+          : fallbackLabel,
+      value: String(value),
+    }
+  }
+
+  return {
+    label: localizeFallback
+      ? localizeFallback(fallbackLabel)
+      : fallbackLabel,
+    value: String(field),
+  }
+}
+
+/** Pot fields whose rendered value takes a unit suffix. */
+const POT_DIMENSION_KEYS = new Set(["width", "depth", "height"])
+
+/**
+ * Convert pot metadata into an ordered list of localized spec items.
+ *
+ * Supports both the structured shape ({ value, label }) and the legacy
+ * flat shape (plain scalars).  Dimension values get the pot's unit
+ * appended ("40 cm"); the unit itself defaults to "cm" when absent.
+ *
+ * `localizeFallback` (optional) translates the fallback label (the field
+ * key) when the backend provides no label; backend-provided labels always
+ * pass through untouched.
+ *
+ * The `size` field is intentionally excluded — components render it in
+ * the "Pot only" heading instead.
+ */
+export function resolvePotSpecs(
+  pot: Record<string, any> | null | undefined,
+  localizeFallback?: (label: string) => string
+): LocalizedSpec[] {
+  if (!pot || typeof pot !== "object" || Array.isArray(pot)) return []
+
+  const unit =
+    typeof pot.unit === "string" && pot.unit.trim() !== ""
+      ? pot.unit.trim()
+      : "cm"
+
+  const specs: LocalizedSpec[] = []
+  // Order matches the tree specs: Height, Width, Depth, …
+  for (const [key, fallbackLabel] of [
+    ["height", "Height"],
+    ["width", "Width"],
+    ["depth", "Depth"],
+    ["material", "Material"],
+    ["finish", "Finish"],
+    ["care", "Care"],
+  ] as const) {
+    const resolved = resolveSpecField(pot[key], fallbackLabel, localizeFallback)
+    if (!resolved) continue
+    specs.push({
+      label: resolved.label,
+      value: POT_DIMENSION_KEYS.has(key)
+        ? `${resolved.value} ${unit}`
+        : resolved.value,
+    })
+  }
+  return specs
+}

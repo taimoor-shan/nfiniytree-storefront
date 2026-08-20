@@ -1,7 +1,7 @@
 import { Metadata } from "next"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
-import { getDictionary } from "@lib/i18n/dictionaries"
+import { getDictionary, translate } from "@lib/i18n/dictionaries"
 import Hero from "@modules/home/components/hero"
 import ContactForm from "@modules/contact/components/contact-form"
 
@@ -11,9 +11,14 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = (await getLocale()) || "en"
   const page = await retrievePageBySlug(SLUG, locale)
   return {
-    title: page?.seo_title || page?.title || `Contact Us | Infinytree`,
+    title:
+      page?.seo_title ||
+      page?.title ||
+      (await translate("metadata.contactTitle", locale)),
     description:
-      page?.seo_description || page?.excerpt || "Get in touch with Infinytree.",
+      page?.seo_description ||
+      page?.excerpt ||
+      (await translate("metadata.contactDescription", locale)),
   }
 }
 

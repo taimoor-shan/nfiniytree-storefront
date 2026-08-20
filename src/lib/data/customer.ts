@@ -13,6 +13,31 @@ import {
   setAuthToken,
 } from "./cookies"
 import { CACHE_TAGS } from "./cache"
+import { getLocale } from "./locale-actions"
+import { translate } from "@lib/i18n/dictionaries"
+
+/**
+ * Known backend error messages → translation keys.  Raw Medusa/SDK error
+ * text is English and technical; these are the messages users can actually
+ * encounter, localized before they reach the UI.
+ */
+const KNOWN_ERROR_KEYS: Record<string, string> = {
+  "invalid email or password": "account.invalidCredentials",
+}
+
+/**
+ * Localize a caught error for the UI.  Known messages are mapped to their
+ * translation keys; everything else falls back to a generic message so raw
+ * SDK errors never surface untranslated.
+ */
+const localizeError = async (error: any): Promise<string> => {
+  const locale = await getLocale()
+  const raw = String(error?.message ?? error ?? "").toLowerCase()
+  const entry = Object.entries(KNOWN_ERROR_KEYS).find(([known]) =>
+    raw.includes(known)
+  )
+  return translate(entry?.[1] || "account.errorOccurred", locale)
+}
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
@@ -99,7 +124,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
     return createdCustomer
   } catch (error: any) {
-    return error.toString()
+    return await localizeError(error)
   }
 }
 
@@ -115,13 +140,13 @@ export async function login(_currentState: unknown, formData: FormData) {
         revalidateTag(CACHE_TAGS.products, "max")
       })
   } catch (error: any) {
-    return error.toString()
+    return await localizeError(error)
   }
 
   try {
     await transferCart()
   } catch (error: any) {
-    return error.toString()
+    return await localizeError(error)
   }
 }
 
@@ -185,8 +210,8 @@ export const addCustomerAddress = async (
       revalidateTag(CACHE_TAGS.products, "max")
       return { success: true, error: null }
     })
-    .catch((err) => {
-      return { success: false, error: err.toString() }
+    .catch(async (err) => {
+      return { success: false, error: await localizeError(err) }
     })
 }
 
@@ -203,8 +228,8 @@ export const deleteCustomerAddress = async (
       revalidateTag(CACHE_TAGS.products, "max")
       return { success: true, error: null }
     })
-    .catch((err) => {
-      return { success: false, error: err.toString() }
+    .catch(async (err) => {
+      return { success: false, error: await localizeError(err) }
     })
 }
 
@@ -215,7 +240,7 @@ export async function requestPasswordReset(
   const email = formData.get("email") as string
 
   if (!email) {
-    return "Email is required"
+    return await translate("account.emailRequired", await getLocale())
   }
 
   try {
@@ -224,7 +249,7 @@ export async function requestPasswordReset(
     })
     return null
   } catch (error: any) {
-    return error.toString()
+    return await localizeError(error)
   }
 }
 
@@ -242,7 +267,7 @@ export async function resetPassword(
     )
     return { success: true, error: null }
   } catch (error: any) {
-    return { success: false, error: error.toString() }
+    return { success: false, error: await localizeError(error) }
   }
 }
 
@@ -262,7 +287,10 @@ export async function updateCustomerPassword(
 
     const token = typeof loginResult === "string" ? loginResult : null
     if (!token) {
-      return { success: false, error: "Current password is incorrect" }
+      return {
+        success: false,
+        error: await translate("account.currentPasswordIncorrect", await getLocale()),
+      }
     }
 
     await sdk.auth.updateProvider(
@@ -274,7 +302,7 @@ export async function updateCustomerPassword(
 
     return { success: true, error: null }
   } catch (error: any) {
-    return { success: false, error: error.toString() }
+    return { success: false, error: await localizeError(error) }
   }
 }
 
@@ -286,7 +314,10 @@ export const updateCustomerAddress = async (
     (currentState.addressId as string) || (formData.get("addressId") as string)
 
   if (!addressId) {
-    return { success: false, error: "Address ID is required" }
+    return {
+      success: false,
+      error: await translate("account.addressIdRequired", await getLocale()),
+    }
   }
 
   const address = {
@@ -317,7 +348,7 @@ export const updateCustomerAddress = async (
       revalidateTag(CACHE_TAGS.products, "max")
       return { success: true, error: null }
     })
-    .catch((err) => {
-      return { success: false, error: err.toString() }
+    .catch(async (err) => {
+      return { success: false, error: await localizeError(err) }
     })
 }

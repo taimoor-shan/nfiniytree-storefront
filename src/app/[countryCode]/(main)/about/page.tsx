@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
-import { getDictionary } from "@lib/i18n/dictionaries"
+import { getDictionary, translate } from "@lib/i18n/dictionaries"
 import { Sparkles, Droplets, TreePine, Building2 } from "lucide-react"
 
 type AboutPageProps = {
@@ -15,17 +15,18 @@ export async function generateMetadata(props: AboutPageProps): Promise<Metadata>
 
   if (!page) {
     return {
-      title: "About | Infinytree",
-      description: "Handmade artificial botanical masterpieces for luxury interiors.",
+      title: await translate("metadata.aboutTitle", locale),
+      description: await translate("metadata.aboutDescription", locale),
     }
   }
 
   return {
-    title: page.seo_title || page.title || "About",
+    title:
+      page.seo_title || page.title || (await translate("metadata.aboutTitle", locale)),
     description:
       page.seo_description ||
       page.excerpt ||
-      "Handmade artificial botanical masterpieces for luxury interiors.",
+      (await translate("metadata.aboutDescription", locale)),
   }
 }
 

@@ -9,6 +9,7 @@ import SimpleDropdown from "./simple-dropdown"
 import { Phone, Mail } from "lucide-react"
 import { Locale } from "@lib/data/locales"
 import { HttpTypes } from "@medusajs/types"
+import { useTranslation } from "@lib/i18n/client"
 
 type TopBarProps = {
   locales: Locale[] | null
@@ -110,6 +111,7 @@ export default function TopBar({
   const pathname = usePathname()
   const { countryCode } = useParams()
   const [isPending, startTransition] = useTransition()
+  const { t } = useTranslation()
 
   /* -------------------------------------------------- */
   /* Language options                                    */
@@ -260,7 +262,7 @@ export default function TopBar({
                 <span className="flex items-center gap-x-1.5">
                   <CurrencyIcon />
                   <span className="leading-tight">
-                    {currentCountryLabel || "Select country"}
+                    {currentCountryLabel || t("topbar.selectCountry")}
                   </span>
                 </span>
               }

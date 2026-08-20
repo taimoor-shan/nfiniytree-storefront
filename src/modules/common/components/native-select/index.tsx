@@ -1,3 +1,5 @@
+"use client"
+
 import { ChevronUpDown } from "@medusajs/icons"
 import { clx } from "@medusajs/ui"
 import {
@@ -8,6 +10,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { useTranslation } from "@lib/i18n/client"
 
 export type NativeSelectProps = {
   placeholder?: string
@@ -17,9 +20,11 @@ export type NativeSelectProps = {
 
 const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
   (
-    { placeholder = "Select...", defaultValue, className, children, ...props },
+    { placeholder, defaultValue, className, children, ...props },
     ref
   ) => {
+    const { t } = useTranslation()
+    const resolvedPlaceholder = placeholder ?? t("common.select")
     const innerRef = useRef<HTMLSelectElement>(null)
     const [isPlaceholder, setIsPlaceholder] = useState(false)
 
@@ -56,7 +61,7 @@ const NativeSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
             className="appearance-none flex-1 bg-transparent border-none px-4 py-2.5 transition-colors duration-150 outline-none "
           >
             <option disabled value="">
-              {placeholder}
+              {resolvedPlaceholder}
             </option>
             {children}
           </select>

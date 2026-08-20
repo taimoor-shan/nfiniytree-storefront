@@ -9,6 +9,10 @@ const dictionaryModules: Record<string, () => Promise<{ default: Dictionary }>> 
   "de-AT": () => import("@/i18n/dictionaries/de-AT.json") as Promise<{ default: Dictionary }>,
   "de-DE": () => import("@/i18n/dictionaries/de-DE.json") as Promise<{ default: Dictionary }>,
   "hu-HU": () => import("@/i18n/dictionaries/hu-HU.json") as Promise<{ default: Dictionary }>,
+  // Bare language codes — mirrors the client-side `importDict` mapping so
+  // server and client resolve "de" / "hu" to the same dictionaries.
+  de: () => import("@/i18n/dictionaries/de-AT.json") as Promise<{ default: Dictionary }>,
+  hu: () => import("@/i18n/dictionaries/hu-HU.json") as Promise<{ default: Dictionary }>,
 }
 
 /** In-memory cache to avoid re-loading the same dictionary */

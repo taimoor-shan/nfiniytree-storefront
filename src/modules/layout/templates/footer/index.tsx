@@ -31,7 +31,7 @@ export default async function Footer() {
                 footer when it arrives. See nav for the 256x49 reasoning. */}
             <Image
               src="/logo-full.png"
-              alt="Logo"
+              alt={dict["common.logo"]}
               width={256}
               height={49}
               className="w-48 object-contain"
