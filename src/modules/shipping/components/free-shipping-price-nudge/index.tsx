@@ -1,6 +1,7 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
+import { getCartCountryCode } from "@lib/util/country-locale"
 import { CheckCircleSolid, XMark } from "@medusajs/icons"
 import {
   HttpTypes,
@@ -143,6 +144,7 @@ function FreeShippingInline({
   }
 }) {
   const { t } = useTranslation()
+  const cc = getCartCountryCode(cart)
   return (
     <div className="bg-surface-soft p-2 rounded-lg border">
       <div className="space-y-1.5">
@@ -168,6 +170,7 @@ function FreeShippingInline({
               {convertToLocale({
                 amount: price.target_remaining,
                 currency_code: cart.currency_code,
+                countryCode: cc,
               })}
             </span>
             {t("misc.onlyAway").split("{amount}")[1]}
@@ -199,6 +202,7 @@ function FreeShippingPopup({
 }) {
   const { t } = useTranslation()
   const [isClosed, setIsClosed] = useState(false)
+  const cc = getCartCountryCode(cart)
 
   return (
     <div
@@ -245,6 +249,7 @@ function FreeShippingPopup({
                   {convertToLocale({
                     amount: price.target_remaining,
                     currency_code: cart.currency_code,
+                    countryCode: cc,
                   })}
                 </span>
                 {t("misc.onlyAway").split("{amount}")[1]}

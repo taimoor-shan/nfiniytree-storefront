@@ -13,12 +13,15 @@ export default async function ProductPreview({
   isFeatured,
   region,
   eager,
+  countryCode,
 }: {
   product: HttpTypes.StoreProduct
   isFeatured?: boolean
   region: HttpTypes.StoreRegion
   /** Above the fold — load the thumbnail immediately instead of lazily. */
   eager?: boolean
+  /** URL country — determines price formatting locale. */
+  countryCode: string
 }) {
   // const pricedProduct = await listProducts({
   //   regionId: region.id,
@@ -31,6 +34,7 @@ export default async function ProductPreview({
 
   const { cheapestPrice } = getProductPrice({
     product,
+    countryCode,
   })
 
   const locale = await getLocale()

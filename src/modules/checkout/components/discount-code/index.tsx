@@ -5,6 +5,7 @@ import React from "react"
 
 import { applyPromotions } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
+import { getCartCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
 import Trash from "@modules/common/icons/trash"
 import { useTranslation } from "@/lib/i18n"
@@ -21,6 +22,9 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState("")
+  // Promotion keeps its own currency_code; the formatting locale follows
+  // the cart's commercial country.
+  const cc = getCartCountryCode(cart)
 
   const { promotions = [] } = cart
   const removePromotionCode = async (code: string) => {
@@ -138,6 +142,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                                     currency_code:
                                       promotion.application_method
                                         .currency_code,
+                                    countryCode: cc,
                                   })}
                             </>
                           )}

@@ -9,14 +9,18 @@ import { useTranslation } from "@/lib/i18n"
 export default function ProductPrice({
   product,
   variant,
+  countryCode,
 }: {
   product: HttpTypes.StoreProduct
   variant?: HttpTypes.StoreProductVariant
+  /** URL country — determines price formatting locale. */
+  countryCode?: string
 }) {
   const { t } = useTranslation()
   const { cheapestPrice, variantPrice } = getProductPrice({
     product,
     variantId: variant?.id,
+    countryCode,
   })
 
   const selectedPrice = variant ? variantPrice : cheapestPrice

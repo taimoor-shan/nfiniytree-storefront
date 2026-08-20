@@ -1,6 +1,7 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
+import { getCartCountryCode } from "@lib/util/country-locale"
 import { useTranslation } from "@/lib/i18n"
 import React from "react"
 
@@ -13,11 +14,17 @@ type CartTotalsProps = {
     item_subtotal?: number | null
     shipping_subtotal?: number | null
     discount_subtotal?: number | null
+    shipping_address?: { country_code?: string | null } | null
   }
   taxRate?: number | null
+  countryCode?: string
 }
 
-const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxRate }) => {
+const CartTotals: React.FC<CartTotalsProps> = ({
+  totals,
+  taxRate,
+  countryCode,
+}) => {
   const {
     currency_code,
     total,
@@ -28,6 +35,10 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxRate }) => {
   } = totals
 
   const { t } = useTranslation()
+
+  // Commercial context wins: format cart/order totals per the shipping
+  // country that Medusa priced them for, not per the URL country.
+  const cc = countryCode ?? getCartCountryCode(totals)
 
   return (
     <div>
@@ -40,13 +51,21 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxRate }) => {
             </span>
           </span>
           <span data-testid="cart-subtotal" data-value={item_subtotal || 0}>
-            {convertToLocale({ amount: item_subtotal ?? 0, currency_code })}
+            {convertToLocale({
+              amount: item_subtotal ?? 0,
+              currency_code,
+              countryCode: cc,
+            })}
           </span>
         </div>
         <div className="flex items-center justify-between">
           <span>{t("cart.shipping")}</span>
           <span data-testid="cart-shipping" data-value={shipping_subtotal || 0}>
-            {convertToLocale({ amount: shipping_subtotal ?? 0, currency_code })}
+            {convertToLocale({
+              amount: shipping_subtotal ?? 0,
+              currency_code,
+              countryCode: cc,
+            })}
           </span>
         </div>
         {!!discount_subtotal && (
@@ -61,6 +80,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxRate }) => {
               {convertToLocale({
                 amount: discount_subtotal ?? 0,
                 currency_code,
+                countryCode: cc,
               })}
             </span>
           </div>
@@ -73,7 +93,11 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxRate }) => {
             )}
           </span>
           <span data-testid="cart-taxes" data-value={tax_total || 0}>
-            {convertToLocale({ amount: tax_total ?? 0, currency_code })}
+            {convertToLocale({
+              amount: tax_total ?? 0,
+              currency_code,
+              countryCode: cc,
+            })}
           </span>
         </div>
       </div>
@@ -85,7 +109,11 @@ const CartTotals: React.FC<CartTotalsProps> = ({ totals, taxRate }) => {
           data-testid="cart-total"
           data-value={total || 0}
         >
-          {convertToLocale({ amount: total ?? 0, currency_code })}
+          {convertToLocale({
+            amount: total ?? 0,
+            currency_code,
+            countryCode: cc,
+          })}
         </span>
       </div>
       <div className="h-px w-full border-b border-hairline mt-4" />

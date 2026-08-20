@@ -1,6 +1,7 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
+import { getOrderCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@/lib/i18n"
 
@@ -10,6 +11,9 @@ type OrderSummaryProps = {
 
 const OrderSummary = ({ order }: OrderSummaryProps) => {
   const { t } = useTranslation()
+  // Historical orders format per their own shipping country, not the
+  // customer's current country.
+  const cc = getOrderCountryCode(order)
   const getAmount = (amount?: number | null) => {
     if (!amount) {
       return
@@ -18,6 +22,7 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
     return convertToLocale({
       amount,
       currency_code: order.currency_code,
+      countryCode: cc,
     })
   }
 

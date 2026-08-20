@@ -9,9 +9,10 @@ import LineItemOptions from "@modules/common/components/line-item-options"
 import LineItemPrice from "@modules/common/components/line-item-price"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import Thumbnail from "@modules/products/components/thumbnail"
-import { usePathname } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "@lib/i18n"
+import { getCartCountryCode } from "@lib/util/country-locale"
 
 type Props = {
   cart?: HttpTypes.StoreCart | null
@@ -27,7 +28,11 @@ const CartDropdown = ({
   const hasMountedRef = useRef(false)
   const previousCountRef = useRef(0)
   const pathname = usePathname()
+  const pathCountryCode = useParams().countryCode as string | undefined
   const { t } = useTranslation()
+
+  // Format from the cart's own commercial context; fall back to the URL country.
+  const cc = getCartCountryCode(cartState) ?? pathCountryCode
 
   const close = useCallback(() => setOpen(false), [])
   const toggle = useCallback(() => setOpen((prev) => !prev), [])
@@ -181,6 +186,7 @@ const CartDropdown = ({
                             item={item}
                             style="tight"
                             currencyCode={cartState.currency_code}
+                            countryCode={cc}
                           />
                         </div>
                       </div>
@@ -209,6 +215,7 @@ const CartDropdown = ({
                   {convertToLocale({
                     amount: subtotal,
                     currency_code: cartState.currency_code,
+                    countryCode: cc,
                   })}
                 </span>
               </div>

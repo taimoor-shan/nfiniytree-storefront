@@ -29,7 +29,9 @@ async function fetchGuestOrder(displayId: string, token: string) {
     process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
 
   const res = await fetch(
-    `${backendUrl}/store/orders/guest/${displayId}?token=${encodeURIComponent(token)}`,
+    `${backendUrl}/store/orders/guest/${displayId}?token=${encodeURIComponent(
+      token
+    )}&fields=*shipping_address,*shipping_methods`,
     { cache: "no-store" }
   )
 

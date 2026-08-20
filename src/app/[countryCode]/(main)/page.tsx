@@ -68,7 +68,11 @@ export default async function Home(props: {
               the LCP element. Streaming it behind Suspense lets the hero ship
               immediately and the rails fill in. */}
           <Suspense fallback={<SkeletonProductGrid />}>
-            <FeaturedProducts collections={collections} region={region} />
+            <FeaturedProducts
+              collections={collections}
+              region={region}
+              countryCode={countryCode}
+            />
           </Suspense>
 
       <div className="">

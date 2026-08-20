@@ -78,7 +78,12 @@ export default async function PaginatedProducts({
               {/* First row is above the fold on every breakpoint (1 col on
                   mobile, 3 on desktop) — load those eagerly so the LCP
                   candidate is not deferred behind lazy loading. */}
-              <ProductPreview product={p} region={region} eager={index < 3} />
+              <ProductPreview
+                product={p}
+                region={region}
+                eager={index < 3}
+                countryCode={countryCode}
+              />
             </li>
           )
         })}

@@ -6,12 +6,18 @@ import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
 import { translate } from "@/lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
+import { getCartCountryCode } from "@lib/util/country-locale"
 
 type ItemsTemplateProps = {
   cart?: HttpTypes.StoreCart
+  /** URL country — fallback when the cart has no shipping country yet. */
+  countryCode?: string
 }
 
-const ItemsTemplate = async ({ cart }: ItemsTemplateProps) => {
+const ItemsTemplate = async ({ cart, countryCode }: ItemsTemplateProps) => {
+  // Commercial context wins: format per the country Medusa priced the
+  // cart for; fall back to the URL country for carts without one.
+  const cc = getCartCountryCode(cart) ?? countryCode
   const locale = await getLocale()
   const items = cart?.items
   return (
@@ -45,6 +51,7 @@ const ItemsTemplate = async ({ cart }: ItemsTemplateProps) => {
                       key={item.id}
                       item={item}
                       currencyCode={cart?.currency_code}
+                      countryCode={cc}
                     />
                   )
                 })

@@ -10,12 +10,14 @@ type LineItemPriceProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   style?: "default" | "tight"
   currencyCode: string
+  countryCode?: string
 }
 
 const LineItemPrice = ({
   item,
   style = "default",
   currencyCode,
+  countryCode,
 }: LineItemPriceProps) => {
   const { t } = useTranslation()
   const { subtotal, original_subtotal } = item
@@ -39,6 +41,7 @@ const LineItemPrice = ({
                 {convertToLocale({
                   amount: originalPrice,
                   currency_code: currencyCode,
+                  countryCode,
                 })}
               </span>
             </p>
@@ -58,6 +61,7 @@ const LineItemPrice = ({
           {convertToLocale({
             amount: currentPrice,
             currency_code: currencyCode,
+            countryCode,
           })}
         </span>
       </div>

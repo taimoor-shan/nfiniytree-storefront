@@ -6,6 +6,7 @@ import { Button } from "@medusajs/ui"
 import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
+import { getOrderCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
 
 type OrderCardProps = {
@@ -14,6 +15,8 @@ type OrderCardProps = {
 
 const OrderCard = ({ order }: OrderCardProps) => {
   const { t } = useTranslation()
+  // Historical orders format per their own shipping country.
+  const cc = getOrderCountryCode(order)
 
   const numberOfLines = order.items?.reduce((acc, item) => {
     return acc + item.quantity
@@ -34,6 +37,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
           {convertToLocale({
             amount: order.total,
             currency_code: order.currency_code,
+            countryCode: cc,
           })}
         </span>
         <span className="pl-2">{t(`account.${numberOfLines > 1 ? "items" : "item"}`).replace("{count}", String(numberOfLines))}</span>

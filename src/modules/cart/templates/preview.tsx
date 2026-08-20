@@ -6,12 +6,16 @@ import { Table, clx } from "@medusajs/ui"
 
 import Item from "@modules/cart/components/item"
 import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
+import { getCartCountryCode } from "@lib/util/country-locale"
 
 type ItemsTemplateProps = {
   cart: HttpTypes.StoreCart
+  /** URL country — fallback when the cart has no shipping country yet. */
+  countryCode?: string
 }
 
-const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
+const ItemsPreviewTemplate = ({ cart, countryCode }: ItemsTemplateProps) => {
+  const cc = getCartCountryCode(cart) ?? countryCode
   const items = cart.items
   const hasOverflow = items && items.length > 4
 
@@ -36,6 +40,7 @@ const ItemsPreviewTemplate = ({ cart }: ItemsTemplateProps) => {
                       item={item}
                       type="preview"
                       currencyCode={cart.currency_code}
+                      countryCode={cc}
                     />
                   )
                 })

@@ -32,6 +32,8 @@ type MobileActionsProps = {
   /** IDs of option values where ALL matching variants are out of stock */
   unavailableValueIds?: Set<string>
   customerEmail?: string
+  /** URL country — determines price formatting locale. */
+  countryCode?: string
 }
 
 const MobileActions: React.FC<MobileActionsProps> = ({
@@ -47,6 +49,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   optionsDisabled,
   unavailableValueIds,
   customerEmail,
+  countryCode,
 }) => {
   const { state, open, close } = useToggleState()
   const { t } = useTranslation()
@@ -54,6 +57,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   const price = getProductPrice({
     product: product,
     variantId: variant?.id,
+    countryCode,
   })
 
   const selectedPrice = useMemo(() => {

@@ -11,9 +11,12 @@ import { getLocale } from "@lib/data/locale-actions"
 const CartTemplate = async ({
   cart,
   customer,
+  countryCode,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
+  /** URL country — price formatting falls back to it when the cart has no shipping country yet. */
+  countryCode?: string
 }) => {
   const locale = await getLocale()
 
@@ -29,7 +32,7 @@ const CartTemplate = async ({
                   <Divider />
                 </>
               )}
-              <ItemsTemplate cart={cart} />
+              <ItemsTemplate cart={cart} countryCode={countryCode} />
               <WithdrawalNotice
                 variant="banner"
                 title={await translate("withdrawal.noticeTitle", locale)}

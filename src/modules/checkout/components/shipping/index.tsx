@@ -4,6 +4,7 @@ import { Radio, RadioGroup } from "@headlessui/react"
 import { setShippingMethod } from "@lib/data/cart"
 import { calculatePriceForShippingOption } from "@lib/data/fulfillment"
 import { convertToLocale } from "@lib/util/money"
+import { getCartCountryCode } from "@lib/util/country-locale"
 import { CheckCircleSolid, Loader } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import { Button, clx, Heading, Text } from "@medusajs/ui"
@@ -69,6 +70,9 @@ const Shipping: React.FC<ShippingProps> = ({
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
+
+  // Shipping options are priced by Medusa per the cart's shipping country.
+  const cc = getCartCountryCode(cart)
 
   const isOpen = searchParams.get("step") === "delivery"
 
@@ -310,11 +314,13 @@ const Shipping: React.FC<ShippingProps> = ({
                             convertToLocale({
                               amount: option.amount!,
                               currency_code: cart?.currency_code,
+                              countryCode: cc,
                             })
                           ) : calculatedPricesMap[option.id] ? (
                             convertToLocale({
                               amount: calculatedPricesMap[option.id],
                               currency_code: cart?.currency_code,
+                              countryCode: cc,
                             })
                           ) : isLoadingPrices ? (
                             <Loader />
@@ -387,6 +393,7 @@ const Shipping: React.FC<ShippingProps> = ({
                             {convertToLocale({
                               amount: option.amount!,
                               currency_code: cart?.currency_code,
+                              countryCode: cc,
                             })}
                           </span>
                         </Radio>
@@ -428,6 +435,7 @@ const Shipping: React.FC<ShippingProps> = ({
                   {convertToLocale({
                     amount: cart.shipping_methods!.at(-1)!.amount!,
                     currency_code: cart?.currency_code,
+                    countryCode: cc,
                   })}
                 </Text>
               </div>

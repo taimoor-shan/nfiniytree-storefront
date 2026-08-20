@@ -9,9 +9,11 @@ import Thumbnail from "@modules/products/components/thumbnail"
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   currencyCode: string
+  /** Order's shipping country — historical orders keep their own formatting. */
+  countryCode?: string
 }
 
-const Item = ({ item, currencyCode }: ItemProps) => {
+const Item = ({ item, currencyCode, countryCode }: ItemProps) => {
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
@@ -40,6 +42,7 @@ const Item = ({ item, currencyCode }: ItemProps) => {
               item={item}
               style="tight"
               currencyCode={currencyCode}
+              countryCode={countryCode}
             />
           </span>
 
@@ -47,6 +50,7 @@ const Item = ({ item, currencyCode }: ItemProps) => {
             item={item}
             style="tight"
             currencyCode={currencyCode}
+            countryCode={countryCode}
           />
         </span>
       </Table.Cell>

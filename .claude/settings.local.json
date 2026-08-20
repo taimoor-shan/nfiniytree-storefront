@@ -23,7 +23,9 @@
       "Bash(yarn start *)",
       "Bash(echo \"started pid $!\")",
       "Bash(node scripts/perf-measure.mjs baseline)",
-      "Bash(grep -oE '<img[^>]{0,400}>' /tmp/hu.html)"
+      "Bash(grep -oE '<img[^>]{0,400}>' /tmp/hu.html)",
+      "mcp__codegraph__codegraph_callers",
+      "mcp__codegraph__codegraph_node"
     ]
   },
   "enableAllProjectMcpServers": true,

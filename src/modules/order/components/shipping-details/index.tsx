@@ -1,6 +1,7 @@
 "use client"
 
 import { convertToLocale } from "@lib/util/money"
+import { getOrderCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
 
@@ -14,6 +15,7 @@ type ShippingDetailsProps = {
 
 const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
   const { t } = useTranslation()
+  const cc = getOrderCountryCode(order)
   return (
     <div>
       <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
@@ -93,6 +95,7 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
                 ?? order.shipping_methods?.[0].total
                 ?? 0,
               currency_code: order.currency_code,
+              countryCode: cc,
             })}
             )
           </Text>

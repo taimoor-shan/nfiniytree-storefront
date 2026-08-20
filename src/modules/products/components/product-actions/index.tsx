@@ -248,7 +248,11 @@ export default function ProductActions({
           )}
         </div>
 
-        <ProductPrice product={product} variant={selectedVariant} />
+        <ProductPrice
+          product={product}
+          variant={selectedVariant}
+          countryCode={countryCode}
+        />
 
         {quantityExceedsStock && inStock && (
           <p className="text-error text-xs">
@@ -343,6 +347,7 @@ export default function ProductActions({
           optionsDisabled={!!disabled || isAdding}
           unavailableValueIds={unavailableOptionValueIds}
           customerEmail={customerEmail}
+          countryCode={countryCode}
         />
       </div>
     </>

@@ -5,6 +5,7 @@ import { Container } from "@medusajs/ui"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
+import { getOrderCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
 
 type OverviewProps = {
@@ -120,6 +121,7 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
                                 {convertToLocale({
                                   amount: order.total,
                                   currency_code: order.currency_code,
+                                  countryCode: getOrderCountryCode(order),
                                 })}
                               </span>
                             </div>

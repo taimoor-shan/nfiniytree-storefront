@@ -10,9 +10,12 @@ import { getLocale } from "@lib/data/locale-actions"
 export default async function ProductRail({
   collection,
   region,
+  countryCode,
 }: {
   collection: HttpTypes.StoreCollection
   region: HttpTypes.StoreRegion
+  /** URL country — determines price formatting locale. */
+  countryCode: string
 }) {
   const locale = await getLocale()
   const {
@@ -43,7 +46,12 @@ export default async function ProductRail({
         {pricedProducts &&
           pricedProducts.map((product) => (
             <li key={product.id}>
-              <ProductPreview product={product} region={region} isFeatured />
+              <ProductPreview
+                product={product}
+                region={region}
+                isFeatured
+                countryCode={countryCode}
+              />
             </li>
           ))}
       </ul>

@@ -18,9 +18,11 @@ type ItemProps = {
   item: HttpTypes.StoreCartLineItem
   type?: "full" | "preview"
   currencyCode: string
+  /** Commercial country of the cart (or URL fallback) — determines price formatting locale. */
+  countryCode?: string
 }
 
-const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
+const Item = ({ item, type = "full", currencyCode, countryCode }: ItemProps) => {
   const [updating, setUpdating] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -110,6 +112,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             item={item}
             style="tight"
             currencyCode={currencyCode}
+            countryCode={countryCode}
           />
         </Table.Cell>
       )}
@@ -127,6 +130,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
                 item={item}
                 style="tight"
                 currencyCode={currencyCode}
+                countryCode={countryCode}
               />
             </span>
           )}
@@ -134,6 +138,7 @@ const Item = ({ item, type = "full", currencyCode }: ItemProps) => {
             item={item}
             style="tight"
             currencyCode={currencyCode}
+            countryCode={countryCode}
           />
         </span>
       </Table.Cell>
