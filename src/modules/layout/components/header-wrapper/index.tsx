@@ -7,23 +7,41 @@ type HeaderWrapperProps = {
   children: React.ReactNode
 }
 
-export default function HeaderWrapper({ topBar, children }: HeaderWrapperProps) {
+export default function HeaderWrapper({
+  topBar,
+  children,
+}: HeaderWrapperProps) {
   const [hidden, setHidden] = useState(false)
-  const [topBarH, setTopBarH] = useState(40) // mobile default
+  const [topBarH, setTopBarH] = useState(40)
   const lastY = useRef(0)
   const ticking = useRef(false)
 
-  // Track top bar height responsively (40px mobile, 48px >= 1024px)
+  // Track top bar height responsively
   useEffect(() => {
     const mq = window.matchMedia("(min-width: 1024px)")
-    const update = () => setTopBarH(mq.matches ? 48 : 40)
+
+    const update = () => {
+      setTopBarH(mq.matches ? 48 : 40)
+
+      // Mobile: always reset to visible
+      if (!mq.matches) {
+        setHidden(false)
+      }
+    }
+
     update()
+
     mq.addEventListener("change", update)
     return () => mq.removeEventListener("change", update)
   }, [])
 
   useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)")
+
     const onScroll = () => {
+      // Completely disable scroll behavior on mobile
+      if (!mq.matches) return
+
       if (ticking.current) return
       ticking.current = true
 
@@ -31,13 +49,10 @@ export default function HeaderWrapper({ topBar, children }: HeaderWrapperProps) 
         const y = window.scrollY
 
         if (y <= 40) {
-          // At the very top — always show top bar
           setHidden(false)
         } else if (y > lastY.current) {
-          // Scrolling down — hide top bar, nav slides up
           setHidden(true)
         } else if (y < lastY.current) {
-          // Scrolling up — show top bar, nav slides back down
           setHidden(false)
         }
 
@@ -47,7 +62,10 @@ export default function HeaderWrapper({ topBar, children }: HeaderWrapperProps) 
     }
 
     window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
+
+    return () => {
+      window.removeEventListener("scroll", onScroll)
+    }
   }, [])
 
   return (

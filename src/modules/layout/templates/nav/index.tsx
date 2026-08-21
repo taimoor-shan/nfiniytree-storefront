@@ -6,7 +6,7 @@ import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
 import { retrieveStore } from "@lib/data/store"
 import { getDictionary } from "@lib/i18n/dictionaries"
-import { ShoppingCart, User } from 'lucide-react';
+import { ShoppingCart, User } from "lucide-react"
 
 import { StoreRegion } from "@medusajs/types"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
@@ -36,19 +36,24 @@ export default async function Nav() {
       }
     >
       <header className="relative mx-auto border-b duration-200 bg-canvas border-hairline py-4 small:py-5">
-        <nav className="content-container txt-xsmall-plus text-body flex h-full w-full items-center justify-between gap-x-4 text-small-regular small:grid small:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]">
-          {/* Left: Logo */}
-          <div className="flex items-center gap-x-4 justify-self-start">
+        <nav className="content-container txt-xsmall-plus grid h-full w-full grid-cols-[auto_1fr_auto] items-center text-small-regular small:flex small:items-center small:justify-between">
+          {/* Mobile: Hamburger */}
+          <div className="small:hidden justify-self-start">
+            <SideMenu
+              regions={regions}
+              locales={locales}
+              currentLocale={currentLocale}
+              storeName={storeName}
+            />
+          </div>
+
+          {/* Logo */}
+          <div className="flex items-center justify-self-center small:justify-self-start">
             <LocalizedClientLink
               href="/"
               className="flex items-center gap-3"
               data-testid="nav-store-link"
             >
-              {/* Explicit dimensions reserve the box before the PNG arrives —
-                  the raw <img> here had none, so the header shifted on every
-                  page load. 256x49 is 768x147 (the asset's intrinsic size)
-                  reduced exactly, so `w-48` still renders it at 192x36.75.
-                  Eager because it is above the fold on every route. */}
               <Image
                 src="/logo-full.png"
                 alt={dict["common.logo"]}
@@ -57,11 +62,10 @@ export default async function Nav() {
                 loading="eager"
                 className="w-48 object-contain"
               />
-              {/* <h1 className="font-display text-ink text-3xl leading-none">{storeName}</h1> */}
             </LocalizedClientLink>
           </div>
 
-          {/* Center: Nav Links */}
+          {/* Center: Desktop Nav */}
           <div className="hidden h-full items-center justify-self-center small:flex">
             <div className="flex items-center gap-x-8 whitespace-nowrap">
               <LocalizedClientLink
@@ -71,6 +75,7 @@ export default async function Nav() {
               >
                 {dict["nav.home"]}
               </LocalizedClientLink>
+
               <LocalizedClientLink
                 className="hover:text-primary text-sm text-ink uppercase"
                 href="/store"
@@ -78,6 +83,7 @@ export default async function Nav() {
               >
                 {dict["nav.store"]}
               </LocalizedClientLink>
+
               <LocalizedClientLink
                 className="hover:text-primary text-sm text-ink uppercase"
                 href="/about"
@@ -85,6 +91,7 @@ export default async function Nav() {
               >
                 {dict["nav.about"]}
               </LocalizedClientLink>
+
               <LocalizedClientLink
                 className="hover:text-primary text-sm text-ink uppercase"
                 href="/contact"
@@ -96,11 +103,11 @@ export default async function Nav() {
           </div>
 
           {/* Right: Actions */}
-          <div className="flex h-full items-center justify-self-end gap-x-1 small:gap-x-0">
+          <div className="flex h-full items-center justify-self-end">
+            {/* Desktop Actions */}
             <div className="hidden small:flex items-center gap-x-4">
-              {/* Account Icon */}
               <LocalizedClientLink
-                className="flex  items-center justify-center rounded-full text-ink"
+                className="flex items-center justify-center rounded-full text-ink"
                 href="/account"
                 data-testid="nav-account-link"
                 aria-label={dict["nav.account"]}
@@ -108,11 +115,10 @@ export default async function Nav() {
                 <User />
               </LocalizedClientLink>
 
-              {/* Cart */}
               <Suspense
                 fallback={
                   <LocalizedClientLink
-                    className="flex  items-center justify-center rounded-full text-ink"
+                    className="flex items-center justify-center rounded-full text-ink"
                     href="/cart"
                     data-testid="nav-cart-link"
                     aria-label={dict["nav.cart"]}
@@ -129,7 +135,7 @@ export default async function Nav() {
             <Suspense
               fallback={
                 <LocalizedClientLink
-                  className="small:hidden flex h-20 w-20 items-center justify-center rounded-full text-ink"
+                  className="small:hidden flex h-10 w-10 items-center justify-center rounded-full text-ink"
                   href="/cart"
                   data-testid="mobile-nav-cart-link"
                   aria-label={dict["nav.cart"]}
@@ -143,16 +149,6 @@ export default async function Nav() {
                 <CartButton iconOnly />
               </div>
             </Suspense>
-
-            {/* Mobile Hamburger */}
-            <div className="small:hidden">
-              <SideMenu
-                regions={regions}
-                locales={locales}
-                currentLocale={currentLocale}
-                storeName={storeName}
-              />
-            </div>
           </div>
         </nav>
       </header>
