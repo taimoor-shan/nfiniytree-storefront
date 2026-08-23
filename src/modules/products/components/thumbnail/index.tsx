@@ -17,16 +17,7 @@ type ThumbnailProps = {
   size?: ThumbnailSize
   isFeatured?: boolean
   className?: string
-  /**
-   * Load immediately instead of lazily. Set this on above-the-fold cards (the
-   * first grid row) so the LCP candidate is not deferred. Next 16 deprecated
-   * `priority` in favour of `preload`, but `preload` is explicitly not for
-   * cases with several possible LCP elements depending on viewport — which is
-   * exactly a responsive product grid — so this uses eager + high fetch
-   * priority instead.
-   */
   eager?: boolean
-  /** Override the default `sizes` for an unusual layout. */
   sizes?: string
   /**
    * What the image shows. Pass the product (and, where relevant, variant) name —
@@ -39,22 +30,11 @@ type ThumbnailProps = {
   "data-testid"?: string
 }
 
-/**
- * What the image actually occupies on screen, per `size` variant. These must
- * track the container widths below (and, for `full`, the product grid's
- * columns) or the browser picks a candidate that is too large — which is what
- * the previous hardcoded `800px` did on a ~448px card.
- */
 const DEFAULT_SIZES: Record<ThumbnailSize, string> = {
-  // Fixed-width variants: the container class pins the width.
   small: "180px",
   medium: "290px",
   large: "440px",
-  // Cart line items and order rows: w-12 / w-16 / w-24.
   square: "96px",
-  // Product grid: 1 col below 1024px, 3 cols above, inside a 1440px
-  // max-width container with 24px page padding and 24px gutters — so a card
-  // tops out at (1392 - 48) / 3 = 448px however wide the viewport gets.
   full: "(max-width: 1023px) 100vw, (max-width: 1440px) 31vw, 448px",
 }
 
@@ -74,8 +54,12 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   return (
     <Container
       className={clx(
-        "relative w-full overflow-hidden p-4 bg-surface-card shadow-elevation-card-rest rounded-lg group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150",
-        className,
+        // NOTE: no width utility here anymore — width now comes from exactly
+        // ONE place: either the size-specific default below, or `className`
+        // when the caller passes one. Previously "w-full" lived here
+        // unconditionally AND competed with per-size overrides below, which
+        // is undefined behaviour once nested inside a CSS Grid `auto` track.
+        "relative overflow-hidden p-4 bg-surface-card shadow-elevation-card-rest rounded-lg group-hover:shadow-elevation-card-hover transition-shadow ease-in-out duration-150",
         {
           "aspect-[11/14]": isFeatured,
           "aspect-[9/12]": !isFeatured && size !== "square",
@@ -84,7 +68,11 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
           "w-[290px]": size === "medium",
           "w-[440px]": size === "large",
           "w-full": size === "full",
-        }
+          // Only apply a default square size when the caller hasn't supplied
+          // its own — so there is never a second competing width utility.
+          "w-16 h-16": size === "square" && !className,
+        },
+        className
       )}
       data-testid={dataTestid}
     >

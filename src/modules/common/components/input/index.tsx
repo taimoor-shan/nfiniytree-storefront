@@ -80,7 +80,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-required={required ? true : undefined}
             aria-invalid={error ? true : undefined}
             aria-describedby={describedBy}
-            className={`pt-4 pb-1 block w-full h-11 px-4 mt-0 bg-canvas border rounded-md appearance-none focus:ring-2 focus:ring-primary hover:bg-surface-soft ${
+            className={`pt-4 pb-1 block w-full h-11 px-4 mt-0 bg-canvas border rounded-md appearance-none focus:ring-1 focus:ring-primary focus:border-none hover:bg-surface-soft ${
               error ? "border-error" : "border-hairline"
             }`}
             {...props}

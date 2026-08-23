@@ -49,10 +49,13 @@ const WithdrawalNotice = ({
   policyLinkLabel = DEFAULT_POLICY_LINK_LABEL,
 }: WithdrawalNoticeProps) => {
   const [legalBefore, legalAfter] = splitOn(legalText, "{decree}")
+  // NOTE: previously this span had `whitespace-nowrap`, which forced the entire
+  // decree citation (60+ chars) to render on one line and overflow the container
+  // on narrow screens. Removed so it wraps like normal text.
   const legalBody = (
     <>
       {legalBefore}
-      <span className="whitespace-nowrap">{decree}</span>
+      {decree}
       {legalAfter}
     </>
   )
@@ -74,12 +77,12 @@ const WithdrawalNotice = ({
   if (variant === "inline") {
     return (
       <div className={`mt-6 pt-6 border-t border-hairline ${className}`}>
-        <div className="bg-surface-card rounded-lg p-4 border-l-2 border-l-primary">
-          <p className="text-sm text-body leading-relaxed">
+        <div className="bg-surface-card rounded-lg p-4 border-l-2 border-l-primary min-w-0">
+          <p className="text-sm text-body leading-relaxed break-words">
             <span className="font-medium text-ink">{importantPrefix}</span>
             {legalBody}
           </p>
-          <p className="text-sm text-muted mt-2">{policyLine}</p>
+          <p className="text-sm text-muted mt-2 break-words">{policyLine}</p>
         </div>
       </div>
     )
@@ -87,17 +90,24 @@ const WithdrawalNotice = ({
 
   // banner variant (cart)
   return (
-    <div className={`bg-surface-card rounded-lg p-5 ${className}`}>
+    <div className={`bg-surface-card rounded-lg p-5 min-w-0 ${className}`}>
       <div className="flex items-start gap-x-3">
         {/* Decorative — the notice text immediately to the right says the same. */}
         <Info
           className="h-5 w-5 text-primary-text mt-0.5 shrink-0"
           aria-hidden="true"
         />
-        <div>
-          <p className="font-medium text-ink text-sm mb-1">{title}</p>
-          <p className="text-sm text-body leading-relaxed">{legalBody}</p>
-          <p className="text-sm text-muted mt-2">{policyLine}</p>
+        {/* min-w-0 is required here: flex children default to min-width:auto,
+            so without it this column can't shrink below its content's
+            intrinsic width and text-wrapping utilities are ignored. */}
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-ink text-sm mb-1 break-words">
+            {title}
+          </p>
+          <p className="text-sm text-body leading-relaxed break-words">
+            {legalBody}
+          </p>
+          <p className="text-sm text-muted mt-2 break-words">{policyLine}</p>
         </div>
       </div>
     </div>

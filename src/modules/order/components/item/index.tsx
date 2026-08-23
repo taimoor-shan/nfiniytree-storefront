@@ -17,7 +17,10 @@ const Item = ({ item, currencyCode, countryCode }: ItemProps) => {
   return (
     <Table.Row className="w-full" data-testid="product-row">
       <Table.Cell className="!pl-0 p-4 w-24">
-        <div className="flex w-16">
+        <div className="flex w-24">
+          {/* Wrapper matches the Thumbnail's default square size (w-24) so the
+              declared sizes agree with the w-24 cell, instead of relying on
+              flex-shrink to rescue a w-16 box around a w-24 image. */}
           {/* Decorative — the product name is in the very next table cell, so
               announcing it again on the image would double it up. */}
           <Thumbnail thumbnail={item.variant?.thumbnail || item.product?.thumbnail || item.thumbnail} images={item.variant?.images || item.product?.images || []} size="square" alt="" />

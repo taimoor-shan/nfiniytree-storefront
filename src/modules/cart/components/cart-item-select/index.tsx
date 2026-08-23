@@ -47,6 +47,9 @@ const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
 
     return (
       <div>
+        {/* The caller's `className` is the single size authority for the
+            pill — the inner select and chevron fill it, so the control can
+            never overflow (or clip) its own container. */}
         <label htmlFor={selectId} className="sr-only">
           {label ?? t("cart.quantity")}
         </label>
@@ -65,14 +68,14 @@ const CartItemSelect = forwardRef<HTMLSelectElement, NativeSelectProps>(
             ref={innerRef}
             id={selectId}
             {...props}
-            className="appearance-none bg-transparent border-none px-4 transition-colors duration-150 focus:border-gray-700 outline-none w-16 h-16 items-center justify-center"
+            className="appearance-none bg-transparent border-none h-full w-full pl-3 pr-6 text-center transition-colors duration-150 focus:border-gray-700 outline-none"
           >
             <option disabled value="">
               {resolvedPlaceholder}
             </option>
             {children}
           </select>
-          <span className="absolute flex pointer-events-none justify-end w-8 group-hover:animate-pulse">
+          <span className="absolute inset-y-0 right-2 flex items-center pointer-events-none group-hover:animate-pulse">
             <ChevronDown />
           </span>
         </IconBadge>
