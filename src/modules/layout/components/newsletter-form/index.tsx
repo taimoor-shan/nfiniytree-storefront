@@ -25,11 +25,17 @@ export default function NewsletterForm() {
       <div className="flex max-w-[400px]">
         <input
           type="email"
+          name="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("newsletter.placeholder")}
-          className="flex-grow border border-hairline px-4 rounded-l-sm bg-canvas text-base focus:outline-none focus:border-primary text-ink"
+          // The placeholder was the only visible cue and is not an accessible
+          // name — it disappears on input and is not exposed reliably.
+          aria-label={t("account.email")}
+          className="flex-grow border border-hairline px-4 rounded-l-sm bg-canvas text-base focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary text-ink"
           required
+          aria-required="true"
           disabled={status === "loading" || status === "success"}
         />
         <button
@@ -44,9 +50,9 @@ export default function NewsletterForm() {
           {status === "loading" ? "..." : status === "success" ? t("newsletter.done") : t("newsletter.submit")}
         </button>
       </div>
-      {status === "success" && (
-        <p className="text-sm text-success mt-2 absolute -bottom-6">{t("newsletter.success")}</p>
-      )}
+      <p role="status" className="text-sm text-success mt-2 absolute -bottom-6">
+        {status === "success" ? t("newsletter.success") : ""}
+      </p>
     </form>
   )
 }

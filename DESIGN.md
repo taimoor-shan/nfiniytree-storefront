@@ -5,6 +5,8 @@ description: A warm-canvas editorial interface for Anthropic's Claude product. T
 
 colors:
   primary: "#cc785c"
+  primary-text: "#a65134"
+  primary-strong: "#bb5a3a"
   primary-active: "#a9583e"
   primary-disabled: "#e6dfd8"
   ink: "#141413"
@@ -324,9 +326,24 @@ The dark surfaces are where Claude shows its product chrome — code blocks, ter
 ## Colors
 
 ### Brand & Accent
-- **Coral / Primary** (`{colors.primary}` — #cc785c): The signature Anthropic warm coral. Used on every primary CTA background, on full-bleed coral callout cards, on the brand wordmark accent. The most-recognized Anthropic color outside of the spike-mark logo.
-- **Coral Active** (`{colors.primary-active}` — #a9583e): The press / hover-darker variant.
+- **Coral / Primary** (`{colors.primary}` — #cc785c): The signature Anthropic warm coral. Used on full-bleed coral callout cards, on the brand wordmark accent, on large display type, and on non-text marks (state dots, timeline fills, borders, focus rings). The most-recognized Anthropic color outside of the spike-mark logo.
+- **Coral Text** (`{colors.primary-text}` — #a65134): Coral used as **normal-size text** on any cream or white surface — inline links, prices, eyebrow labels, outlined-button labels. Same hue (15°) and saturation (52%) as `{colors.primary}`, lightness dropped 58% → 42%.
+- **Coral Strong** (`{colors.primary-strong}` — #bb5a3a): Coral used as a **fill beneath white text** — the primary CTA background, coral badges.
+- **Coral Active** (`{colors.primary-active}` — #a9583e): The press / hover-darker variant. Aliased as `primary-hover`.
 - **Coral Disabled** (`{colors.primary-disabled}` — #e6dfd8): A desaturated cream-tinted disabled state.
+
+#### Which coral to use — accessibility rule
+`{colors.primary}` measures **3.28:1** on white and **2.89:1** on `{colors.surface-soft}`. That clears the 3:1 WCAG 1.4.11 bar for non-text marks, and it is fine for large display type, but it is **below the 4.5:1 WCAG 2.2 AA floor for normal-size text**. So:
+
+| Role | Token | Ratio |
+|---|---|---|
+| Coral text on cream/white | `primary-text` | 4.52–5.46:1 |
+| White text on a coral fill | `primary-strong` | 4.53:1 |
+| Hover/press fill under white text | `primary-active` | 5.06:1 |
+| Dots, rings, borders, timeline, large display type | `primary` | 3.11–3.28:1 |
+
+Never use `text-primary` for body-size text — use `text-primary-text`. Never put white text on `bg-primary` — use `bg-primary-strong`. The brand coral itself is unchanged, so callout cards, badges and the wordmark keep their exact original colour.
+
 - **Accent Teal** (`{colors.accent-teal}` — #5db8a6): Used sparingly on secondary product surfaces (terminal status indicators, "active connection" dots in connectors page).
 - **Accent Amber** (`{colors.accent-amber}` — #e8a55a): A small companion warm-tone used on category badges and inline highlights.
 

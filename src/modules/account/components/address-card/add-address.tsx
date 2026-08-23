@@ -133,12 +133,14 @@ const AddAddress = ({
               <Input
                 label={t("account.phone")}
                 name="phone"
-                autoComplete="phone"
+                type="tel"
+                autoComplete="tel"
                 data-testid="phone-input"
               />
             </div>
             {formState.error && (
               <div
+                role="alert"
                 className="text-error text-small-regular py-2"
                 data-testid="address-error"
               >

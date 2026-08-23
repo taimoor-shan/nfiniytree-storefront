@@ -36,7 +36,19 @@ export default async function Nav() {
       }
     >
       <header className="relative mx-auto border-b duration-200 bg-canvas border-hairline py-4 small:py-5">
-        <nav className="content-container txt-xsmall-plus grid h-full w-full grid-cols-[auto_1fr_auto] items-center text-small-regular small:flex small:items-center small:justify-between">
+        {/* First focusable element on the page: lets keyboard and screen-reader
+            users jump past the top bar and the whole nav to the page content.
+            Visually hidden until focused, so the design is unchanged. */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-canvas focus:px-4 focus:py-2 focus:text-sm focus:text-ink focus:outline-none focus:ring-2 focus:ring-primary"
+        >
+          {dict["a11y.skipToContent"]}
+        </a>
+        <nav
+          aria-label={dict["a11y.mainNavigation"]}
+          className="content-container txt-xsmall-plus grid h-full w-full grid-cols-[auto_1fr_auto] items-center text-small-regular small:flex small:items-center small:justify-between"
+        >
           {/* Mobile: Hamburger */}
           <div className="small:hidden justify-self-start">
             <SideMenu
@@ -69,7 +81,7 @@ export default async function Nav() {
           <div className="hidden h-full items-center justify-self-center small:flex">
             <div className="flex items-center gap-x-8 whitespace-nowrap">
               <LocalizedClientLink
-                className="hover:text-primary text-sm text-ink uppercase"
+                className="hover:text-primary-text text-sm text-ink uppercase"
                 href="/"
                 data-testid="nav-home-link"
               >
@@ -77,7 +89,7 @@ export default async function Nav() {
               </LocalizedClientLink>
 
               <LocalizedClientLink
-                className="hover:text-primary text-sm text-ink uppercase"
+                className="hover:text-primary-text text-sm text-ink uppercase"
                 href="/store"
                 data-testid="nav-store-link-center"
               >
@@ -85,7 +97,7 @@ export default async function Nav() {
               </LocalizedClientLink>
 
               <LocalizedClientLink
-                className="hover:text-primary text-sm text-ink uppercase"
+                className="hover:text-primary-text text-sm text-ink uppercase"
                 href="/about"
                 data-testid="nav-about-link"
               >
@@ -93,7 +105,7 @@ export default async function Nav() {
               </LocalizedClientLink>
 
               <LocalizedClientLink
-                className="hover:text-primary text-sm text-ink uppercase"
+                className="hover:text-primary-text text-sm text-ink uppercase"
                 href="/contact"
                 data-testid="nav-contact-link"
               >

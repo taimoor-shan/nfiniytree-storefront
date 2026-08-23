@@ -1,8 +1,13 @@
 import { declineTransferRequest } from "@lib/data/orders"
 import { Heading, Text } from "@medusajs/ui"
+import type { Metadata } from "next"
 import TransferImage from "@modules/order/components/transfer-image"
 import { translate } from "@/lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
+import { NOINDEX_METADATA } from "@lib/util/seo"
+
+// Same as the accept route: renders a state change, so it must not be crawled.
+export const metadata: Metadata = NOINDEX_METADATA
 
 export default async function TransferPage({
   params,

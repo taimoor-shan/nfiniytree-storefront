@@ -151,7 +151,7 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
 const KeyFeaturesTab = ({ features }: { features: string[] }) => {
   return (
     <div className="text-sm py-4">
-      <ul className="list-disc pl-4 flex flex-col gap-y-2 marker:text-primary">
+      <ul className="list-disc pl-4 flex flex-col gap-y-2 marker:text-primary-text">
         {features.map((feature, i) => (
           <li key={i} className="text-body text-base">
             {feature}
@@ -226,7 +226,7 @@ const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProp
       { hasTreeSpecs && (
         <div>
           {hasPotSpecs && (
-            <span className="font-semibold text-primary text-base mb-4 block">
+            <span className="font-semibold text-primary-text text-base mb-4 block">
               {t("product.treeIncludingPot")}
             </span>
           )}
@@ -250,7 +250,7 @@ const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProp
       {/* Pot specifications */}
       {hasPotSpecs && (
         <div className={hasTreeSpecs ? "mt-8 pt-8 border-t border-hairline" : ""}>
-          <span className="font-semibold text-primary text-base mb-4 block">
+          <span className="font-semibold text-primary-text text-base mb-4 block">
             {potSize ? `${t("product.potOnly")} (${potSize})` : t("product.potOnly")}
           </span>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-4 text-sm">

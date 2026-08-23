@@ -35,11 +35,13 @@ const OrderOverview = ({ orders }: { orders: HttpTypes.StoreOrder[] }) => {
         {t("account.noOrdersYet")}
       </p>
       <div className="mt-4">
-        <LocalizedClientLink href="/" passHref>
-          <Button data-testid="continue-shopping-button">
+        {/* `asChild` — see the hero CTA: a <Button> nested inside the link is
+            invalid HTML and produces two overlapping targets. */}
+        <Button data-testid="continue-shopping-button" asChild>
+          <LocalizedClientLink href="/">
             {t("cart.continueShopping")}
-          </Button>
-        </LocalizedClientLink>
+          </LocalizedClientLink>
+        </Button>
       </div>
     </div>
   )

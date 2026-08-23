@@ -90,7 +90,7 @@ const Timeline = ({ order }: TimelineProps) => {
                 href={steps.find((s) => s.id === "shipped")!.tracking!.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block mt-2 text-sm text-primary hover:underline"
+                className="inline-block mt-2 text-sm text-primary-text hover:underline"
               >
                 {t("order.timeline.trackShipment")} &rarr;
               </a>
@@ -150,7 +150,7 @@ const Timeline = ({ order }: TimelineProps) => {
                       href={f.tracking_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline"
+                      className="text-xs text-primary-text hover:underline"
                     >
                       {t("order.timeline.track")} &rarr;
                     </a>

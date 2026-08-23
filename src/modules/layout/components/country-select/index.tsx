@@ -49,7 +49,7 @@ const CountrySelect = ({
   const { countryCode } = useParams()
   const currentPath = usePathname().split(`/${countryCode}`)[1]
 
-  const { state, close } = toggleState
+  const { state, close, toggle } = toggleState
 
   const options = useMemo(() => getCountryOptions(regions), [regions])
 
@@ -76,14 +76,34 @@ const CountrySelect = ({
             : undefined
         }
       >
+        {/* The dropdown's visibility is driven by `toggleState` (the options
+            list is `static`), and its only trigger used to be a `mouseenter`
+            on the wrapping div — so there was no keyboard path to it at all.
+            Toggling here makes the button itself the control. */}
         <ListboxButton
-          className={["py-1 w-full", buttonClassName].filter(Boolean).join(" ")}
+          onClick={toggle}
+          aria-expanded={state}
+          // Same problem `LanguageSelect` documents: `NavCountrySelect` passes
+          // `label={null}`, so in the top nav this button's whole accessible
+          // name was just the country name — "Hungary, button" — which does not
+          // say it opens a shipping-country chooser. The visible label, where
+          // shown, stays as-is.
+          aria-label={t("a11y.selectCountry")}
+          className={[
+            "py-1 w-full rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+            buttonClassName,
+          ]
+            .filter(Boolean)
+            .join(" ")}
         >
           <div className="txt-compact-small flex items-start gap-x-2">
             {label !== null ? <span>{t("misc.shippingTo", label)}</span> : null}
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
                 {}
+                {/* Decorative — `current.label` names the country right after
+                    it. `react-country-flag` emits an <img> with no alt of its
+                    own, so without this it was an unlabelled image. */}
                 <ReactCountryFlag
                   svg
                   style={{
@@ -91,6 +111,8 @@ const CountrySelect = ({
                     height: "16px",
                   }}
                   countryCode={current.country ?? ""}
+                  alt=""
+                  aria-hidden="true"
                 />
                 {current.label}
               </span>
@@ -131,6 +153,8 @@ const CountrySelect = ({
                         height: "16px",
                       }}
                       countryCode={o?.country ?? ""}
+                      alt=""
+                      aria-hidden="true"
                     />{" "}
                     {o?.label}
                   </ListboxOption>

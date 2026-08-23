@@ -4,6 +4,7 @@ import Features from "@modules/home/components/features"
 import ImageGallery from "@modules/products/components/image-gallery"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductInfoBlocks from "@modules/products/components/product-info-blocks"
+import ProductJsonLd from "@modules/products/components/product-jsonld"
 import ProductTabs from "@modules/products/components/product-tabs"
 import RelatedProducts from "@modules/products/components/related-products"
 import ProductInfo from "@modules/products/templates/product-info"
@@ -40,13 +41,18 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
 
   return (
     <>
+      {/* Product structured data. Rendered from the same server-fetched, priced
+          product the page displays, so the markup can never drift from what a
+          shopper sees. */}
+      <ProductJsonLd product={product} countryCode={countryCode} />
+
       <div
         className="content-container flex flex-col small:flex-row small:items-start py-6 gap-y-8 small:gap-x-20 relative"
         data-testid="product-container"
       >
         {/* Left Column - Image Gallery */}
         <div className="block w-full small:w-[55%] small:sticky small:top-28">
-          <ImageGallery images={images} />
+          <ImageGallery images={images} productTitle={product.title} />
         </div>
 
         {/* Right Column - Product Details sticky wrapper */}

@@ -3,6 +3,8 @@ import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
 import { getDictionary, translate } from "@lib/i18n/dictionaries"
+import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 import { Sparkles, Droplets, TreePine, Building2 } from "lucide-react"
 
 type AboutPageProps = {
@@ -10,23 +12,32 @@ type AboutPageProps = {
 }
 
 export async function generateMetadata(props: AboutPageProps): Promise<Metadata> {
+  const { countryCode } = await props.params
   const locale = (await getLocale()) || "en"
   const page = await retrievePageBySlug("about", locale)
 
-  if (!page) {
-    return {
-      title: await translate("metadata.aboutTitle", locale),
-      description: await translate("metadata.aboutDescription", locale),
-    }
-  }
+  const title =
+    page?.seo_title ||
+    page?.title ||
+    (await translate("metadata.aboutTitle", locale))
+  // Blank-but-present CMS fields are truthy, so a plain `||` chain would let an
+  // empty `seo_description` suppress the translated fallback.
+  const description =
+    resolveDescription([page?.seo_description, page?.excerpt]) ||
+    (await translate("metadata.aboutDescription", locale))
 
   return {
-    title:
-      page.seo_title || page.title || (await translate("metadata.aboutTitle", locale)),
-    description:
-      page.seo_description ||
-      page.excerpt ||
-      (await translate("metadata.aboutDescription", locale)),
+    title,
+    description,
+    alternates: await getSeoAlternates(countryCode, "/about"),
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      title,
+      description,
+      url: `/${countryCode}/about`,
+      images: page?.featured_image ? [{ url: page.featured_image }] : [],
+    },
   }
 }
 
@@ -79,7 +90,7 @@ export default async function AboutPage(props: AboutPageProps) {
           <div className="absolute inset-0 flex flex-col justify-end pb-16">
             <div className="content-container">
               <div className="max-w-3xl">
-                {/* <p className="text-primary text-xs uppercase tracking-[0.2em] font-medium mb-4">
+                {/* <p className="text-primary-text text-xs uppercase tracking-[0.2em] font-medium mb-4">
                   {dict["about.handmadeCollection"]}
                 </p> */}
                 <h1 className="font-display text-3xl lg:text-5xl text-on-dark leading-tight mb-4">
@@ -98,7 +109,7 @@ export default async function AboutPage(props: AboutPageProps) {
         /* Fallback when no featured image — minimal centered header */
         <section className="pt-20 pb-8 lg:pt-28 lg:pb-12">
           <div className="content-container text-center">
-            <p className="text-primary text-xs uppercase tracking-[0.2em] font-medium mb-4">
+            <p className="text-primary-text text-xs uppercase tracking-[0.2em] font-medium mb-4">
               {dict["about.handmadeCollection"]}
             </p>
             <h1 className="font-display text-3xl lg:text-5xl text-ink leading-tight mb-4">
@@ -123,7 +134,7 @@ export default async function AboutPage(props: AboutPageProps) {
                 className="prose prose-lg max-w-none
                   prose-headings:font-display prose-headings:text-ink
                   prose-p:text-body prose-p:leading-relaxed
-                  prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                  prose-a:text-primary-text prose-a:no-underline hover:prose-a:underline
                   prose-strong:text-ink
                   prose-li:text-body
                   prose-img:rounded-lg"
@@ -142,7 +153,7 @@ export default async function AboutPage(props: AboutPageProps) {
                 {promisePillars.map(({ icon: Icon, title, description }) => (
                   <div key={title} className="flex gap-4">
                     <div className="w-10 h-10 rounded-full bg-surface-card flex items-center justify-center shrink-0 mt-0.5">
-                      <Icon size={18} className="text-primary" />
+                      <Icon size={18} className="text-primary-text" />
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-ink mb-1">
@@ -166,7 +177,7 @@ export default async function AboutPage(props: AboutPageProps) {
                 </p>
                 <a
                   href="mailto:info@infinytree.com"
-                  className="inline-block mt-3 text-xs text-primary font-medium hover:underline"
+                  className="inline-block mt-3 text-xs text-primary-text font-medium hover:underline"
                 >
                   info@infinytree.com
                 </a>

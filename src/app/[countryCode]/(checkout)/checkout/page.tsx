@@ -6,9 +6,11 @@ import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { NOINDEX_METADATA } from "@lib/util/seo"
 
 export const metadata: Metadata = {
   title: "Checkout",
+  ...NOINDEX_METADATA,
 }
 
 export default async function Checkout() {

@@ -63,7 +63,7 @@ const WithdrawalNotice = ({
       {seeBefore}
       <LocalizedClientLink
         href="/policies/returns"
-        className="text-primary underline hover:opacity-80 transition-opacity"
+        className="text-primary-text underline hover:opacity-80 transition-opacity"
       >
         {policyLinkLabel}
       </LocalizedClientLink>
@@ -89,7 +89,11 @@ const WithdrawalNotice = ({
   return (
     <div className={`bg-surface-card rounded-lg p-5 ${className}`}>
       <div className="flex items-start gap-x-3">
-        <Info className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+        {/* Decorative — the notice text immediately to the right says the same. */}
+        <Info
+          className="h-5 w-5 text-primary-text mt-0.5 shrink-0"
+          aria-hidden="true"
+        />
         <div>
           <p className="font-medium text-ink text-sm mb-1">{title}</p>
           <p className="text-sm text-body leading-relaxed">{legalBody}</p>

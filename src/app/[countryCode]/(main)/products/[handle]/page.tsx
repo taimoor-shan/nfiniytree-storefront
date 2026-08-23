@@ -2,9 +2,13 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
 import { getRegion, listRegions } from "@lib/data/regions"
+import { getLocale } from "@lib/data/locale-actions"
+import { translate } from "@lib/i18n"
 import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
 import { normalizeImageUrl } from "@lib/util/image-url"
+import { getSeoAlternates } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -62,17 +66,31 @@ function getImagesForVariant(
   return product.images ?? []
 }
 
+/**
+ * Meta descriptions are truncated by search engines somewhere around 155–160
+ * characters. Cutting on a word boundary — and only when the text is actually
+ * too long — reads better in the SERP than a hard slice mid-word.
+ */
+function toMetaDescription(text: string, maxLength = 155): string {
+  const collapsed = text.replace(/\s+/g, " ").trim()
+  if (collapsed.length <= maxLength) return collapsed
+
+  const cut = collapsed.slice(0, maxLength)
+  const lastSpace = cut.lastIndexOf(" ")
+  return `${(lastSpace > maxLength * 0.6 ? cut.slice(0, lastSpace) : cut).replace(/[,;:.\s]+$/, "")}…`
+}
+
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
-  const { handle } = params
-  const region = await getRegion(params.countryCode)
+  const { handle, countryCode } = params
+  const region = await getRegion(countryCode)
 
   if (!region) {
     notFound()
   }
 
   const product = await listProducts({
-    countryCode: params.countryCode,
+    countryCode,
     queryParams: { handle },
   }).then(({ response }) => response.products[0])
 
@@ -80,16 +98,44 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     notFound()
   }
 
+  const locale = await getLocale()
+  const title = `${product.title} | ${SITE_NAME}`
+
+  // The description used to be `product.title` — identical to the title, so
+  // every product page shipped a duplicate-of-the-title description and Google
+  // rewrote it. Prefer the real product copy, fall back to a localized template
+  // built from the product name only when there is no copy at all.
+  const source =
+    product.subtitle?.trim() ||
+    product.description?.trim() ||
+    (await translate("metadata.productDescription", locale)).replace(
+      "{product}",
+      product.title
+    )
+
+  const description = toMetaDescription(source)
+  const image = product.thumbnail ? normalizeImageUrl(product.thumbnail) : null
+
   return {
-    title: `${product.title} | Infinytree`,
-    description: `${product.title}`,
+    title,
+    description,
+    alternates: await getSeoAlternates(countryCode, `/products/${handle}`),
     openGraph: {
-      title: `${product.title} | Infinytree`,
-      description: `${product.title}`,
+      type: "website",
+      siteName: SITE_NAME,
+      title,
+      description,
+      url: `/${countryCode}/products/${handle}`,
       // Relative `/static/...`, resolved against `metadataBase` in the root
       // layout. Keeps social crawlers on the public storefront origin instead
       // of whatever origin Medusa's file provider happens to emit.
-      images: product.thumbnail ? [normalizeImageUrl(product.thumbnail)] : [],
+      images: image ? [{ url: image, alt: product.title }] : [],
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: image ? [image] : [],
     },
   }
 }

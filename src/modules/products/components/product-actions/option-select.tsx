@@ -44,7 +44,12 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               className={clx(
                 "h-9 py-2 px-6 text-xs",
                 {
-                  "btn-primary border border-primary hover:!bg-primary": value.value === current && !isUnavailable,
+                  // `hover:!bg-primary` was forcing the lighter brand coral back
+                  // under `.btn-primary`'s white label on hover, which is 3.28:1.
+                  // The selected state already has the correct fill from
+                  // `.btn-primary`, so the override only needs to stop the class's
+                  // own hover from changing it — `primary-strong` is that fill.
+                  "btn-primary border border-primary hover:!bg-primary-strong": value.value === current && !isUnavailable,
                   "btn-primary-outlined": value.value !== current && !isUnavailable,
                   "btn-secondary": isUnavailable,
                 }

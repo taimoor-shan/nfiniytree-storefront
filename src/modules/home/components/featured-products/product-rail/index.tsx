@@ -24,7 +24,11 @@ export default async function ProductRail({
     regionId: region.id,
     queryParams: {
       collection_id: collection.id,
-      fields: "*variants.calculated_price,*variants.prices",
+      // `fields` *replaces* the default select in `listProducts`, so `*categories`
+      // must be listed here or the category badge in ProductPreview never renders
+      // on the home rail (the store/category/collection grids keep the default,
+      // which includes it — hence the badge appearing everywhere else).
+      fields: "*variants.calculated_price,*variants.prices,*categories",
     },
   })
 

@@ -43,7 +43,7 @@ const OrderDetails = ({ order, showStatus, isGuest }: OrderDetailsProps) => {
           {new Date(order.created_at).toDateString()}
         </span>
       </Text>
-      <Text className="mt-2 text-primary">
+      <Text className="mt-2 text-primary-text">
         {orderNumber}{" "}
         <span data-testid="order-id">{order.display_id}</span>
       </Text>

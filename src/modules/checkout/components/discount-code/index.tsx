@@ -65,23 +65,28 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
     <div className="w-full bg-canvas flex flex-col">
       <div className="txt-medium">
         <form action={(a) => addPromotionCode(a)} className="w-full mb-5">
-          <Label className="flex gap-x-1 my-2 items-center">
+          {/* This used to be a <Label> wrapping the toggle button, which is
+              invalid and left the code field with no accessible name at all.
+              The toggle is now a plain disclosure button and the field carries
+              its own <Label htmlFor>. */}
+          <div className="flex gap-x-1 my-2 items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
               type="button"
               className="text-link"
+              aria-expanded={isOpen}
+              aria-controls="promotion-fields"
               data-testid="add-discount-button"
             >
               {t("checkout.addPromotion")}
             </button>
-
-            {/* <Tooltip content="You can add multiple promotion codes">
-              <InformationCircleSolid color="var(--fg-muted)" />
-            </Tooltip> */}
-          </Label>
+          </div>
 
           {isOpen && (
-            <>
+            <div id="promotion-fields">
+              <Label htmlFor="promotion-input" className="sr-only">
+                {t("checkout.addPromotion")}
+              </Label>
               <div className="flex w-full gap-x-2">
                 <Input
                   className="size-full"
@@ -89,6 +94,10 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                   name="code"
                   type="text"
                   autoFocus={false}
+                  aria-invalid={errorMessage ? true : undefined}
+                  aria-describedby={
+                    errorMessage ? "promotion-input-error" : undefined
+                  }
                   data-testid="discount-input"
                 />
                 <SubmitButton
@@ -100,10 +109,11 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
               </div>
 
               <ErrorMessage
+                id="promotion-input-error"
                 error={errorMessage}
                 data-testid="discount-error-message"
               />
-            </>
+            </div>
           )}
         </form>
 
@@ -167,8 +177,12 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                         data-testid="remove-discount-button"
                       >
                         <Trash size={14} />
+                        {/* Every row renders the same icon, so the name has to
+                            carry the code or the buttons are indistinguishable
+                            when several promotions are applied. */}
                         <span className="sr-only">
                           {t("checkout.removeDiscount")}
+                          {promotion.code ? ` — ${promotion.code}` : ""}
                         </span>
                       </button>
                     )}

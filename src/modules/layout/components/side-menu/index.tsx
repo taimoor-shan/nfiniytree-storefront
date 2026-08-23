@@ -86,6 +86,11 @@ const SideMenu = ({
                   <div
                     className="fixed inset-0 z-[9998] bg-surface-dark/0 pointer-events-auto"
                     onClick={close}
+                    // Purely a mouse convenience: Headless UI's Popover already
+                    // closes on Escape and on outside clicks, and the panel has
+                    // a real close button. Marked presentational so it is not
+                    // announced as an interactive element.
+                    aria-hidden="true"
                     data-testid="side-menu-backdrop"
                   />
                 )}
@@ -104,12 +109,34 @@ const SideMenu = ({
                       positioned ancestor left, so `absolute` would anchor to
                       the document and scroll away with the page. */}
                   <PopoverPanel className="flex flex-col fixed w-full sm:w-1/3 2xl:w-1/4 sm:min-w-min h-screen z-[9999] top-0 left-0 text-sm text-on-primary backdrop-blur-2xl overflow-hidden">
+                    {/* `/70`, not `/50`. The panel is portalled to <body> and
+                        overlays arbitrary page content, so at 50% opacity the
+                        effective background — and therefore the contrast of the
+                        white `text-on-primary` label above — depended on
+                        whatever happened to be behind it. Measured white-on-
+                        panel: 3.41:1 over a white product photo, 3.55:1 over the
+                        cream canvas. That clears the 3:1 large-text bar for the
+                        30px nav links but fails the 4.5:1 AA floor for this
+                        panel's `text-sm` base, the country/language selects and
+                        the copyright line. `backdrop-blur-2xl` does not help —
+                        a blur averages neighbouring pixels, so it preserves
+                        luminance rather than lowering it. At /70 the worst case
+                        (over pure white) is 6.62:1, so legibility no longer
+                        depends on page content, and the panel is still visibly
+                        translucent and frosted. */}
                     <div
                       data-testid="nav-menu-popup"
-                      className="flex flex-col h-full bg-surface-dark/50 justify-between p-6"
+                      className="flex flex-col h-full bg-surface-dark/70 justify-between p-6"
                     >
                       <div className="flex justify-end" id="xmark">
-                        <button data-testid="close-menu-button" onClick={close}>
+                        {/* Was icon-only with no accessible name. */}
+                        <button
+                          type="button"
+                          data-testid="close-menu-button"
+                          onClick={close}
+                          aria-label={t("a11y.closeMenu")}
+                          className="rounded-sm p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                        >
                           <XMark className="size-8" />
                         </button>
                       </div>
@@ -119,7 +146,7 @@ const SideMenu = ({
                             <li key={name}>
                               <LocalizedClientLink
                                 href={href}
-                                className="text-3xl leading-10 hover:text-muted-soft"
+                                className="text-3xl leading-10 hover:text-muted-soft rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                                 onClick={close}
                                 data-testid={`${name.toLowerCase()}-link`}
                               >
@@ -131,17 +158,14 @@ const SideMenu = ({
                       </ul>
                       <div className="flex flex-col gap-y-6">
                         {!!locales?.length && (
-                          <div
-                            className="flex justify-between"
-                            onMouseEnter={languageToggleState.open}
-                            onMouseLeave={languageToggleState.close}
-                          >
+                          <div className="flex justify-between">
                             <LanguageSelect
                               toggleState={languageToggleState}
                               locales={locales}
                               currentLocale={currentLocale}
                             />
                             <ArrowRightMini
+                              aria-hidden="true"
                               className={clx(
                                 "transition-transform duration-150",
                                 languageToggleState.state ? "-rotate-90" : ""
@@ -150,16 +174,13 @@ const SideMenu = ({
                           </div>
                         )}
                         {!!regions?.length && (
-                          <div
-                            className="flex justify-between"
-                            onMouseEnter={countryToggleState.open}
-                            onMouseLeave={countryToggleState.close}
-                          >
+                          <div className="flex justify-between">
                             <CountrySelect
                               toggleState={countryToggleState}
                               regions={regions}
                             />
                             <ArrowRightMini
+                              aria-hidden="true"
                               className={clx(
                                 "transition-transform duration-150",
                                 countryToggleState.state ? "-rotate-90" : ""

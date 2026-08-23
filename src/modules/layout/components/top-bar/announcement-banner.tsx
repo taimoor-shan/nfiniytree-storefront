@@ -38,6 +38,16 @@ export default function AnnouncementBanner({
   }, [rotate])
 
   useEffect(() => {
+    // WCAG 2.2.2: auto-updating content needs a way to stop. Hover-pause alone
+    // is mouse-only, so honour the OS reduced-motion setting by not rotating at
+    // all — the first message stays put.
+    if (
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return
+    }
+
     startInterval()
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current)
@@ -51,8 +61,13 @@ export default function AnnouncementBanner({
       className="relative overflow-hidden h-full flex-1 flex items-center justify-center text-sm"
       onMouseEnter={() => { pauseRef.current = true }}
       onMouseLeave={() => { pauseRef.current = false }}
-      role="marquee"
-      aria-live="polite"
+      onFocus={() => { pauseRef.current = true }}
+      onBlur={() => { pauseRef.current = false }}
+      // Deliberately not a live region. These are decorative promo messages, and
+      // `aria-live` here meant a screen reader user was interrupted every four
+      // seconds for as long as the page stayed open. The current message is
+      // still read normally when reached in document order.
+      aria-live="off"
     >
       {/* Current message */}
       <span
@@ -64,9 +79,13 @@ export default function AnnouncementBanner({
         {messages[currentIndex]}
       </span>
 
-      {/* Next message — only rendered during transition */}
+      {/* Next message — only rendered during transition, and hidden from
+          assistive tech so the outgoing/incoming pair is never read twice. */}
       {isLeaving && (
-        <span className="absolute whitespace-nowrap animate-slide-up-in">
+        <span
+          aria-hidden="true"
+          className="absolute whitespace-nowrap animate-slide-up-in"
+        >
           {messages[nextIndex]}
         </span>
       )}

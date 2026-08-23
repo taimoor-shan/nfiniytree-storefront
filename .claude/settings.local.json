@@ -25,7 +25,9 @@
       "Bash(node scripts/perf-measure.mjs baseline)",
       "Bash(grep -oE '<img[^>]{0,400}>' /tmp/hu.html)",
       "mcp__codegraph__codegraph_callers",
-      "mcp__codegraph__codegraph_node"
+      "mcp__codegraph__codegraph_node",
+      "Bash(echo \"build exit: $?\")",
+      "Read(//tmp/**)"
     ]
   },
   "enableAllProjectMcpServers": true,

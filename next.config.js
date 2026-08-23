@@ -114,6 +114,65 @@ const nextConfig = {
       },
     ]
   },
+  async redirects() {
+    // Domain canonicalization. `NEXT_PUBLIC_BASE_URL` is the canonical origin,
+    // so the `www.` host must 308 to it — one permanent hop, no chain. Skipped
+    // unless the canonical origin is an https host, so local development on
+    // `localhost:8000` is unaffected.
+    //
+    // HTTP → HTTPS is deliberately *not* handled here. It belongs at the
+    // TLS-terminating layer (Nginx / the platform edge): a Next.js redirect
+    // only runs after the plaintext request has already been accepted, which
+    // means the URL and any cookies have travelled in the clear. The `headers()`
+    // block below sends HSTS so browsers upgrade on their own from the second
+    // visit onward — but the edge must still issue the first 301.
+    if (!isBaseUrlHttps || !baseUrl || baseUrl.startsWith("www.")) {
+      return []
+    }
+
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: `www.${baseUrl}` }],
+        destination: `https://${baseUrl}/:path*`,
+        permanent: true, // 308
+      },
+    ]
+  },
+  async headers() {
+    const securityHeaders = [
+      // Crawlers and browsers should never sniff a content type — an HTML
+      // response mislabelled as an image is how `robots.txt` returning
+      // storefront markup went unnoticed for so long.
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+    ]
+
+    // HSTS is only meaningful — and only safe — on an https origin.
+    if (isBaseUrlHttps) {
+      securityHeaders.push({
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains",
+      })
+    }
+
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      {
+        // Both are generated per request from the live catalogue. A short
+        // shared-cache TTL keeps crawler traffic off the Medusa API without
+        // letting a new product wait a day to appear in the sitemap.
+        source: "/:file(robots.txt|sitemap.xml)",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
+          },
+        ],
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig

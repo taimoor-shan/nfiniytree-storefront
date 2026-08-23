@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { updateLocale } from "@lib/data/locale-actions"
 import { Locale } from "@lib/data/locales"
+import { useTranslation } from "@/lib/i18n"
 import {
   getLanguageSubtag,
   getLocalizedLanguageName,
@@ -30,8 +31,13 @@ type LanguageSelectProps = {
   locales: Locale[]
   currentLocale: string | null
   /**
-   * Optional label shown before the selected language name.
-   * Pass `null` to hide (useful in tight UI like the top nav).
+   * Optional label shown before the selected language name. Defaults to the
+   * translated "Language" — it used to default to the hardcoded English
+   * "Language:" and was rendered verbatim, so a German or Hungarian visitor saw
+   * an English label in an otherwise translated menu.
+   *
+   * Pass `null` to hide it (useful in tight UI like the top nav); the button
+   * still gets an accessible name from `aria-label`.
    */
   label?: string | null
   /**
@@ -52,15 +58,20 @@ const LanguageSelect = ({
   toggleState,
   locales,
   currentLocale,
-  label = "Language:",
+  label,
   buttonClassName,
   dropdownWrapperClassName,
 }: LanguageSelectProps) => {
+  const { t } = useTranslation()
   const [current, setCurrent] = useState<LanguageOption | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
-  const { state, close } = toggleState
+  // `undefined` means "not specified" → translated default. `null` still means
+  // "no visible label".
+  const visibleLabel = label === undefined ? t("common.language") : label
+
+  const { state, close, toggle } = toggleState
 
   const options = useMemo(() => {
     const seen = new Set<string>()
@@ -121,9 +132,26 @@ const LanguageSelect = ({
         }
         disabled={isPending}
       >
-        <ListboxButton className={["py-1 w-full", buttonClassName].filter(Boolean).join(" ")}>
+        {/* Same as CountrySelect: visibility is owned by `toggleState` and was
+            previously only reachable by hovering the wrapper, leaving keyboard
+            users with no way to open the list. */}
+        <ListboxButton
+          onClick={toggle}
+          aria-expanded={state}
+          // The visible label is only "Language" — without this the button's
+          // accessible name is just the label plus the current value, which does
+          // not say it opens a chooser. And when `label` is null it had no name
+          // beyond the language name itself.
+          aria-label={t("a11y.selectLanguage")}
+          className={[
+            "py-1 w-full rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+            buttonClassName,
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
           <div className="txt-compact-small flex items-start gap-x-2">
-            {label !== null ? <span>{label}</span> : null}
+            {visibleLabel !== null ? <span>{visibleLabel}</span> : null}
             {current && (
               <span className="txt-compact-small flex items-center gap-x-2">
                 {isPending ? "..." : current.localizedName}

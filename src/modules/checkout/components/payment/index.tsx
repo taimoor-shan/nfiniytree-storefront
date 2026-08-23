@@ -131,6 +131,7 @@ const Payment = ({
               <button
                 onClick={handleEdit}
                 className="text-link"
+                aria-label={`${t("account.edit")} — ${t("checkout.payment")}`}
                 data-testid="edit-payment-button"
               >
                 {t("account.edit")}

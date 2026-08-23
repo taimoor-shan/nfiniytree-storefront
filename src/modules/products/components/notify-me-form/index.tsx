@@ -84,13 +84,19 @@ export default function NotifyMeForm({
       <div className="flex">
         <input
           type="email"
+          name="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder={t("product.notifyMe.emailPlaceholder")}
           required
+          aria-required="true"
           disabled={disabled || status === "loading"}
           aria-label={t("product.notifyMe.emailPlaceholder")}
-          className="flex-grow min-w-0 border border-hairline px-4 rounded-l-sm bg-canvas text-base focus:outline-none focus:border-primary text-ink"
+          // A border-colour swap alone is too weak a focus indicator against a
+          // hairline border; the ring keeps focus unambiguous without changing
+          // the resting appearance.
+          className="flex-grow min-w-0 border border-hairline px-4 rounded-l-sm bg-canvas text-base focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary text-ink"
         />
         <Button
           type="submit"

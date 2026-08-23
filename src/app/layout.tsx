@@ -2,7 +2,11 @@ import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
 import { cookies } from "next/headers"
 import "styles/globals.css"
-import { Gelasio, Fraunces, DM_Sans, Inter, Bodoni_Moda } from "next/font/google"
+// Only the two fonts actually instantiated below are imported. `Gelasio`,
+// `Fraunces` and `Inter` were imported and never used — each unused
+// `next/font/google` import still runs at build time, fetching and subsetting a
+// font family that never reaches a stylesheet.
+import { DM_Sans, Bodoni_Moda } from "next/font/google"
 import { getDictionary } from "@lib/i18n/dictionaries"
 import { LocaleProvider } from "@lib/i18n/client"
 
@@ -34,7 +38,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     <html lang={lang} data-mode="light">
       <body className={`${badoni.variable} ${dmSans.variable}`}>
         <LocaleProvider initialLocale={locale} initialDict={dict}>
-          <main className="relative">{props.children}</main>
+          {/* Deliberately not <main>: the route-group layouts render the header
+              and footer inside this wrapper, so a <main> here would swallow the
+              banner/nav/footer landmarks and there would be no way to mark the
+              actual page content. Each group declares its own <main>. */}
+          <div className="relative">{props.children}</div>
         </LocaleProvider>
       </body>
     </html>

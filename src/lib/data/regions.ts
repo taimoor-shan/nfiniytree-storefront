@@ -31,6 +31,36 @@ export const retrieveRegion = async (id: string) => {
     .catch(medusaError)
 }
 
+/**
+ * Every ISO-2 country code the store actually serves, lowercased and sorted.
+ *
+ * Used to build hreflang clusters and the sitemap. Both must only ever contain
+ * URLs that resolve, so this reads the live region list rather than a hardcoded
+ * array. Returns an empty list if the backend is unreachable — callers fall
+ * back to the default region rather than emitting alternates for markets that
+ * may not exist.
+ */
+export const listCountryCodes = async (): Promise<string[]> => {
+  try {
+    const regions = await listRegions()
+
+    if (!regions?.length) {
+      return []
+    }
+
+    const codes = new Set<string>()
+    regions.forEach((region) => {
+      region.countries?.forEach((c) => {
+        if (c?.iso_2) codes.add(c.iso_2.toLowerCase())
+      })
+    })
+
+    return Array.from(codes).sort()
+  } catch {
+    return []
+  }
+}
+
 const regionMap = new Map<string, HttpTypes.StoreRegion>()
 
 export const getRegion = async (countryCode: string) => {

@@ -107,7 +107,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                     )}
                     <span
                       className={clx({
-                        "text-primary":
+                        "text-primary-text":
                           selectedPrice.price_type === "sale",
                       })}
                     >

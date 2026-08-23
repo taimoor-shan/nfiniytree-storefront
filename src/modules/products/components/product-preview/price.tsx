@@ -26,8 +26,8 @@ export default async function PreviewPrice({
           </Text>
         )}
         <Text
-          className={clx("text-primary text-lg md:text-xl", {
-            "text-primary": isDiscounted,
+          className={clx("text-primary-text text-lg md:text-xl", {
+            "text-primary-text": isDiscounted,
           })}
           data-testid="price"
         >

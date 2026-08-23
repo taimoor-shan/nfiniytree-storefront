@@ -58,6 +58,7 @@ const Addresses = ({
             <button
               onClick={handleEdit}
               className="text-link"
+              aria-label={`${t("account.edit")} — ${t("checkout.shippingAddress")}`}
               data-testid="edit-address-button"
             >
               {t("account.edit")}

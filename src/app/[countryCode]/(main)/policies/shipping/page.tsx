@@ -2,18 +2,23 @@ import { Metadata } from "next"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { translate } from "@lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
+import { getCmsPageMetadata } from "@lib/util/page-metadata"
 
 const SLUG = "shipping-policy"
 
-export async function generateMetadata(): Promise<Metadata> {
-  const locale = (await getLocale()) || "en"
-  const page = await retrievePageBySlug(SLUG, locale)
-  const title = await translate("footer.shippingPolicy", locale)
-  return {
-    title: page?.seo_title || page?.title || `${title} | Infinytree`,
-    description:
-      page?.seo_description || page?.excerpt || (await translate("policy.pageBeingUpdated", locale)),
-  }
+type Props = {
+  params: Promise<{ countryCode: string }>
+}
+
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const { countryCode } = await props.params
+  return getCmsPageMetadata({
+    slug: SLUG,
+    path: "/policies/shipping",
+    countryCode,
+    titleKey: "footer.shippingPolicy",
+    descriptionKey: "metadata.shippingDescription",
+  })
 }
 
 export default async function ShippingPolicyPage() {

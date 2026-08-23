@@ -52,7 +52,7 @@ export default async function RelatedProducts({
   return (
     <div className="product-page-constraint">
       <div className="flex flex-col items-center text-center mb-16">
-        <span className="text-primary uppercase tracking-wide mb-2">
+        <span className="text-primary-text uppercase tracking-wide mb-2">
           {await translate("product.relatedProducts", locale)}
         </span>
         <h2 className="text-3xl text-ink max-w-lg leading-tight">

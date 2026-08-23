@@ -23,18 +23,21 @@ const ProductInfo = async ({ product }: ProductInfoProps) => {
           </LocalizedClientLink>
         )}
       
+        {/* The product name is the page's single H1. It used to render as an h2
+            while the PDP emitted an empty h1 elsewhere, so crawlers saw a
+            product page with no headline. Classes are unchanged, so the visual
+            treatment is byte-identical. */}
         <Heading
-          level="h2"
+          level="h1"
           className="text-3xl leading-10 text-ink font-display mb-2"
           data-testid="product-title"
         >
           {product.title}
-         
         </Heading>
           {product.categories && product.categories.length > 0 && (
             <LocalizedClientLink
               href={`/categories/${product.categories[0].handle}`}
-              className="text-md tracking-wide text-primary uppercase mb-6 block hover:text-body"
+              className="text-md tracking-wide text-primary-text uppercase mb-6 block hover:text-body"
               data-testid="product-subtitle"
             >
               {product.categories[0].name}

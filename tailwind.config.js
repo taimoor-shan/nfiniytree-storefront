@@ -35,8 +35,33 @@ module.exports = {
           90: "#111827",
         },
         // DESIGN.md brand tokens
+        //
+        // `primary` is the signature coral and is UNCHANGED. It measures 3.28:1
+        // on white and 2.89:1 on `surface-soft` — fine for the large display
+        // type, fills, borders and dots it was designed for, but below the 4.5:1
+        // WCAG 2.2 AA floor for normal-size text. Rather than darken the brand
+        // colour everywhere (which would flatten the coral callout cards, badges
+        // and CTA bands the design system is built around), the two text-facing
+        // roles get their own tokens:
         primary: "#cc785c",
+        // Coral as *text* on any cream/white surface — links, prices, eyebrow
+        // labels. Same hue (15°) and saturation (52%) as `primary`, lightness
+        // dropped 58%→42%, so it still reads as the brand coral. Clears 4.5:1
+        // against every light surface in use: white 5.46, canvas 5.18,
+        // surface-soft 4.81, surface-card 4.52.
+        "primary-text": "#a65134",
+        // Coral as a *fill under white text* — the primary CTA background. Only
+        // needs to be dark enough that white text on it reaches 4.5:1 (4.53),
+        // which is a far smaller shift than `primary-text` and keeps buttons
+        // visually close to the original coral.
+        "primary-strong": "#bb5a3a",
         "primary-hover": "#a9583e",
+        // Was referenced as `hover:bg-primary-active` in country-popup but never
+        // defined here, so that class silently compiled to nothing and the
+        // button had no hover state at all. DESIGN.md names this role
+        // `primary-active`; keeping both names pointing at the same hex fixes
+        // the dead class without renaming existing `primary-hover` call sites.
+        "primary-active": "#a9583e",
         "primary-disabled": "#e6dfd8",
         // Surfaces
         canvas: "#faf9f5",

@@ -72,11 +72,17 @@ const Hero = ({ page }: HeroProps) => {
             {excerpt}
           </Heading>
         </span>
-        <LocalizedClientLink href="/store" passHref>
-          <Button size="large" className="mt-2">
+        {/* `asChild` collapses this to a single <a> styled as the button. It
+            used to be <Button> nested *inside* the link, which is invalid HTML
+            (interactive content inside an <a>) and gave two overlapping targets:
+            the button covered the anchor, leaving only an 8px strip of it
+            clickable, which failed WCAG 2.5.8 target size. One element, same
+            appearance, one focus stop. */}
+        <Button size="large" className="mt-2" asChild>
+          <LocalizedClientLink href="/store">
             {t("hero.shopCollection")}
-          </Button>
-        </LocalizedClientLink>
+          </LocalizedClientLink>
+        </Button>
       </div>
       {/* <button
         className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 text-on-dark hover:text-on-dark transition-all duration-1000 animate-bounce"

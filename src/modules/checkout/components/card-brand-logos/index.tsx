@@ -25,7 +25,8 @@ export const CardBrandLogos = ({ className, showStripe = false }: CardBrandLogos
       ))}
       {showStripe && (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded border border-hairline bg-surface-card text-[10px] font-medium text-muted uppercase tracking-wider ml-0.5">
-          <CreditCard className="w-3 h-3" />
+          {/* Decorative — "Stripe" is right there as text. */}
+          <CreditCard className="w-3 h-3" aria-hidden="true" />
           Stripe
         </span>
       )}

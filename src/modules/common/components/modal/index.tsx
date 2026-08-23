@@ -3,6 +3,7 @@ import { clx } from "@medusajs/ui"
 import React, { Fragment } from "react"
 
 import { ModalProvider, useModal } from "@lib/context/modal-context"
+import { useTranslation } from "@lib/i18n/client"
 import X from "@modules/common/icons/x"
 
 type ModalProps = {
@@ -81,12 +82,20 @@ const Modal = ({
 
 const Title: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { close } = useModal()
+  const { t } = useTranslation()
 
   return (
     <Dialog.Title className="flex items-center justify-between">
       <div className="text-xl">{children}</div>
       <div>
-        <button onClick={close} data-testid="close-modal-button">
+        {/* Icon-only, so it carried no accessible name at all. */}
+        <button
+          type="button"
+          onClick={close}
+          aria-label={t("common.close")}
+          className="rounded-sm p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          data-testid="close-modal-button"
+        >
           <X size={20} />
         </button>
       </div>

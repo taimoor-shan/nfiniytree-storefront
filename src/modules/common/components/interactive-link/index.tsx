@@ -21,7 +21,7 @@ const InteractiveLink = ({
       onClick={onClick}
       {...props}
     >
-      <Text className="text-primary">{children}</Text>
+      <Text className="text-primary-text">{children}</Text>
       <ArrowUpRightMini
         className="group-hover:rotate-45 ease-in-out duration-150"
         color="var(--fg-interactive)"

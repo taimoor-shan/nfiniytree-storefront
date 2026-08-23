@@ -49,9 +49,19 @@ export default async function ProductPreview({
           size="full"
           isFeatured={isFeatured}
           eager={eager}
+          // Decorative here, deliberately. The image, the category badge, the
+          // product name and the price all sit inside this one link, so the
+          // link already announces the product by name — repeating it in `alt`
+          // would make every card in the grid say the product name twice. The
+          // descriptive alt for image search lives on the PDP gallery, which is
+          // the canonical page for the product's images.
+          alt=""
         />
         {product.categories && product.categories.length > 0 && (
-          <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-primary text-white uppercase tracking-wider border border-primary">
+          // 12px white text on coral. `bg-primary` gives 3.28:1 there, below the
+          // 4.5:1 AA floor, so the fill uses `primary-strong` (4.53:1). The
+          // border stays `primary` — it is non-text and only needs 3:1.
+          <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-primary-strong text-white uppercase tracking-wider border border-primary">
             {product.categories[0].name}
           </span>
         )}

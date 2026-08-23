@@ -217,6 +217,7 @@ const Shipping: React.FC<ShippingProps> = ({
               <button
                 onClick={handleEdit}
                 className="text-link"
+                aria-label={`${t("account.edit")} — ${t("checkout.delivery")}`}
                 data-testid="edit-delivery-button"
               >
                 {t("account.edit")}
@@ -255,6 +256,7 @@ const Shipping: React.FC<ShippingProps> = ({
                       data-testid="delivery-option-radio"
                       className={clx(
                         "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-md px-8 mb-2 hover:shadow-borders-interactive-with-active",
+                        "radio-option-focus",
                         {
                           "border-primary":
                             showPickupOptions === PICKUP_OPTION_ON,
@@ -297,6 +299,7 @@ const Shipping: React.FC<ShippingProps> = ({
                         disabled={isDisabled}
                         className={clx(
                           "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-md px-8 mb-2 hover:shadow-borders-interactive-with-active",
+                          "radio-option-focus",
                           {
                             "border-primary":
                               option.id === shippingMethodId,
@@ -369,6 +372,7 @@ const Shipping: React.FC<ShippingProps> = ({
                           data-testid="delivery-option-radio"
                           className={clx(
                             "flex items-center justify-between text-small-regular cursor-pointer py-4 border rounded-md px-8 mb-2 hover:shadow-borders-interactive-with-active",
+                            "radio-option-focus",
                             {
                               "border-primary":
                                 option.id === shippingMethodId,

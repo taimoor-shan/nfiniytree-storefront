@@ -94,6 +94,13 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
             svg
             countryCode={selected.country}
             style={{ width: "48px", height: "48px" }}
+            // `react-country-flag` renders an <img> and sets no alt of its own,
+            // so each flag arrived as an unlabelled image (Lighthouse
+            // `image-alt`). Decorative here: the country name is rendered as
+            // text beside or below every flag in this dialog, so an alt would
+            // only make a screen reader say the country twice.
+            alt=""
+            aria-hidden="true"
           />
         )}
       </div>
@@ -118,6 +125,8 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
                 svg
                 countryCode={selected.country}
                 style={{ width: "16px", height: "16px" }}
+                alt=""
+                aria-hidden="true"
               />
             )}
             <span className="text-ink">{selected?.label ?? ""}</span>
@@ -137,6 +146,8 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
                   svg
                   countryCode={option.country ?? ""}
                   style={{ width: "16px", height: "16px" }}
+                  alt=""
+                  aria-hidden="true"
                 />
                 {option.label}
               </ListboxOption>
@@ -148,7 +159,12 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
       {/* Continue CTA — primary button, full-width */}
       <button
         onClick={handleContinue}
-        className="mt-6 w-full h-10 rounded-md bg-primary text-white text-sm font-medium px-5 py-3 leading-none hover:bg-primary-active transition-colors flex items-center justify-center"
+        // `bg-primary-strong`: the label is 14px white text, and white on the
+        // brand `primary` is 3.28:1 — under the 4.5:1 AA floor. `primary-active`
+        // is now defined in tailwind.config.js; previously this hover class
+        // referenced an undefined token and compiled to nothing, so the button
+        // had no hover state at all.
+        className="mt-6 w-full h-10 rounded-md bg-primary-strong text-white text-sm font-medium px-5 py-3 leading-none hover:bg-primary-active transition-colors flex items-center justify-center"
       >
         {t("countryPopup.continue", "Continue")}
       </button>

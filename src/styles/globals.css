@@ -31,7 +31,15 @@
   --border-error: #c64545;
 
   /* Buttons — color */
-  --button-inverted: #cc785c;
+  /* `#bb5a3a` (the `primary-strong` token), not the `#cc785c` signature coral.
+     This variable is the fill for every Medusa UI <Button variant="primary">,
+     whose label is 13–14px white — and white on `#cc785c` is 3.28:1, under the
+     4.5:1 WCAG 1.4.3 floor for normal-size text. `.btn-primary` in this file was
+     already corrected for exactly this reason, but the Medusa token was not, so
+     the app's real CTAs (Add to Cart, the mobile cart bar, the hero's "Shop
+     Collection", the contact form's submit) all still failed. Same hue and
+     saturation, darkened only far enough to reach 4.53:1. */
+  --button-inverted: #bb5a3a;
   --button-inverted-hover: #a9583e;
   --button-inverted-pressed: #a9583e;
   --button-neutral: #faf9f5;
@@ -46,11 +54,16 @@
 
   /* Buttons — box-shadow (flat design = no shadow) */
   --buttons-neutral: none;
-  --buttons-neutral-focus: none;
   --buttons-inverted: none;
-  --buttons-inverted-focus: none;
   --buttons-danger: none;
-  --buttons-danger-focus: none;
+
+  /* The three `*-focus` box-shadows used to be `none` as well, which silently
+     removed the focus indicator from every Medusa UI <Button> in the app —
+     including the checkout step buttons. The flat resting look is preserved;
+     only the focused state now draws a coral ring. */
+  --buttons-neutral-focus: 0 0 0 2px #faf9f5, 0 0 0 4px #cc785c;
+  --buttons-inverted-focus: 0 0 0 2px #faf9f5, 0 0 0 4px #cc785c;
+  --buttons-danger-focus: 0 0 0 2px #faf9f5, 0 0 0 4px #c64545;
 }
 
 @layer base {
@@ -58,11 +71,32 @@
     @apply font-sans;
   }
 
+  /* This set `--tw-ring-color` but never a ring *width*, so the only focus cue
+     on a field was a border tint — too subtle to satisfy 2.4.7 / 2.4.11.
+     `:focus-visible` keeps mouse clicks visually unchanged. */
   input:focus,
   textarea:focus,
   select:focus {
     --tw-ring-color: #cc785c;
     border-color: #cc785c;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #cc785c;
+    outline-offset: 1px;
+  }
+
+  /* Baseline focus ring for everything that does not set its own. Applied to
+     :focus-visible only, so it never appears on mouse interaction. */
+  a:focus-visible,
+  button:focus-visible,
+  summary:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2px solid #cc785c;
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 
   h1,
@@ -149,13 +183,23 @@
   }
 
   .contrast-btn {
-    @apply px-4 py-2 border border-hairline rounded-full hover:bg-primary hover:text-on-primary transition-colors duration-200 ease-in;
+    /* Hover fills with coral and flips the label to white, so it needs the
+       darker `primary-strong` for the same white-on-coral reason as
+       `.btn-primary`. */
+    @apply px-4 py-2 border border-hairline rounded-full hover:bg-primary-strong hover:text-on-primary transition-colors duration-200 ease-in;
   }
 
   /* DESIGN.md button component classes */
 
   .btn-primary {
-    @apply bg-primary text-on-primary font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
+    /*
+     * `bg-primary-strong` rather than `bg-primary`: the button label is 14px
+     * white text, and white on `#cc785c` is 3.28:1 — under the 4.5:1 AA floor
+     * for normal-size text. `primary-strong` is the same coral hue darkened
+     * just far enough to reach 4.53:1, so the CTA still reads as the brand
+     * colour.
+     */
+    @apply bg-primary-strong text-on-primary font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
   }
   .btn-primary:hover:not(:disabled) {
     @apply bg-primary-hover;
@@ -166,11 +210,13 @@
 
 /*Outlined Primary Button*/
 .btn-primary-outlined {
-  @apply border border-primary bg-transparent text-primary font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
+  /* Border stays `primary` (non-text, only needs 3:1); the label is text, so it
+     uses `primary-text` to clear 4.5:1 on cream. */
+  @apply border border-primary bg-transparent text-primary-text font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center transition-colors;
 }
 
 .btn-primary-outlined:hover:not(:disabled) {
-  @apply bg-primary text-on-primary;
+  @apply bg-primary-strong text-on-primary;
 }
 
 .btn-primary-outlined:disabled {
@@ -225,8 +271,28 @@
     @apply bg-surface-dark-soft;
   }
 
+  /*
+   * Focus ring for the option cards in checkout's radio groups (shipping
+   * method, pickup location, payment method, salutation, saved address).
+   *
+   * Headless UI's `Radio` is the real control and takes focus, but none of
+   * these call sites styled its focus state, and the presentational dot inside
+   * carried `outline-none` — so arrowing through payment methods or shipping
+   * options moved focus with nothing at all on screen to show where it had
+   * landed. `data-focus` is Headless UI v2's focus-visible attribute, so this
+   * appears for keyboard users and stays out of the way on mouse clicks.
+   *
+   * Uses the same `ring-primary` treatment as every other focus style in the
+   * app rather than introducing a new one.
+   */
+  .radio-option-focus {
+    @apply outline-none data-[focus]:ring-2 data-[focus]:ring-primary data-[focus]:ring-offset-1 data-[focus]:ring-offset-canvas;
+  }
+
   .text-link {
-    @apply text-primary font-sans text-sm font-medium bg-transparent border-none cursor-pointer underline-offset-4;
+    /* Inline coral link — text, so it needs `primary-text` (4.5:1+) rather than
+       the brand `primary` (2.89:1 on the cream surfaces these links sit on). */
+    @apply text-primary-text font-sans text-sm font-medium bg-transparent border-none cursor-pointer underline-offset-4;
   }
   .text-link:hover {
     @apply underline;

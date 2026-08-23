@@ -3,22 +3,44 @@ import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n/dictionaries"
+import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 
 const SLUG = "customer-service"
 
-export async function generateMetadata(): Promise<Metadata> {
+type CustomerServicePageProps = {
+  params: Promise<{ countryCode: string }>
+}
+
+export async function generateMetadata(
+  props: CustomerServicePageProps
+): Promise<Metadata> {
+  const { countryCode } = await props.params
   const locale = (await getLocale()) || "en"
   const page = await retrievePageBySlug(SLUG, locale)
 
+  const title =
+    page?.seo_title ||
+    page?.title ||
+    (await translate("metadata.customerServiceTitle", locale))
+  // Blank-but-present CMS fields are truthy, so a plain `||` chain would let an
+  // empty `seo_description` suppress the translated fallback.
+  const description =
+    resolveDescription([page?.seo_description, page?.excerpt]) ||
+    (await translate("metadata.customerServiceDescription", locale))
+
   return {
-    title:
-      page?.seo_title ||
-      page?.title ||
-      (await translate("metadata.customerServiceTitle", locale)),
-    description:
-      page?.seo_description ||
-      page?.excerpt ||
-      (await translate("metadata.customerServiceDescription", locale)),
+    title,
+    description,
+    alternates: await getSeoAlternates(countryCode, "/customer-service"),
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      title,
+      description,
+      url: `/${countryCode}/customer-service`,
+      images: page?.featured_image ? [{ url: page.featured_image }] : [],
+    },
   }
 }
 
@@ -80,7 +102,7 @@ export default async function CustomerServicePage() {
               className="prose prose-lg max-w-none
                 prose-headings:font-display prose-headings:text-ink
                 prose-p:text-body prose-p:leading-relaxed
-                prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                prose-a:text-primary-text prose-a:no-underline hover:prose-a:underline
                 prose-strong:text-ink
                 prose-li:text-body
                 prose-img:rounded-lg"

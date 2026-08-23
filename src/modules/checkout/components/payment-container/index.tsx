@@ -34,6 +34,7 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
       disabled={disabled}
       className={clx(
         "flex flex-col gap-y-2 text-small-regular cursor-pointer py-4 border rounded-md px-8 mb-2 hover:shadow-borders-interactive-with-active",
+        "radio-option-focus",
         {
           "border-primary":
             selectedPaymentOptionId === paymentProviderId,
@@ -52,7 +53,12 @@ const PaymentContainer: React.FC<PaymentContainerProps> = ({
             <PaymentTest className="hidden small:block" />
           )}
         </div>
-        <span className="justify-self-end text-ink">
+        {/* Decorative. Every entry in `paymentInfoMap` pairs its icon with the
+            provider title, which is rendered as text to the left — so the brand
+            marks are redundant to a screen reader. Hiding them here covers all
+            providers at once, including the raw <svg> ones that carry no
+            <title> and would otherwise be announced as unlabelled graphics. */}
+        <span className="justify-self-end text-ink" aria-hidden="true">
           {paymentInfoMap[paymentProviderId]?.icon}
         </span>
       </div>

@@ -466,7 +466,9 @@ const ShippingAddress = ({
         />
         {!customer && (
           <div className="">
-            <span className="txt-compact-medium text-ink/70">Already have an account? </span>
+            <span className="txt-compact-medium text-ink/70">
+              {t("cart.alreadyHaveAccount")}{" "}
+            </span>
             <LocalizedClientLink
               href={`/account?returnUrl=${encodeURIComponent(loginReturnUrl)}`}
               className="text-link hover:underline"
@@ -479,10 +481,10 @@ const ShippingAddress = ({
         </div>
 
         {/* Salutation */}
-        <div className="flex flex-col gap-y-2 col-span-2">
-          <span className="txt-compact-medium-plus text-ink">
+        <fieldset className="flex flex-col gap-y-2 col-span-2 border-0 p-0 m-0">
+          <legend className="txt-compact-medium-plus text-ink mb-2">
             {t("checkout.salutation")}
-          </span>
+          </legend>
           <RadioGroup
             value={formData.salutation}
             onChange={(value) =>
@@ -495,7 +497,7 @@ const ShippingAddress = ({
                 key={option.value}
                 value={option.value}
                 data-testid={`salutation-${option.value}`}
-                className="flex items-center gap-x-2 text-base-regular cursor-pointer"
+                className="flex items-center gap-x-2 text-base-regular cursor-pointer rounded-sm radio-option-focus"
               >
                 <MedusaRadio checked={formData.salutation === option.value} />
                 <span>{option.label}</span>
@@ -507,7 +509,7 @@ const ShippingAddress = ({
             name="salutation"
             value={formData.salutation}
           />
-        </div>
+        </fieldset>
 
         {/* First / Last name */}
         <Input
@@ -530,10 +532,10 @@ const ShippingAddress = ({
         />
 
         {/* Customer type — the B2C/B2B decision point */}
-        <div className="flex flex-col gap-y-2 col-span-2">
-          <span className="txt-compact-medium-plus text-ink">
+        <fieldset className="flex flex-col gap-y-2 col-span-2 border-0 p-0 m-0">
+          <legend className="txt-compact-medium-plus text-ink mb-2">
             {t("checkout.youAreA")}
-          </span>
+          </legend>
           <RadioGroup
             value={formData.customer_type}
             onChange={(value) =>
@@ -551,7 +553,7 @@ const ShippingAddress = ({
                 key={option.value}
                 value={option.value}
                 data-testid={`customer-type-${option.value}`}
-                className="flex items-center gap-x-2 text-base-regular cursor-pointer"
+                className="flex items-center gap-x-2 text-base-regular cursor-pointer rounded-sm radio-option-focus"
               >
                 <MedusaRadio
                   checked={formData.customer_type === option.value}
@@ -565,7 +567,7 @@ const ShippingAddress = ({
             name="customer_type"
             value={formData.customer_type}
           />
-        </div>
+        </fieldset>
 
         {/* Company name — optional for private, required for business */}
         <Input
@@ -633,25 +635,20 @@ const ShippingAddress = ({
           data-testid="shipping-country-select"
         />
 
-        {/* Phone — with the delivery-coordination rationale */}
-        <div className="flex flex-col gap-y-1">
-          <Input
-            label={t("account.phone")}
-            name="shipping_address.phone"
-            autoComplete="tel"
-            value={formData["shipping_address.phone"]}
-            onChange={handleChange}
-            data-testid="shipping-phone-input"
-          />
-          <span className="text-xs text-ui-fg-subtle">
-            {t("checkout.phoneHelper")}
-          </span>
-          {phoneError && (
-            <Text className="text-xs text-red-500 mt-1 mb-2">
-              {phoneError}
-            </Text>
-          )}
-        </div>
+        {/* Phone — with the delivery-coordination rationale. Helper and error
+            are passed as props so they are linked via aria-describedby rather
+            than floating next to the field as unassociated text. */}
+        <Input
+          label={t("account.phone")}
+          name="shipping_address.phone"
+          type="tel"
+          autoComplete="tel"
+          value={formData["shipping_address.phone"]}
+          onChange={handleChange}
+          helperText={t("checkout.phoneHelper")}
+          error={phoneError}
+          data-testid="shipping-phone-input"
+        />
 
         {/* VAT — business customers only */}
         {isBusiness && (
@@ -664,36 +661,38 @@ const ShippingAddress = ({
               onChange={handleChange}
               required
               data-testid="shipping-vat-input"
-              errors={vatError ? { vat_number: vatError } : undefined}
+              error={vatError}
             />
-            {vatError && (
-              <Text className="text-xs text-red-500 mt-1 mb-2">
-                {vatError}
-              </Text>
-            )}
 
-            {/* Async VIES verification status */}
-            {vatVerificationStatus === "checking" && (
-              <Text className="text-xs text-ui-fg-subtle mt-1 mb-2">
-                {t("checkout.vatVerifying")}
-              </Text>
-            )}
-            {vatVerificationStatus === "active" && (
-              <Text className="text-xs text-green-600 mt-1 mb-2">
-                ✓ {t("checkout.vatVerified")}
-                {vatCompanyName ? ` — ${vatCompanyName}` : ""}
-              </Text>
-            )}
-            {vatVerificationStatus === "invalid" && (
-              <Text className="text-xs text-red-500 mt-1 mb-2">
-                ✗ {t("checkout.vatNotRegistered")}
-              </Text>
-            )}
-            {vatVerificationStatus === "service_unavailable" && (
-              <Text className="text-xs text-amber-600 mt-1 mb-2">
-                ⚠ {t("checkout.vatServiceUnavailable")}
-              </Text>
-            )}
+            {/* Async VIES verification status. The wrapper is a permanent
+                polite live region so each status change is announced — a
+                region that only mounts with its message is often missed. */}
+            <div role="status" aria-live="polite" aria-atomic="true">
+              {vatVerificationStatus === "checking" && (
+                <Text className="text-xs text-ui-fg-subtle mt-1 mb-2">
+                  {t("checkout.vatVerifying")}
+                </Text>
+              )}
+              {vatVerificationStatus === "active" && (
+                <Text className="text-xs text-green-700 mt-1 mb-2">
+                  <span aria-hidden="true">✓ </span>
+                  {t("checkout.vatVerified")}
+                  {vatCompanyName ? ` — ${vatCompanyName}` : ""}
+                </Text>
+              )}
+              {vatVerificationStatus === "invalid" && (
+                <Text className="text-xs text-error mt-1 mb-2">
+                  <span aria-hidden="true">✗ </span>
+                  {t("checkout.vatNotRegistered")}
+                </Text>
+              )}
+              {vatVerificationStatus === "service_unavailable" && (
+                <Text className="text-xs text-amber-700 mt-1 mb-2">
+                  <span aria-hidden="true">⚠ </span>
+                  {t("checkout.vatServiceUnavailable")}
+                </Text>
+              )}
+            </div>
           </div>
         )}
 
@@ -737,11 +736,9 @@ const ShippingAddress = ({
                   value={password}
                   onChange={(e) => handlePasswordChange(e.target.value)}
                   required
+                  helperText={t("checkout.passwordRule")}
                   data-testid="checkout-password-input"
                 />
-                <span className="text-xs text-ui-fg-subtle -mt-2">
-                  {t("checkout.passwordRule")}
-                </span>
                 <Input
                   label={t("checkout.repeatNewPassword")}
                   name="password_repeat"
@@ -750,13 +747,9 @@ const ShippingAddress = ({
                   value={passwordRepeat}
                   onChange={(e) => handlePasswordRepeatChange(e.target.value)}
                   required
+                  error={passwordError}
                   data-testid="checkout-password-repeat-input"
                 />
-                {passwordError && (
-                  <Text className="text-xs text-red-500 -mt-2">
-                    {passwordError}
-                  </Text>
-                )}
               </>
             )}
           </section>

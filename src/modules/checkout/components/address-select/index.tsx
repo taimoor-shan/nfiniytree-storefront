@@ -40,7 +40,11 @@ const AddressSelect = ({
     <Listbox onChange={handleSelect} value={selectedAddress?.id}>
       <div className="relative">
         <Listbox.Button
-          className="relative w-full flex justify-between items-center px-4 py-[10px] text-left bg-canvas cursor-default focus:outline-none border rounded-md focus-visible:ring-2 focus-visible:ring-opacity-75 focus-visible:ring-white focus-visible:ring-offset-gray-300 focus-visible:ring-offset-2 focus-visible:border-gray-300 text-base-regular"
+          // The previous ring was `ring-white` with a `gray-300` offset, which
+          // is invisible against the cream canvas. Coral matches the focus
+          // treatment used by the other form primitives.
+          className="relative w-full flex justify-between items-center px-4 py-[10px] text-left bg-canvas cursor-default border rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 focus-visible:ring-offset-canvas text-base-regular"
+          aria-label={t("checkout.chooseAddress")}
           data-testid="shipping-address-select"
         >
           {({ open }) => (
@@ -73,7 +77,7 @@ const AddressSelect = ({
                 <Listbox.Option
                   key={address.id}
                   value={address.id}
-                  className="cursor-default select-none relative pl-6 pr-10 hover:bg-surface-soft py-4"
+                  className="cursor-default select-none relative pl-6 pr-10 hover:bg-surface-soft data-[focus]:bg-surface-soft py-4"
                   data-testid="shipping-address-option"
                 >
                   <div className="flex gap-x-4 items-start">

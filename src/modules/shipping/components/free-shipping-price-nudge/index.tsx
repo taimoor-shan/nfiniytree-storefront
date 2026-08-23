@@ -271,15 +271,18 @@ function FreeShippingPopup({
         </div>
 
         <div className="flex gap-3">
+          {/* `outline-none` here removed the only focus indicator these two
+              links had. Replaced with a focus-visible ring that reads against
+              the dark nudge surface. */}
           <LocalizedClientLink
-            className="rounded-2xl bg-transparent shadow-none outline-none border-[1px] border-hairline text-[15px] py-2.5 px-4"
+            className="rounded-2xl bg-transparent shadow-none border-[1px] border-hairline text-[15px] py-2.5 px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-on-dark focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dark"
             href="/cart"
           >
             {t("common.viewCart")}
           </LocalizedClientLink>
 
           <LocalizedClientLink
-            className="flex-grow rounded-2xl bg-canvas text-ink shadow-none outline-none border-[1px] border-hairline text-[15px] py-2.5 px-4 text-center"
+            className="flex-grow rounded-2xl bg-canvas text-ink shadow-none border-[1px] border-hairline text-[15px] py-2.5 px-4 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-dark"
             href="/store"
           >
             {t("common.viewProducts")}

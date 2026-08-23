@@ -36,8 +36,8 @@ export default function ProductPrice({
     <div className="flex gap-2 items-center mt-4 mb-2">
       <div className="flex items-center gap-x-2 text-ink">
         <span
-          className={clx("text-lg font-bold text-primary", {
-            "text-primary": isDiscounted,
+          className={clx("text-lg font-bold text-primary-text", {
+            "text-primary-text": isDiscounted,
           })}
         >
           {!variant && t("product.from") + " "}
@@ -60,7 +60,7 @@ export default function ProductPrice({
                 {selectedPrice.original_price}
               </span>
             </p>
-            <span className="text-primary">
+            <span className="text-primary-text">
               -{selectedPrice.percentage_diff}%
             </span>
           </>

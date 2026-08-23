@@ -17,11 +17,18 @@ const SignInPrompt = async () => {
         </Text>
       </div>
       <div>
-        <LocalizedClientLink href="/account">
-          <Button variant="primary" className="h-10" data-testid="sign-in-button">
+        {/* `asChild` — see the hero CTA: a <Button> nested inside the link is
+            invalid HTML and produces two overlapping targets. */}
+        <Button
+          variant="primary"
+          className="h-10"
+          data-testid="sign-in-button"
+          asChild
+        >
+          <LocalizedClientLink href="/account">
             {await translate("cart.signIn", locale)}
-          </Button>
-        </LocalizedClientLink>
+          </LocalizedClientLink>
+        </Button>
       </div>
     </div>
   )

@@ -42,7 +42,10 @@ const Features = ({ categoryName, categoryDescription }: FeaturesProps) => {
         {features.map(({ icon: Icon, title, description }) => (
           <div key={title} className="flex flex-col items-center text-center gap-4">
             <div className="w-14 h-14 rounded-full bg-surface-card flex items-center justify-center">
-              <Icon size={24} className="text-ink" />
+              {/* Decorative. The heading below carries the meaning; lucide
+                  renders an <svg> with no title, so without this a screen
+                  reader announces an unlabelled graphic before every feature. */}
+              <Icon size={24} className="text-ink" aria-hidden="true" />
             </div>
             <h3 className="text-lg font-semibold text-ink">{title}</h3>
             <p className="text-sm text-body leading-relaxed">{description}</p>

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button, Heading, Input, Textarea, Text } from "@medusajs/ui"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { sdk } from "@lib/config"
 import { useTranslation } from "@lib/i18n/client"
 
@@ -9,6 +9,16 @@ export default function ContactForm() {
   const { t } = useTranslation()
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle")
   const [errorMessage, setErrorMessage] = useState("")
+  const successPanelRef = useRef<HTMLDivElement>(null)
+
+  // Submitting swaps the form out for a confirmation panel. Without moving
+  // focus, a keyboard/screen-reader user is left on a button that no longer
+  // exists and never hears that the message was sent.
+  useEffect(() => {
+    if (status === "success") {
+      successPanelRef.current?.focus()
+    }
+  }, [status])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -30,7 +40,7 @@ export default function ContactForm() {
         method: "POST",
         body: data,
       })
-      
+
       setStatus("success")
       ;(e.target as HTMLFormElement).reset()
     } catch (err: any) {
@@ -48,8 +58,15 @@ export default function ContactForm() {
 
   if (status === "success") {
     return (
-      <div className="flex flex-col gap-y-4 p-8 border border-hairline rounded-lg bg-surface-card text-center">
-        <Heading level="h2" className="text-xl">{t("contact.form.success")}</Heading>
+      <div
+        role="status"
+        ref={successPanelRef}
+        tabIndex={-1}
+        className="flex flex-col gap-y-4 p-8 border border-hairline rounded-lg bg-surface-card text-center outline-none"
+      >
+        <Heading level="h2" className="text-xl">
+          {t("contact.form.success")}
+        </Heading>
         <Text className="text-body">
           {t("contact.form.successText")}
         </Text>
@@ -65,44 +82,85 @@ export default function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-y-6">
+    // `noValidate` was suppressing browser validation while the fields carried
+    // no `required` at all — the asterisks were decoration only. The fields now
+    // declare their real constraints, so native validation is left enabled.
+    <form onSubmit={handleSubmit} className="flex flex-col gap-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col gap-y-2">
           <label htmlFor="name" className="text-sm font-medium text-ink">
-            {t("contact.form.name")} <span className="text-error">*</span>
+            {t("contact.form.name")}{" "}
+            <span className="text-error" aria-hidden="true">
+              *
+            </span>
           </label>
-          <Input id="name" name="name" placeholder={t("contact.form.namePlaceholder")} />
+          <Input
+            id="name"
+            name="name"
+            autoComplete="name"
+            required
+            aria-required="true"
+            placeholder={t("contact.form.namePlaceholder")}
+          />
         </div>
 
         <div className="flex flex-col gap-y-2">
           <label htmlFor="email" className="text-sm font-medium text-ink">
-            {t("contact.form.email")} <span className="text-error">*</span>
+            {t("contact.form.email")}{" "}
+            <span className="text-error" aria-hidden="true">
+              *
+            </span>
           </label>
-          <Input id="email" name="email" size="base" placeholder={t("contact.form.emailPlaceholder")} />
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            aria-required="true"
+            size="base"
+            placeholder={t("contact.form.emailPlaceholder")}
+          />
         </div>
       </div>
 
       <div className="flex flex-col gap-y-2">
         <label htmlFor="subject" className="text-sm font-medium text-ink">
-          {t("contact.form.subject")} <span className="text-error">*</span>
+          {t("contact.form.subject")}{" "}
+          <span className="text-error" aria-hidden="true">
+            *
+          </span>
         </label>
-        <Input id="subject" name="subject" placeholder={t("contact.form.subjectPlaceholder")} />
+        <Input
+          id="subject"
+          name="subject"
+          required
+          aria-required="true"
+          placeholder={t("contact.form.subjectPlaceholder")}
+        />
       </div>
 
       <div className="flex flex-col gap-y-2">
         <label htmlFor="message" className="text-sm font-medium text-ink">
-          {t("contact.form.message")} <span className="text-error">*</span>
+          {t("contact.form.message")}{" "}
+          <span className="text-error" aria-hidden="true">
+            *
+          </span>
         </label>
         <Textarea
           id="message"
           name="message"
+          required
+          aria-required="true"
           placeholder={t("contact.form.messagePlaceholder")}
           rows={6}
         />
       </div>
 
       {status === "error" && (
-        <Text className="text-error text-sm">{errorMessage}</Text>
+        <Text role="alert" className="text-error text-sm">
+          {errorMessage}
+        </Text>
       )}
 
       <Button

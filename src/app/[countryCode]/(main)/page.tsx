@@ -13,16 +13,33 @@ import { getRegion } from "@lib/data/regions"
 import { retrieveStore } from "@lib/data/store"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
+import { getSeoAlternates } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata(props: {
+  params: Promise<{ countryCode: string }>
+}): Promise<Metadata> {
+  const { countryCode } = await props.params
   const store = await retrieveStore()
-  const storeName = store?.name || "Infinytree"
+  const storeName = store?.name || SITE_NAME
   const locale = await getLocale()
+  const description = await translate("metadata.homeDescription", locale)
 
   return {
     title: storeName,
-    description: await translate("metadata.homeDescription", locale),
+    description,
+    // Self-referencing canonical plus the country cluster. Without this the
+    // homepage had no canonical at all, so `/hu`, `/at` and `/de` competed with
+    // each other as duplicates of the same content.
+    alternates: await getSeoAlternates(countryCode),
+    openGraph: {
+      type: "website",
+      siteName: storeName,
+      title: storeName,
+      description,
+      url: `/${countryCode}`,
+    },
   }
 }
 

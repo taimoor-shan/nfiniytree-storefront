@@ -1,8 +1,16 @@
 import { acceptTransferRequest } from "@lib/data/orders"
 import { Heading, Text } from "@medusajs/ui"
+import type { Metadata } from "next"
 import TransferImage from "@modules/order/components/transfer-image"
 import { translate } from "@/lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
+import { NOINDEX_METADATA } from "@lib/util/seo"
+
+// This route performs a state change (accepting the transfer) during render, so
+// it must be kept out of any index — a crawler following the link would accept
+// the transfer as a side effect. See the audit note: the mutation belongs behind
+// a POST, which is a functional change outside this audit's scope.
+export const metadata: Metadata = NOINDEX_METADATA
 
 export default async function TransferPage({
   params,

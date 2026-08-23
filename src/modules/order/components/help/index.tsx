@@ -14,10 +14,10 @@ const Help = () => {
       <div className="text-base-regular my-2">
         <ul className="gap-y-2 flex flex-col">
           <li>
-            <LocalizedClientLink className="hover:underline text-primary" href="/contact">{t("nav.contact")}</LocalizedClientLink>
+            <LocalizedClientLink className="hover:underline text-primary-text" href="/contact">{t("nav.contact")}</LocalizedClientLink>
           </li>
           <li>
-            <LocalizedClientLink className="hover:underline text-primary" href="/policies/returns">
+            <LocalizedClientLink className="hover:underline text-primary-text" href="/policies/returns">
               {t("order.returnsExchanges")}
             </LocalizedClientLink>
           </li>

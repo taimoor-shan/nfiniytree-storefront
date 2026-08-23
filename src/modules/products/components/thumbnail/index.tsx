@@ -28,6 +28,14 @@ type ThumbnailProps = {
   eager?: boolean
   /** Override the default `sizes` for an unusual layout. */
   sizes?: string
+  /**
+   * What the image shows. Pass the product (and, where relevant, variant) name —
+   * `alt="Olive Tree 120cm"` tells a screen-reader user and an image crawler
+   * which product this card is for, where the previous hardcoded "Product image"
+   * told neither. Omitted only when the same information is already adjacent in
+   * text and the image is therefore decorative, in which case pass `alt=""`.
+   */
+  alt?: string
   "data-testid"?: string
 }
 
@@ -58,6 +66,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
   className,
   eager,
   sizes,
+  alt,
   "data-testid": dataTestid,
 }) => {
   const initialImage = thumbnail || images?.[0]?.url
@@ -84,6 +93,7 @@ const Thumbnail: React.FC<ThumbnailProps> = ({
         size={size}
         eager={eager}
         sizes={sizes}
+        alt={alt}
       />
     </Container>
   )
@@ -94,13 +104,18 @@ const ImageOrPlaceholder = ({
   size = "small",
   eager,
   sizes,
-}: Pick<ThumbnailProps, "size" | "eager" | "sizes"> & { image?: string }) => {
+  alt,
+}: Pick<ThumbnailProps, "size" | "eager" | "sizes" | "alt"> & {
+  image?: string
+}) => {
   const { t } = useTranslation()
 
   return image ? (
     <Image
       src={normalizeImageUrl(image)}
-      alt={t("product.productImage")}
+      // `alt` may legitimately be "" (decorative — the product name sits next to
+      // the image in text), so only fall back when it was not passed at all.
+      alt={alt ?? t("product.productImage")}
       className="absolute inset-0 object-cover object-center"
       draggable={false}
       sizes={sizes ?? DEFAULT_SIZES[size]}
@@ -110,7 +125,11 @@ const ImageOrPlaceholder = ({
     />
   ) : (
     <div className="w-full h-full absolute inset-0 flex items-center justify-center">
-      <PlaceholderImage size={size === "small" ? 16 : 24} />
+      {/* Decorative — it stands in for a missing image and conveys nothing, so
+          it is hidden from assistive technology rather than announced. */}
+      <div aria-hidden="true">
+        <PlaceholderImage size={size === "small" ? 16 : 24} />
+      </div>
     </div>
   )
 }

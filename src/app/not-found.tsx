@@ -26,7 +26,7 @@ export default async function NotFound() {
         className="flex gap-x-1 items-center group"
         href="/"
       >
-        <Text className="text-primary">{await translate("common.goToFrontpage", locale)}</Text>
+        <Text className="text-primary-text">{await translate("common.goToFrontpage", locale)}</Text>
         <ArrowUpRightMini
           className="group-hover:rotate-45 ease-in-out duration-150"
           color="var(--fg-interactive)"

@@ -85,12 +85,21 @@ export default async function Footer() {
         </div> */}
         <div className="grid grid-cols-1 gap-8 lg:col-span-4 lg:col-start-8 lg:row-span-full mt-12 lg:mt-0">
           <div className="grid grid-cols-2 gap-8 lg:gap-2">
-            <div>
-              <h3 className="text-lg md:text-xl text-ink mb-4">{dict["footer.shop"]}</h3>
+            {/* Each link group is a labelled navigation region, and the headings
+                are h2 rather than h3 so the outline does not skip a level from
+                the page's h1. Type sizes come from the classes, so nothing
+                changes visually. */}
+            <nav aria-labelledby="footer-shop-heading">
+              <h2
+                id="footer-shop-heading"
+                className="text-lg md:text-xl text-ink mb-4"
+              >
+                {dict["footer.shop"]}
+              </h2>
               {/* <ul className="space-y-4">
                 {collections?.slice(0, 6).map((c) => (
                   <li key={c.id}>
-                    <LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-md" href={`/collections/${c.handle}`}>
+                    <LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-md" href={`/collections/${c.handle}`}>
                       {c.title}
                     </LocalizedClientLink>
                   </li>
@@ -99,7 +108,7 @@ export default async function Footer() {
                     if (c.parent_category) return null;
                     return (
                         <li key={c.id}>
-                            <LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-md" href={`/categories/${c.handle}`}>
+                            <LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-md" href={`/categories/${c.handle}`}>
                                 {c.name}
                             </LocalizedClientLink>
                         </li>
@@ -107,21 +116,26 @@ export default async function Footer() {
                 })}
               </ul> */}
                <ul className="space-y-2">
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4" href="/">{dict["nav.home"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/store">{dict["nav.store"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/about">{dict["nav.about"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/contact">{dict["nav.contact"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4" href="/">{dict["nav.home"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/store">{dict["nav.store"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/about">{dict["nav.about"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/contact">{dict["nav.contact"]}</LocalizedClientLink></li>
               </ul>
-            </div>
-            <div>
-              <h3 className="text-lg md:text-xl text-ink mb-4">{dict["footer.company"]}</h3>
+            </nav>
+            <nav aria-labelledby="footer-company-heading">
+              <h2
+                id="footer-company-heading"
+                className="text-lg md:text-xl text-ink mb-4"
+              >
+                {dict["footer.company"]}
+              </h2>
               <ul className="space-y-2">
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4" href="/policies/returns">{dict["footer.returnsRefunds"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/policies/shipping">{dict["footer.shippingPolicy"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/policies/imprint">{dict["footer.imprint"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary hover:underline underline-offset-4 text-base" href="/customer-service">{dict["account.customerService"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4" href="/policies/returns">{dict["footer.returnsRefunds"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/policies/shipping">{dict["footer.shippingPolicy"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/policies/imprint">{dict["footer.imprint"]}</LocalizedClientLink></li>
+                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/customer-service">{dict["account.customerService"]}</LocalizedClientLink></li>
               </ul>
-            </div>
+            </nav>
           </div>
         </div>
 

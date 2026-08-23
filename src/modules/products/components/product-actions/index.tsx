@@ -52,6 +52,10 @@ export default function ProductActions({
   const [options, setOptions] = useState<Record<string, string | undefined>>({})
   const [isAdding, setIsAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
+  // Announced to assistive tech after a successful add. Sighted users see the
+  // cart badge and dropdown update; a screen-reader user previously got nothing
+  // at all — the button just stopped spinning.
+  const [addedMessage, setAddedMessage] = useState("")
   const [quantity, setQuantity] = useState(1)
   const countryCode = useParams().countryCode as string
 
@@ -198,6 +202,7 @@ export default function ProductActions({
     if (!selectedVariant?.id) return null
 
     setAddError(null)
+    setAddedMessage("")
     setIsAdding(true)
 
     try {
@@ -207,6 +212,9 @@ export default function ProductActions({
         countryCode,
       })
       setQuantity(1)
+      setAddedMessage(
+        t("a11y.addedToCart").replace("{product}", product.title)
+      )
     } catch (err) {
       // There was no catch here at all, so a rejected `addToCart` skipped
       // `setIsAdding(false)` and left the button spinning indefinitely with no
@@ -264,7 +272,13 @@ export default function ProductActions({
         {selectedVariant && !inStock ? (
           <div className="max-w-[350px]">
             <div className="flex flex-col gap-y-4" data-testid="oos-status">
-              <h3 className="text-xl text-error font-medium" role="status">
+              {/* `role="status"` used to sit on this heading, which overrode its
+                  heading semantics — screen readers stopped announcing it as a
+                  heading, and because the node only mounts when stock runs out,
+                  the live region was never present to announce anything anyway.
+                  The permanently-mounted region at the bottom of this component
+                  does that job; this is a plain heading again. */}
+              <h3 className="text-xl text-error font-medium">
                 {t("product.notifyMe.outOfStock")}
               </h3>
               <p className="text-sm text-body">
@@ -334,6 +348,16 @@ export default function ProductActions({
             {addError}
           </p>
         )}
+
+        {/* Add-to-cart status, announced politely. This region is mounted for
+            the life of the component and starts empty — a live region that
+            appears at the same moment as its text is frequently missed, because
+            the screen reader has nothing to observe a change against. Visually
+            hidden: the sighted equivalent is the cart badge and the dropdown
+            that opens. */}
+        <p className="sr-only" role="status" aria-live="polite">
+          {addedMessage}
+        </p>
         <MobileActions
           product={product}
           variant={selectedVariant}

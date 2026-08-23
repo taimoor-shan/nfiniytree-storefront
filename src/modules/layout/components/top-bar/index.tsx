@@ -24,6 +24,8 @@ type TopBarProps = {
 function GlobeIcon() {
   return (
     <svg
+      aria-hidden="true"
+      focusable="false"
       className="hidden xl:block w-4 h-4 stroke-1"
       viewBox="0 0 18 18"
       stroke="currentColor"
@@ -54,6 +56,8 @@ function GlobeIcon() {
 function CurrencyIcon() {
   return (
     <svg
+      aria-hidden="true"
+      focusable="false"
       className="hidden xl:block w-4 h-4 stroke-1"
       viewBox="0 0 16 16"
       stroke="currentColor"
@@ -201,7 +205,8 @@ export default function TopBar({
             href="mailto:info@infinytree.com"
             className="flex items-center gap-x-1.5 text-sm font-light hover:opacity-80 transition-opacity"
           >
-            <Mail className="w-4 h-4" strokeWidth={1} />
+            {/* Decorative — the address itself is the link text. */}
+            <Mail className="w-4 h-4" strokeWidth={1} aria-hidden="true" />
             <span>info@infinytree.com</span>
           </a>
         </div>
@@ -213,6 +218,7 @@ export default function TopBar({
         <div className="flex-1 h-full small:flex items-center justify-end gap-x-1">
           {locales && locales.length > 0 && (
             <SimpleDropdown
+              label={t("a11y.selectLanguage")}
               trigger={
                 <span className="flex items-center gap-x-1.5">
                   <GlobeIcon />
@@ -258,6 +264,7 @@ export default function TopBar({
           {regions && regions.length > 0 && (
             <SimpleDropdown
               align="right"
+              label={t("topbar.selectCountry")}
               trigger={
                 <span className="flex items-center gap-x-1.5">
                   <CurrencyIcon />

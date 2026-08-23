@@ -3,7 +3,7 @@
 import { useTranslation } from "@/lib/i18n"
 import { Disclosure } from "@headlessui/react"
 import { Badge, Button, clx } from "@medusajs/ui"
-import { useEffect } from "react"
+import { useEffect, useId } from "react"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { useFormStatus } from "react-dom"
@@ -35,6 +35,10 @@ const AccountInfo = ({
 
   const { pending } = useFormStatus()
 
+  // The profile page stacks several of these, so a bare "Edit" button is
+  // ambiguous out of context and the panel it controls is unidentified.
+  const panelId = useId()
+
   const handleToggle = () => {
     clearState()
     setTimeout(() => toggle(), 100)
@@ -65,6 +69,9 @@ const AccountInfo = ({
             className="w-[100px] min-h-[25px] py-1"
             onClick={handleToggle}
             type={state ? "reset" : "button"}
+            aria-expanded={state}
+            aria-controls={panelId}
+            aria-label={`${state ? t("account.cancel") : t("account.edit")} — ${label}`}
             data-testid="edit-button"
             data-active={state}
           >
@@ -73,10 +80,12 @@ const AccountInfo = ({
         </div>
       </div>
 
-      {/* Success state */}
+      {/* Success state — the wrapper stays mounted as a polite live region so
+          the badge appearing after a save is announced. */}
       <Disclosure>
         <Disclosure.Panel
           static
+          role="status"
           className={clx(
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
             {
@@ -86,9 +95,13 @@ const AccountInfo = ({
           )}
           data-testid="success-message"
         >
-          <Badge className="p-2 my-4" color="green">
-            <span>{t("account.updatedSuccessfully").replace("{label}", label)}</span>
-          </Badge>
+          {/* Rendered conditionally: an opacity-0 badge still sits in the
+              accessibility tree and would be read out permanently. */}
+          {isSuccess && (
+            <Badge className="p-2 my-4" color="green">
+              <span>{t("account.updatedSuccessfully").replace("{label}", label)}</span>
+            </Badge>
+          )}
         </Disclosure.Panel>
       </Disclosure>
 
@@ -96,6 +109,7 @@ const AccountInfo = ({
       <Disclosure>
         <Disclosure.Panel
           static
+          role="alert"
           className={clx(
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-hidden",
             {
@@ -105,15 +119,23 @@ const AccountInfo = ({
           )}
           data-testid="error-message"
         >
-          <Badge className="p-2 my-4" color="red">
-            <span>{errorMessage}</span>
-          </Badge>
+          {isError && (
+            <Badge className="p-2 my-4" color="red">
+              <span>{errorMessage}</span>
+            </Badge>
+          )}
         </Disclosure.Panel>
       </Disclosure>
 
       <Disclosure>
         <Disclosure.Panel
           static
+          id={panelId}
+          // Collapsed via max-height only, so the inputs stayed focusable and
+          // keyboard users tabbed into an invisible form. `inert` removes the
+          // whole subtree from tab order and the accessibility tree while the
+          // existing collapse animation is preserved.
+          inert={!state}
           className={clx(
             "transition-[max-height,opacity] duration-300 ease-in-out overflow-visible",
             {

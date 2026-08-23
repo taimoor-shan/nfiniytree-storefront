@@ -63,6 +63,15 @@ const EditAddress: React.FC<EditAddressProps> = ({
     setRemoving(false)
   }
 
+  // Used to disambiguate the per-card Edit/Remove buttons for screen readers.
+  const addressLabel = [
+    `${address.first_name ?? ""} ${address.last_name ?? ""}`.trim(),
+    address.address_1,
+    address.city,
+  ]
+    .filter(Boolean)
+    .join(", ")
+
   return (
     <>
       <div
@@ -104,9 +113,12 @@ const EditAddress: React.FC<EditAddressProps> = ({
           </Text>
         </div>
         <div className="flex items-center gap-x-4">
+          {/* Every card renders a bare "Edit"/"Remove", so in a list of
+              addresses the buttons are indistinguishable out of context. */}
           <button
             className="btn-text-link gap-x-2 text-xs"
             onClick={open}
+            aria-label={`${t("account.edit")} — ${addressLabel}`}
             data-testid="address-edit-button"
           >
             <Edit />
@@ -115,6 +127,8 @@ const EditAddress: React.FC<EditAddressProps> = ({
           <button
             className="btn-text-link gap-x-2 text-xs"
             onClick={removeAddress}
+            disabled={removing}
+            aria-label={`${t("account.remove")} — ${addressLabel}`}
             data-testid="address-delete-button"
           >
             {removing ? <Spinner /> : <Trash />}
@@ -207,13 +221,14 @@ const EditAddress: React.FC<EditAddressProps> = ({
               <Input
                 label={t("account.phone")}
                 name="phone"
-                autoComplete="phone"
+                type="tel"
+                autoComplete="tel"
                 defaultValue={address.phone || undefined}
                 data-testid="phone-input"
               />
             </div>
             {formState.error && (
-              <div className="text-error text-small-regular py-2">
+              <div role="alert" className="text-error text-small-regular py-2">
                 {formState.error}
               </div>
             )}

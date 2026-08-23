@@ -50,7 +50,8 @@ const OrderCard = ({ order }: OrderCardProps) => {
               className="flex flex-col gap-y-2"
               data-testid="order-item"
             >
-              <Thumbnail thumbnail={i.variant?.thumbnail || i.product?.thumbnail || i.thumbnail} images={i.variant?.images || i.product?.images || []} size="full" />
+              {/* Decorative — `i.title` is rendered directly below. */}
+              <Thumbnail thumbnail={i.variant?.thumbnail || i.product?.thumbnail || i.thumbnail} images={i.variant?.images || i.product?.images || []} size="full" alt="" />
               <div className="flex items-center text-small-regular text-ink">
                 <span
                   className="text-ink font-semibold"
@@ -74,11 +75,13 @@ const OrderCard = ({ order }: OrderCardProps) => {
         )}
       </div>
       <div className="flex justify-end">
-        <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
-          <Button data-testid="order-details-link" variant="secondary">
+        {/* `asChild` — see the hero CTA: a <Button> nested inside the link is
+            invalid HTML and produces two overlapping targets. */}
+        <Button data-testid="order-details-link" variant="secondary" asChild>
+          <LocalizedClientLink href={`/account/orders/details/${order.id}`}>
             {t("account.seeDetails")}
-          </Button>
-        </LocalizedClientLink>
+          </LocalizedClientLink>
+        </Button>
       </div>
     </div>
   )

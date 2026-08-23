@@ -16,11 +16,16 @@ const CheckboxWithLabel: React.FC<CheckboxProps> = ({
   name,
   'data-testid': dataTestId
 }) => {
+  // Each checkbox needs a unique id/label pair. A hardcoded id made every
+  // checkbox on a page share one id, so clicking any label toggled the first.
+  const reactId = React.useId()
+  const inputId = name ? `checkbox-${name}` : reactId
+
   return (
     <div className="flex space-x-2 ">
       <Checkbox
         className="text-base-regular flex items-center gap-x-2 shadow-md"
-        id="checkbox"
+        id={inputId}
         role="checkbox"
         type="button"
         checked={checked}
@@ -30,7 +35,7 @@ const CheckboxWithLabel: React.FC<CheckboxProps> = ({
         data-testid={dataTestId}
       />
       <Label
-        htmlFor="checkbox"
+        htmlFor={inputId}
         className="!transform-none !text-[14px] !leading-[1.5]"
       >
         {label}

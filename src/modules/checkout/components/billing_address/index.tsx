@@ -165,6 +165,7 @@ const BillingAddress = ({
         <Input
           label={t("account.phone")}
           name="billing_address.phone"
+          type="tel"
           autoComplete="tel"
           value={formData["billing_address.phone"]}
           onChange={handleChange}

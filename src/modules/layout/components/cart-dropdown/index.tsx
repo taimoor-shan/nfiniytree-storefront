@@ -153,6 +153,10 @@ const CartDropdown = ({
                         thumbnail={item.variant?.thumbnail || item.thumbnail}
                         images={item.variant?.images || item.variant?.product?.images}
                         size="square"
+                        // Image-only link — needs the product name to have an
+                        // accessible name. The adjacent text link to the same
+                        // product is a separate, named link.
+                        alt={item.product_title ?? item.title ?? ""}
                       />
                     </LocalizedClientLink>
 
@@ -219,11 +223,18 @@ const CartDropdown = ({
                   })}
                 </span>
               </div>
-              <LocalizedClientLink href="/cart" passHref onClick={close}>
-                <Button className="w-full primary" size="large" data-testid="go-to-cart-button">
+              {/* `asChild` — see the hero CTA: a <Button> nested inside the
+                  link is invalid HTML and produces two overlapping targets. */}
+              <Button
+                className="w-full primary"
+                size="large"
+                data-testid="go-to-cart-button"
+                asChild
+              >
+                <LocalizedClientLink href="/cart" onClick={close}>
                   {t("cart.goToCheckout")}
-                </Button>
-              </LocalizedClientLink>
+                </LocalizedClientLink>
+              </Button>
             </div>
           </>
         ) : (
@@ -232,9 +243,11 @@ const CartDropdown = ({
               <span>0</span>
             </div>
             <span>{t("misc.emptyCart")}</span>
-            <LocalizedClientLink href="/store" onClick={close}>
-              <Button>{t("cart.exploreProducts")}</Button>
-            </LocalizedClientLink>
+            <Button asChild>
+              <LocalizedClientLink href="/store" onClick={close}>
+                {t("cart.exploreProducts")}
+              </LocalizedClientLink>
+            </Button>
           </div>
         )}
       </div>

@@ -120,10 +120,10 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
       {/* Key Features */}
       {hasKeyFeatures && (
         <div className="flex-1">
-          <h3 className="font-semibold text-primary text-base mb-4">
+          <h3 className="font-semibold text-primary-text text-base mb-4">
             {t("product.keyFeatures")}
           </h3>
-          <ul className="list-disc pl-4 flex flex-col gap-y-2 marker:text-primary text-sm text-body">
+          <ul className="list-disc pl-4 flex flex-col gap-y-2 marker:text-primary-text text-sm text-body">
             {parsedKeyFeatures.map((feature, i) => (
               <li key={i}>{feature}</li>
             ))}
@@ -134,7 +134,7 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
       {/* Specifications */}
       {(hasTreeSpecs || hasPotSpecs) && (
         <div className="flex-1">
-          <h3 className="font-semibold text-primary text-base mb-4">
+          <h3 className="font-semibold text-primary-text text-base mb-4">
             {t("product.specifications")}
           </h3>
           {hasTreeSpecs && (
@@ -179,7 +179,7 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
       {/* Maintenance & Care */}
       {hasCare && (
         <div className="flex-1">
-          <h3 className="font-semibold text-primary text-base mb-4">
+          <h3 className="font-semibold text-primary-text text-base mb-4">
             {t("product.maintenanceCare")}
           </h3>
           <p className="text-sm text-body leading-loose">{care}</p>

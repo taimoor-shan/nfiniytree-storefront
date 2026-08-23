@@ -10,6 +10,7 @@ import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { translate } from "@lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
+import { NOINDEX_METADATA } from "@lib/util/seo"
 
 type Props = {
   params: Promise<{ countryCode: string; displayId: string }>
@@ -21,6 +22,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: await translate("metadata.orderDetailsTitle", locale),
     description: await translate("metadata.viewOrderDetailsDescription", locale),
+    // Token-authenticated but publicly reachable, and it renders the customer's
+    // name, delivery address and line items. `noindex` keeps a leaked link out
+    // of the index even if the token ends up in a referrer or a shared URL.
+    ...NOINDEX_METADATA,
   }
 }
 

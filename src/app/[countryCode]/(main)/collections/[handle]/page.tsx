@@ -3,6 +3,10 @@ import { notFound } from "next/navigation"
 
 import { getCollectionByHandle, listCollections } from "@lib/data/collections"
 import { listRegions } from "@lib/data/regions"
+import { getLocale } from "@lib/data/locale-actions"
+import { translate } from "@lib/i18n"
+import { getSeoAlternates } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 import { StoreCollection, StoreRegion } from "@medusajs/types"
 import CollectionTemplate from "@modules/collections/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -52,18 +56,37 @@ export async function generateStaticParams() {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
-  const collection = await getCollectionByHandle(params.handle)
+  const { countryCode, handle } = params
+  const collection = await getCollectionByHandle(handle)
 
   if (!collection) {
     notFound()
   }
 
-  const metadata = {
-    title: `${collection.title} | Infinytree`,
-    description: `${collection.title} collection`,
-  } as Metadata
+  const title = `${collection.title} | ${SITE_NAME}`
 
-  return metadata
+  // Was `` `${collection.title} collection` `` — a bare label, not a
+  // description, and untranslated. The localized template at least tells a
+  // searcher what the page contains.
+  const locale = await getLocale()
+  const description = (
+    await translate("metadata.collectionDescription", locale)
+  ).replace("{collection}", collection.title)
+
+  const path = `/collections/${handle}`
+
+  return {
+    title,
+    description,
+    alternates: await getSeoAlternates(countryCode, path),
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      title,
+      description,
+      url: `/${countryCode}${path}`,
+    },
+  }
 }
 
 export default async function CollectionPage(props: Props) {

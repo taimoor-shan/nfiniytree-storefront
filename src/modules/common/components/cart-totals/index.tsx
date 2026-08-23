@@ -72,7 +72,7 @@ const CartTotals: React.FC<CartTotalsProps> = ({
           <div className="flex items-center justify-between">
             <span>{t("cart.discount")}</span>
             <span
-              className="text-primary"
+              className="text-primary-text"
               data-testid="cart-discount"
               data-value={discount_subtotal || 0}
             >

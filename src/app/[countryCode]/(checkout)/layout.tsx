@@ -17,7 +17,10 @@ export default async function CheckoutLayout({
   return (
     <div className="w-full bg-canvas relative small:min-h-screen">
       <div className="h-16 bg-canvas border-b ">
-        <nav className="flex h-full items-center content-container justify-between">
+        <nav
+          aria-label={await translate("a11y.mainNavigation", locale)}
+          className="flex h-full items-center content-container justify-between"
+        >
           <LocalizedClientLink
             href="/cart"
             className="text-small-semi text-ink flex items-center gap-x-2 uppercase flex-1 basis-0"
@@ -40,7 +43,7 @@ export default async function CheckoutLayout({
                   See nav for the 256x49 reasoning. */}
               <Image
                 src="/logo-full.png"
-                alt="Logo"
+                alt={storeName}
                 width={256}
                 height={49}
                 loading="eager"
@@ -51,7 +54,13 @@ export default async function CheckoutLayout({
           <div className="flex-1 basis-0" />
         </nav>
       </div>
-      <div className="relative" data-testid="checkout-container">{children}</div>
+      <main
+        id="main-content"
+        className="relative"
+        data-testid="checkout-container"
+      >
+        {children}
+      </main>
     </div>
   )
 }
