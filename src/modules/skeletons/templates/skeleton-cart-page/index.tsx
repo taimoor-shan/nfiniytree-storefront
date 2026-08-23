@@ -1,15 +1,16 @@
 import { Table } from "@medusajs/ui"
 
 import repeat from "@lib/util/repeat"
-import SkeletonCartItem from "@modules/skeletons/components/skeleton-cart-item"
 import SkeletonCodeForm from "@modules/skeletons/components/skeleton-code-form"
+import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
+import SkeletonMobileItemCard from "@modules/skeletons/components/skeleton-mobile-item-card"
 import SkeletonOrderSummary from "@modules/skeletons/components/skeleton-order-summary"
 
 const SkeletonCartPage = () => {
   return (
     <div className="py-12">
       <div className="content-container">
-        <div className="grid grid-cols-1 small:grid-cols-[1fr_360px] gap-x-40">
+        <div className="grid grid-cols-1 small:grid-cols-[1fr_360px] gap-x-20">
           <div className="flex flex-col bg-white p-6 gap-y-6">
             <div className="bg-white flex items-start justify-between">
               <div className="flex flex-col gap-y-2">
@@ -24,10 +25,17 @@ const SkeletonCartPage = () => {
               <div className="pb-3 flex items-center">
                 <div className="w-20 h-12 bg-gray-200 animate-pulse" />
               </div>
-              <Table>
+              {/* Same two-layout split as ItemsTemplate: stacked cards below
+                  `small`, a native table from `small` up. */}
+              <div className="flex flex-col small:hidden">
+                {repeat(4).map((index) => (
+                  <SkeletonMobileItemCard key={index} />
+                ))}
+              </div>
+              <Table className="hidden small:table">
                 <Table.Header className="border-t-0">
                   <Table.Row>
-                    <Table.HeaderCell className="!pl-0">
+                    <Table.HeaderCell>
                       <div className="w-10 h-6 bg-gray-200 animate-pulse" />
                     </Table.HeaderCell>
                     <Table.HeaderCell></Table.HeaderCell>
@@ -37,7 +45,7 @@ const SkeletonCartPage = () => {
                     <Table.HeaderCell>
                       <div className="w-12 h-6 bg-gray-200 animate-pulse" />
                     </Table.HeaderCell>
-                    <Table.HeaderCell className="!pr-0">
+                    <Table.HeaderCell>
                       <div className="flex justify-end">
                         <div className="w-12 h-6 bg-gray-200 animate-pulse" />
                       </div>
@@ -46,7 +54,7 @@ const SkeletonCartPage = () => {
                 </Table.Header>
                 <Table.Body>
                   {repeat(4).map((index) => (
-                    <SkeletonCartItem key={index} />
+                    <SkeletonLineItem key={index} />
                   ))}
                 </Table.Body>
               </Table>

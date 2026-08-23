@@ -4,8 +4,8 @@ import repeat from "@lib/util/repeat"
 import { HttpTypes } from "@medusajs/types"
 import { Table, clx } from "@medusajs/ui"
 
-import Item from "@modules/cart/components/item"
-import SkeletonLineItem from "@modules/skeletons/components/skeleton-line-item"
+import { PreviewItemRow } from "@modules/cart/components/item"
+import SkeletonPreviewItem from "@modules/skeletons/components/skeleton-preview-item"
 import { getCartCountryCode } from "@lib/util/country-locale"
 
 type ItemsTemplateProps = {
@@ -35,17 +35,16 @@ const ItemsPreviewTemplate = ({ cart, countryCode }: ItemsTemplateProps) => {
                 })
                 .map((item) => {
                   return (
-                    <Item
+                    <PreviewItemRow
                       key={item.id}
                       item={item}
-                      type="preview"
                       currencyCode={cart.currency_code}
                       countryCode={cc}
                     />
                   )
                 })
             : repeat(5).map((i) => {
-                return <SkeletonLineItem key={i} />
+                return <SkeletonPreviewItem key={i} />
               })}
         </Table.Body>
       </Table>
