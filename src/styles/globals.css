@@ -179,8 +179,40 @@
 
 @layer components {
   .content-container {
-    @apply max-w-[1440px] w-full mx-auto px-6;
+  @apply w-full mx-auto px-6;
+
+  max-width: 100%;
+}
+
+@media (min-width: 576px) {
+  .content-container {
+    max-width: 540px;
   }
+}
+
+@media (min-width: 768px) {
+  .content-container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .content-container {
+    max-width: 960px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .content-container {
+    max-width: 1140px;
+  }
+}
+
+@media (min-width: 1400px) {
+  .content-container {
+    max-width: 1320px;
+  }
+}
 
   .contrast-btn {
     /* Hover fills with coral and flips the label to white, so it needs the

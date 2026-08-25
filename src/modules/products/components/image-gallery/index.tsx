@@ -3,27 +3,16 @@
 import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Image from "next/image"
-import dynamic from "next/dynamic"
 import { useState, useEffect, useCallback, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { normalizeImageUrl } from "@lib/util/image-url"
 
-/**
- * The lightbox is ~180kb of JS + CSS that only matters after a click, so it is
- * split out of the PDP bundle. It is mounted on first pointer intent (see
- * `lightboxMounted`) rather than on click, so the chunk is normally already
- * fetched by the time the click lands.
- */
-const ProductLightbox = dynamic(() => import("./product-lightbox"), {
-  ssr: false,
-})
-
 type ImageGalleryProps = {
   images: HttpTypes.StoreProductImage[]
   /**
-   * Product name, used to build meaningful alt text and the accessible name of
-   * the zoom control. Without it the gallery can only say "product image".
+   * Product name, used to build meaningful alt text. Without it the gallery can
+   * only say "product image".
    */
   productTitle?: string
 }
@@ -31,11 +20,6 @@ type ImageGalleryProps = {
 const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
   const { t } = useTranslation()
   const [activeIndex, setActiveIndex] = useState(0)
-  const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [lightboxIndex, setLightboxIndex] = useState(0)
-  // Once true, stays true — so the close animation plays out and re-opening is
-  // instant instead of re-triggering a chunk load.
-  const [lightboxMounted, setLightboxMounted] = useState(false)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
 
@@ -79,7 +63,6 @@ const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
   }
 
   const activeImage = images[activeIndex]
-  const slides = images.map((img) => ({ src: normalizeImageUrl(img.url) }))
   const name = productTitle?.trim() || t("product.productImage")
 
   // "Sunset Olive Tree — image 2 of 5" instead of a bare "Product image":
@@ -91,7 +74,6 @@ const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
       .replace("{total}", String(images.length))
 
   return (
-    <>
     <div className="flex gap-x-4 relative w-full justify-end">
       {/* Thumbnails — desktop only, scrollable if more than 6 */}
       {images.length > 1 && (
@@ -127,53 +109,35 @@ const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
         </div>
       )}
 
-      {/* Main Image. The Container used to be the click target itself — a
-          clickable <div> with no accessible name, no keyboard path, and the
-          mobile arrows nested inside it. It is now a plain positioning wrapper;
-          the zoom control is a real <button> that sits below the z-10 carousel
-          controls so nothing is nested. */}
+      {/* Main Image. A plain positioning wrapper for the hero image; the touch
+          handlers drive the mobile swipe carousel. */}
       <Container
-        className="relative aspect-[4/5] w-full max-w-[600px] overflow-hidden bg-surface-card p-0"
+        className="relative aspect-[4/5] w-full max-w-[560px] overflow-hidden bg-surface-card p-0"
         id={activeImage.id}
-        // Warm the lazy lightbox chunk before the click actually happens.
-        onPointerEnter={() => setLightboxMounted(true)}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <button
-          type="button"
-          className="absolute inset-0 w-full h-full cursor-zoom-in focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset rounded-md"
-          onClick={() => {
-            setLightboxMounted(true)
-            setLightboxIndex(activeIndex)
-            setLightboxOpen(true)
-          }}
-          onFocus={() => setLightboxMounted(true)}
-          aria-label={t("a11y.enlargeImage").replace("{product}", name)}
-          data-testid="product-image-zoom"
-        >
-          {!!activeImage.url && (
-            <Image
-              src={normalizeImageUrl(activeImage.url)}
-              // The PDP hero image and the page's LCP element. `priority` is
-              // deprecated in Next 16; `preload` is its explicit replacement and
-              // is appropriate here because there is exactly one candidate.
-              preload
-              // Higher than the 75 used for grid thumbnails — this is the image
-              // shoppers zoom into. Both values are declared in
-              // next.config.js `images.qualities`.
-              quality={85}
-              className="absolute inset-0 rounded-md"
-              alt={describeImage(activeIndex)}
-              fill
-              // Container is `w-full max-w-[600px]`, and the left column only
-              // becomes a 55% flex child at the `small` (1024px) breakpoint.
-              sizes="(max-width: 1023px) 100vw, 600px"
-              style={{ objectFit: "cover" }}
-            />
-          )}
-        </button>
+        {!!activeImage.url && (
+          <Image
+            src={normalizeImageUrl(activeImage.url)}
+            // The PDP hero image and the page's LCP element. `priority` is
+            // deprecated in Next 16; `preload` is its explicit replacement and
+            // is appropriate here because there is exactly one candidate.
+            preload
+            // Higher than the 75 used for grid thumbnails — this is the PDP hero
+            // image shoppers look at most closely. Both values are declared in
+            // next.config.js `images.qualities`.
+            quality={85}
+            className="absolute inset-0 rounded-md"
+            alt={describeImage(activeIndex)}
+            fill
+            // Container is `w-full max-w-[600px]`, and the left column only
+            // becomes a 55% flex child at the `small` (1024px) breakpoint.
+            sizes="(max-width: 1023px) 100vw, 600px"
+            style={{ objectFit: "cover" }}
+          />
+        )}
 
         {/* Mobile carousel: arrows + dot indicators */}
         {images.length > 1 && (
@@ -234,16 +198,6 @@ const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
         )}
       </Container>
     </div>
-    {lightboxMounted && (
-      <ProductLightbox
-        open={lightboxOpen}
-        close={() => setLightboxOpen(false)}
-        index={lightboxIndex}
-        slides={slides}
-        onView={setLightboxIndex}
-      />
-    )}
-  </>
   )
 }
 

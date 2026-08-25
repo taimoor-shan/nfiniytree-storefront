@@ -23,9 +23,12 @@ export default async function Footer() {
 
   return (
     <footer className="border-t border-hairline w-full bg-surface-soft pb-8">
-      <div className="pt-16 lg:grid lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:gap-x-8 max-w-[1440px] mx-auto content-container">
+      <div className="pt-16 lg:grid lg:grid-cols-12 lg:grid-rows-[auto_auto] lg:gap-x-8 content-container">
         <div className="lg:mt-0 lg:col-span-4 lg:row-span-1">
-          <LocalizedClientLink href="/" className="inline-flex items-center gap-3 text-3xl font-display text-ink hover:text-ink">
+          <LocalizedClientLink
+            href="/"
+            className="inline-flex items-center gap-3 text-3xl font-display text-ink hover:text-ink"
+          >
             {/* Below the fold, so this keeps next/image's default lazy
                 loading — but with dimensions, so it no longer shifts the
                 footer when it arrives. See nav for the 256x49 reasoning. */}
@@ -41,7 +44,7 @@ export default async function Footer() {
             {dict["footer.stayUpdated"].replace("{storeName}", storeName)}
           </p>
           <NewsletterForm />
-           {/* <ul className="flex space-x-6 items-center mt-5">
+          {/* <ul className="flex space-x-6 items-center mt-5">
             <li>
               <a href="https://facebook.com" target="_blank" rel="noreferrer" className="hover:opacity-75 transition-opacity" aria-label={dict["footer.facebook"]}>
                 <svg viewBox="0 0 11 22" fill="none" xmlns="http://www.w3.org/2000/svg" className="fill-current text-ink h-[24px] w-auto">
@@ -72,7 +75,7 @@ export default async function Footer() {
             </li>
           </ul> */}
         </div>
-{/* Image column commented out — empty space preserved */}
+        {/* Image column commented out — empty space preserved */}
         {/* <div className="flex flex-col items-center lg:items-start mt-12 lg:mt-0 max-w-full sm:max-w-[66%] lg:max-w-full text-center lg:text-left mx-auto lg:mx-0 lg:col-start-10 lg:col-span-3 lg:row-span-full">
           <LocalizedClientLink className="w-full" href="/store">
             <img
@@ -115,11 +118,39 @@ export default async function Footer() {
                     )
                 })}
               </ul> */}
-               <ul className="space-y-2">
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4" href="/">{dict["nav.home"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/store">{dict["nav.store"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/about">{dict["nav.about"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/contact">{dict["nav.contact"]}</LocalizedClientLink></li>
+              <ul className="space-y-2">
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4"
+                    href="/"
+                  >
+                    {dict["nav.home"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/store"
+                  >
+                    {dict["nav.store"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/about"
+                  >
+                    {dict["nav.about"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/contact"
+                  >
+                    {dict["nav.contact"]}
+                  </LocalizedClientLink>
+                </li>
               </ul>
             </nav>
             <nav aria-labelledby="footer-company-heading">
@@ -130,24 +161,67 @@ export default async function Footer() {
                 {dict["footer.company"]}
               </h2>
               <ul className="space-y-2">
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4" href="/policies/returns">{dict["footer.returnsRefunds"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/policies/shipping">{dict["footer.shippingPolicy"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/policies/imprint">{dict["footer.imprint"]}</LocalizedClientLink></li>
-                <li><LocalizedClientLink className="text-primary-text hover:underline underline-offset-4 text-base" href="/customer-service">{dict["account.customerService"]}</LocalizedClientLink></li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4"
+                    href="/policies/returns"
+                  >
+                    {dict["footer.returnsRefunds"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/policies/shipping"
+                  >
+                    {dict["footer.shippingPolicy"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/policies/imprint"
+                  >
+                    {dict["footer.imprint"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/customer-service"
+                  >
+                    {dict["account.customerService"]}
+                  </LocalizedClientLink>
+                </li>
               </ul>
             </nav>
           </div>
         </div>
 
-  
-
         <div className="border-t border-hairline pt-6 mt-8 lg:col-span-12 lg:row-start-3 lg:self-end">
-
-          <div className="flex flex-col sm:flex-row sm:justify-between space-y-4 sm:space-y-0 text-xs text-muted">
-            <p>{dict["footer.allRightsReserved"].replace("{year}", String(currentYear)).replace("{storeName}", storeName)}</p>
-            <div className="flex space-x-6">
-              <LocalizedClientLink href="/policies/terms" className="hover:text-ink transition-colors">{dict["footer.termsAndConditions"]}</LocalizedClientLink>
-              <LocalizedClientLink href="/policies/privacy" className="hover:text-ink transition-colors">{dict["footer.privacyPolicy"]}</LocalizedClientLink>
+          <div className="lg:grid lg:grid-cols-12 space-y-2 sm:space-y-0 text-xs text-muted">
+            <div className="lg:col-span-9">
+              <p className="mb-0">
+                {dict["footer.allRightsReserved"]
+                  .replace("{year}", String(currentYear))
+                  .replace("{storeName}", storeName)}
+              </p>
+            </div>
+            <div className="lg:col-span-3">
+              <div className="flex space-x-6">
+                <LocalizedClientLink
+                  href="/policies/terms"
+                  className="hover:text-ink transition-colors"
+                >
+                  {dict["footer.termsAndConditions"]}
+                </LocalizedClientLink>
+                <LocalizedClientLink
+                  href="/policies/privacy"
+                  className="hover:text-ink transition-colors"
+              >
+                {dict["footer.privacyPolicy"]}
+              </LocalizedClientLink>
+            </div>
             </div>
           </div>
         </div>

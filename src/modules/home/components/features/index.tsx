@@ -37,7 +37,7 @@ const Features = ({ categoryName, categoryDescription }: FeaturesProps) => {
   ]
 
   return (
-    <section className="content-container pt-16 lg:pt-24">
+    <section className="content-container pt-12">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
         {features.map(({ icon: Icon, title, description }) => (
           <div key={title} className="flex flex-col items-center text-center gap-4">

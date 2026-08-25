@@ -47,7 +47,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
       <ProductJsonLd product={product} countryCode={countryCode} />
 
       <div
-        className="content-container flex flex-col small:flex-row small:items-start py-6 gap-y-8 small:gap-x-20 relative"
+        className="content-container flex flex-col small:flex-row small:items-start sm:pt-12 pt-8 gap-y-8 small:gap-x-10 relative"
         data-testid="product-container"
       >
         {/* Left Column - Image Gallery */}
@@ -76,7 +76,7 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
         categoryDescription={product.categories?.[0]?.description}
       />
       <div
-        className="content-container my-16 small:my-32"
+        className="content-container py-12"
         data-testid="related-products-container"
       >
         <Suspense fallback={<SkeletonRelatedProducts />}>
