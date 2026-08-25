@@ -51,7 +51,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
                   // own hover from changing it — `primary-strong` is that fill.
                   "btn-primary border border-primary hover:!bg-primary-strong": value.value === current && !isUnavailable,
                   "btn-primary-outlined": value.value !== current && !isUnavailable,
-                  "btn-secondary": isUnavailable,
+                  "btn-grey": isUnavailable,
                 }
               )}
               disabled={disabled}

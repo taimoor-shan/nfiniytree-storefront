@@ -250,6 +250,10 @@
     @apply bg-surface-dark-soft;
   }
 
+  .btn-grey{
+    @apply bg-[#dddddd] text-ink font-sans text-sm font-medium leading-none rounded-md h-10 px-5 inline-flex items-center justify-center border border-[#dddddd] transition-colors;
+  }
+
   .btn-text-link {
     @apply text-ink font-sans text-sm font-medium bg-transparent border-none cursor-pointer inline-flex items-center transition-colors;
   }

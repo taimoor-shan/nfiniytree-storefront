@@ -57,14 +57,14 @@ export default async function ProductPreview({
           // the canonical page for the product's images.
           alt=""
         />
-        {product.categories && product.categories.length > 0 && (
+        {/* {product.categories && product.categories.length > 0 && (
           // 12px white text on coral. `bg-primary` gives 3.28:1 there, below the
           // 4.5:1 AA floor, so the fill uses `primary-strong` (4.53:1). The
           // border stays `primary` — it is non-text and only needs 3:1.
           <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-primary-strong text-white uppercase tracking-wider border border-primary">
             {product.categories[0].name}
           </span>
-        )}
+        )} */}
         <div className="flex mt-4 justify-between flex-wrap gap-3">
           <Text className=" text-lg md:text-xl" data-testid="product-title">
             {product.title}

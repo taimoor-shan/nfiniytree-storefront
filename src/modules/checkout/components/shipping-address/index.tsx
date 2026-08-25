@@ -106,7 +106,8 @@ const ShippingAddress = ({
       // Legacy accounts created before customer_type existed: a stored VAT
       // number means a business account.
       (customerMetadata.vat_number ? "b2b" : "") ||
-      "b2c",
+      // Business is the default customer type (the selection is disabled).
+      "b2b",
     vat_number:
       cartAddressMetadata.vat_number || customerMetadata.vat_number || "",
     email: cart?.email || customer?.email || "",
@@ -532,7 +533,8 @@ return (
         data-testid="shipping-last-name-input"
       />
 
-      {/* Customer type — the B2C/B2B decision point */}
+      {/* Customer type — the B2C/B2B decision point (commented out:
+          customer selection is disabled; Business is now the default).
       <fieldset className="flex flex-col gap-y-2 col-span-1 sm:col-span-2">
          <legend className="txt-compact-medium-plus text-ink mb-2">
           {t("checkout.youAreA")}
@@ -568,7 +570,7 @@ return (
           name="customer_type"
           value={formData.customer_type}
         />
-      </fieldset>
+      </fieldset> */}
 
       {/* Company name — full width: business names run long, and it's the anchor
           of a B2B row, so it shouldn't visually pair with Address Line 1 */}

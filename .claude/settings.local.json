@@ -27,7 +27,9 @@
       "mcp__codegraph__codegraph_callers",
       "mcp__codegraph__codegraph_node",
       "Bash(echo \"build exit: $?\")",
-      "Read(//tmp/**)"
+      "Read(//tmp/**)",
+      "Bash(node -e \"const p=require\\('@medusajs/ui-preset'\\);const t=p.theme||{};console.log\\(JSON.stringify\\(Object.keys\\(t.extend||{}\\),null,0\\)\\);console.log\\('FONTSIZE:',JSON.stringify\\(\\(t.extend&&t.extend.fontSize\\)||{},null,1\\).slice\\(0,2500\\)\\)\")",
+      "Bash(node shoot.mjs '[ *)"
     ]
   },
   "enableAllProjectMcpServers": true,
