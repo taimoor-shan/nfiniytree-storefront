@@ -1,6 +1,8 @@
 "use client"
 
-import { Button, Heading, Input, Textarea, Text } from "@medusajs/ui"
+import { Button, Heading, Text } from "@medusajs/ui"
+import Input from "@modules/common/components/input"
+import Textarea from "@modules/common/components/textarea"
 import { useEffect, useRef, useState } from "react"
 import { sdk } from "@lib/config"
 import { useTranslation } from "@lib/i18n/client"
@@ -82,80 +84,48 @@ export default function ContactForm() {
   }
 
   return (
-    // `noValidate` was suppressing browser validation while the fields carried
-    // no `required` at all — the asterisks were decoration only. The fields now
-    // declare their real constraints, so native validation is left enabled.
+    // This form uses the storefront's common Input/Textarea components — the
+    // same ones as checkout — which wire label, `required`, error and helper
+    // text together and only ever paint an error border through the `error`
+    // prop. They never react to the eager `:invalid` CSS pseudo-class, so a
+    // fresh form shows neutral fields. Native `required`/type validation is
+    // left enabled and announced by the browser when the user submits.
     <form onSubmit={handleSubmit} className="flex flex-col gap-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="flex flex-col gap-y-2">
-          <label htmlFor="name" className="text-sm font-medium text-ink">
-            {t("contact.form.name")}{" "}
-            <span className="text-error" aria-hidden="true">
-              *
-            </span>
-          </label>
-          <Input
-            id="name"
-            name="name"
-            autoComplete="name"
-            required
-            aria-required="true"
-            placeholder={t("contact.form.namePlaceholder")}
-          />
-        </div>
-
-        <div className="flex flex-col gap-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-ink">
-            {t("contact.form.email")}{" "}
-            <span className="text-error" aria-hidden="true">
-              *
-            </span>
-          </label>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            aria-required="true"
-            size="base"
-            placeholder={t("contact.form.emailPlaceholder")}
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-y-2">
-        <label htmlFor="subject" className="text-sm font-medium text-ink">
-          {t("contact.form.subject")}{" "}
-          <span className="text-error" aria-hidden="true">
-            *
-          </span>
-        </label>
         <Input
-          id="subject"
-          name="subject"
+          label={t("contact.form.name")}
+          name="name"
+          autoComplete="name"
           required
-          aria-required="true"
-          placeholder={t("contact.form.subjectPlaceholder")}
+          data-testid="contact-name-input"
+        />
+
+        <Input
+          label={t("contact.form.email")}
+          name="email"
+          type="email"
+          autoComplete="email"
+          title={t("common.emailNotValid")}
+          required
+          data-testid="contact-email-input"
         />
       </div>
 
-      <div className="flex flex-col gap-y-2">
-        <label htmlFor="message" className="text-sm font-medium text-ink">
-          {t("contact.form.message")}{" "}
-          <span className="text-error" aria-hidden="true">
-            *
-          </span>
-        </label>
-        <Textarea
-          id="message"
-          name="message"
-          required
-          aria-required="true"
-          placeholder={t("contact.form.messagePlaceholder")}
-          rows={6}
-        />
-      </div>
+      <Input
+        label={t("contact.form.subject")}
+        name="subject"
+        required
+        data-testid="contact-subject-input"
+      />
+
+      <Textarea
+        label={t("contact.form.message")}
+        name="message"
+        required
+        rows={6}
+        helperText={t("contact.form.messagePlaceholder")}
+        data-testid="contact-message-input"
+      />
 
       {status === "error" && (
         <Text role="alert" className="text-error text-sm">

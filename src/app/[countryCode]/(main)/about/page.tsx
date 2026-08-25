@@ -129,7 +129,7 @@ export default async function AboutPage(props: AboutPageProps) {
         <div className="flex flex-col lg:flex-row gap-16 lg:gap-24">
           {/* Main content */}
           {showContent && (
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 lg:mt-[-2em]">
               <div
                 className="prose prose-lg max-w-none
                   prose-headings:font-display prose-headings:text-ink

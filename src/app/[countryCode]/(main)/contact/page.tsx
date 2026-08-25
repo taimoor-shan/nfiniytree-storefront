@@ -100,7 +100,7 @@ export default async function ContactPage() {
                     would otherwise tighten it) and 1.5rem bottom margin, while
                     `mt-8` restores the top margin `.prose h2` had been giving
                     it. Computed styles are identical to the previous h2. */}
-                <h1 className="mt-8 !text-3xl !leading-normal !mb-6 font-display text-ink">{dict["contact.getInTouch"]}</h1>
+                <h1 className="!text-3xl !leading-normal !mb-6 font-display text-ink">{dict["contact.getInTouch"]}</h1>
                 <p>{dict["contact.getInTouchText"]}</p>
                 <div className="mt-8 space-y-6">
                   <div>
