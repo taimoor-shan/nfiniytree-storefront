@@ -54,7 +54,7 @@ export default async function ProductPreview({
           // link already announces the product by name — repeating it in `alt`
           // would make every card in the grid say the product name twice. The
           // descriptive alt for image search lives on the PDP gallery, which is
-          // the canonical page for the product's images.
+          // the canonical page forr the product's images.
           alt=""
         />
         {product.categories && product.categories.length > 0 && (
