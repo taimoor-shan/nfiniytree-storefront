@@ -49,7 +49,7 @@ export default async function ProductPreview({
           size="full"
           isFeatured={isFeatured}
           eager={eager}
-          // Decorative here, deliberately. The image, the category badge, the
+          // Decorative here, deliberately. The image, the subtitle badge, the
           // product name and the price all sit inside this one link, so the
           // link already announces the product by name — repeating it in `alt`
           // would make every card in the grid say the product name twice. The
@@ -57,12 +57,9 @@ export default async function ProductPreview({
           // the canonical page forr the product's images.
           alt=""
         />
-        {product.categories && product.categories.length > 0 && (
+        {product.subtitle && (
           <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-primary-strong text-white uppercase tracking-wider border border-primary">
-            {
-              product.categories[Math.min(product.categories.length - 1, 1)]
-                .name
-            }
+            {product.subtitle}
           </span>
         )}
         <div className="flex mt-4 justify-between flex-wrap gap-3">
