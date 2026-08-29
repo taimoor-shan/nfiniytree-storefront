@@ -8,6 +8,7 @@ import Image from "next/image"
 
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import NewsletterForm from "@modules/layout/components/newsletter-form"
+import { CookieTriggerLocalized } from "@modules/layout/components/cookie-trigger-localized"
 
 export default async function Footer() {
   const store = await retrieveStore()
@@ -221,6 +222,7 @@ export default async function Footer() {
               >
                 {dict["footer.privacyPolicy"]}
               </LocalizedClientLink>
+              <CookieTriggerLocalized />
             </div>
             </div>
           </div>
