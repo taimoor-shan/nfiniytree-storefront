@@ -1,6 +1,7 @@
 import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
 import { CACHE_TAGS } from "./lib/data/cache"
+import { getRequestCountry } from "./lib/geo/client-country"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -73,9 +74,12 @@ async function getCountryCode(
   try {
     let countryCode
 
-    const vercelCountryCode = request.headers
-      .get("x-vercel-ip-country")
-      ?.toLowerCase()
+    // Cloudflare `CF-IPCountry` is the primary geo source on self-hosted.
+    // Returns `null` for `XX`/invalid/unsupported values, in which case we
+    // fall through to `DEFAULT_REGION`. Trusting this header requires the
+    // Cloudflare-only Nginx allowlist documented in `cookies.md`; without it
+    // the header is spoofable.
+    const geoCountry = getRequestCountry(request)?.toLowerCase()
 
     const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
 
@@ -87,8 +91,8 @@ async function getCountryCode(
       countryCode = urlCountryCode
     } else if (selectedCountryCookie && regionMap.has(selectedCountryCookie)) {
       countryCode = selectedCountryCookie
-    } else if (vercelCountryCode && regionMap.has(vercelCountryCode)) {
-      countryCode = vercelCountryCode
+    } else if (geoCountry && regionMap.has(geoCountry)) {
+      countryCode = geoCountry
     } else if (regionMap.has(DEFAULT_REGION)) {
       countryCode = DEFAULT_REGION
     } else if (regionMap.keys().next().value) {
@@ -252,7 +256,7 @@ function redirectToCountry(
   })
 
   response.headers.set("Cache-Control", "no-store")
-  response.headers.set("Vary", "Cookie, x-vercel-ip-country")
+  response.headers.set("Vary", "Cookie, CF-IPCountry")
 
   return response
 }
