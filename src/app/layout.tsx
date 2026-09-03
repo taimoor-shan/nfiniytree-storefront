@@ -36,7 +36,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   const lang = locale.split("-")[0]
 
   return (
-    <html lang={lang} data-mode="light">
+    // `suppressHydrationWarning` on <html>: third-party browser extensions
+    // (Scribe recorder was the first offender seen on /hu) inject attributes
+    // like `data-scribe-recorder-ready` on the client that don't exist in
+    // our SSR markup. The attributes don't affect rendering, and React's
+    // hydration error here is a false positive.
+    <html lang={lang} data-mode="light" suppressHydrationWarning>
       <body className={`${badoni.variable} ${dmSans.variable}`}>
         <LocaleProvider initialLocale={locale} initialDict={dict}>
           {/* Deliberately not <main>: the route-group layouts render the header

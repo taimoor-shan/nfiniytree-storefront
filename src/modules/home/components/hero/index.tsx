@@ -77,7 +77,7 @@ const Hero = ({ page }: HeroProps) => {
           className="absolute inset-0 hidden md:block w-full h-full object-cover object-center"
         />
       )}
-       {/* <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" /> */}
+       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/25 to-transparent pointer-events-none z-[1]" />
       {/* <Image
           src="/logo.png"
           alt="Logo"

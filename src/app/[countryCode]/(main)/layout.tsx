@@ -2,6 +2,8 @@ import { listCartOptions, retrieveCart } from "@lib/data/cart"
 import { getCartId } from "@lib/data/cookies"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listRegions } from "@lib/data/regions"
+import { listLocales } from "@lib/data/locales"
+import { getLocale } from "@lib/data/locale-actions"
 import { StoreCartShippingOption } from "@medusajs/types"
 import CountryPopup from "@modules/common/components/country-popup"
 import CartMismatchBanner from "@modules/layout/components/cart-mismatch-banner"
@@ -21,21 +23,24 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
   // only needs the cheap cookie check to know whether it is worth issuing.
   const cartId = await getCartId()
 
-  const [customer, cart, regions, cartOptions] = await Promise.all([
-    retrieveCustomer(),
-    retrieveCart(),
-    listRegions(),
-    cartId
-      ? listCartOptions()
-      : Promise.resolve(null as { shipping_options: StoreCartShippingOption[] } | null),
-  ])
+  const [customer, cart, regions, cartOptions, locales, currentLocale] =
+    await Promise.all([
+      retrieveCustomer(),
+      retrieveCart(),
+      listRegions(),
+      cartId
+        ? listCartOptions()
+        : Promise.resolve(null as { shipping_options: StoreCartShippingOption[] } | null),
+      listLocales(),
+      getLocale(),
+    ])
 
   const shippingOptions: StoreCartShippingOption[] =
     cart && cartOptions ? cartOptions.shipping_options : []
 
   return (
     <>
-      <CountryPopup regions={regions ?? []} />
+      <CountryPopup regions={regions ?? []} locales={locales} currentLocale={currentLocale} />
       <Nav />
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />

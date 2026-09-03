@@ -8,10 +8,13 @@ import {
 } from "@headlessui/react"
 import { HttpTypes } from "@medusajs/types"
 import ReactCountryFlag from "react-country-flag"
-import { useEffect, useMemo, useState } from "react"
-import { useParams, usePathname } from "next/navigation"
+import { useEffect, useMemo, useState, useTransition } from "react"
+import { useParams, usePathname, useRouter } from "next/navigation"
 
 import { updateRegion } from "@lib/data/cart"
+import { updateLocale } from "@lib/data/locale-actions"
+import { Locale } from "@lib/data/locales"
+import { getLocalizedLanguageName } from "@lib/util/locale-name"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { useTranslation } from "@lib/i18n"
 import { CountryOption, getCountryOptions } from "@lib/util/regions"
@@ -24,18 +27,62 @@ const ONE_YEAR = 60 * 60 * 24 * 365
 
 type CountryPopupProps = {
   regions: HttpTypes.StoreRegion[]
+  locales?: Locale[] | null
+  currentLocale?: string | null
 }
 
-const CountryPopup = ({ regions }: CountryPopupProps) => {
+const CountryPopup = ({
+  regions,
+  locales,
+  currentLocale,
+}: CountryPopupProps) => {
   const { t } = useTranslation()
   const { countryCode } = useParams()
   const pathname = usePathname()
+  const router = useRouter()
   const currentPath = pathname.split(`/${countryCode}`)[1] ?? ""
 
   const toggleState = useToggleState(false)
   const [selected, setSelected] = useState<CountryOption | undefined>(undefined)
+  const [selectedLocale, setSelectedLocale] = useState<string>(
+    currentLocale ?? ""
+  )
+  const [, startLocaleTransition] = useTransition()
 
   const options = useMemo(() => getCountryOptions(regions), [regions])
+
+  const localeOptions = useMemo(() => {
+    if (!locales) return []
+    const seen = new Set<string>()
+    return locales
+      .filter((l) => {
+        if (seen.has(l.code)) return false
+        seen.add(l.code)
+        return true
+      })
+      .map((l) => ({
+        code: l.code,
+        label: getLocalizedLanguageName(
+          l.code,
+          l.name,
+          selectedLocale || "en-US"
+        ),
+      }))
+  }, [locales, selectedLocale])
+
+  const currentLocaleLabel = useMemo(() => {
+    if (!selectedLocale || !locales) return "English"
+    const found = locales.find(
+      (l) => l.code.toLowerCase() === selectedLocale.toLowerCase()
+    )
+    return found
+      ? getLocalizedLanguageName(
+          found.code,
+          found.name,
+          selectedLocale || "en-US"
+        )
+      : "English"
+  }, [selectedLocale, locales])
 
   // Check cookies + path exclusions on mount; open popup if clear.
   useEffect(() => {
@@ -70,6 +117,8 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
 
   const handleContinue = () => {
     const chosen = selected?.country ?? (countryCode as string)
+    const localeChanged =
+      (selectedLocale ?? "") !== (currentLocale ?? "")
 
     // Persist both cookies before any redirect
     document.cookie = `${COUNTRY_POPUP_COOKIE}=true;path=/;max-age=${ONE_YEAR};SameSite=Lax`
@@ -78,6 +127,15 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
     }
 
     toggleState.close()
+
+    // If the user picked a different locale, update it
+    if (localeChanged) {
+      startLocaleTransition(async () => {
+        await updateLocale(selectedLocale ?? "")
+        router.refresh()
+        document.dispatchEvent(new CustomEvent("localechange"))
+      })
+    }
 
     // If the user picked a different country, switch region
     if (chosen && chosen !== countryCode) {
@@ -116,25 +174,30 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
         )}
       </p>
 
-      {/* Country dropdown — Headless UI Listbox, matching nav CountrySelect pattern */}
-      <Listbox value={selected} onChange={setSelected}>
-        <ListboxButton className="w-full flex items-center justify-between rounded-md border border-hairline bg-white px-4 py-3 text-left text-sm cursor-pointer">
-          <span className="flex items-center gap-x-2">
-            {selected?.country && (
-              <ReactCountryFlag
-                svg
-                countryCode={selected.country}
-                style={{ width: "16px", height: "16px" }}
-                alt=""
-                aria-hidden="true"
-              />
-            )}
-            <span className="text-ink">{selected?.label ?? ""}</span>
-          </span>
-          <ChevronDown size="16" />
-        </ListboxButton>
+      {/* Country + Language dropdowns — side-by-side on small screens and up */}
+      <div className="flex flex-col small:flex-row gap-3">
+        <Listbox
+          as="div"
+          value={selected}
+          onChange={setSelected}
+          className="relative flex-1"
+        >
+          <ListboxButton className="w-full flex items-center justify-between rounded-md border border-hairline bg-white px-4 py-3 text-left text-sm cursor-pointer">
+            <span className="flex items-center gap-x-2">
+              {selected?.country && (
+                <ReactCountryFlag
+                  svg
+                  countryCode={selected.country}
+                  style={{ width: "16px", height: "16px" }}
+                  alt=""
+                  aria-hidden="true"
+                />
+              )}
+              <span className="text-ink">{selected?.label ?? ""}</span>
+            </span>
+            <ChevronDown size="16" />
+          </ListboxButton>
 
-        <div className="relative w-full">
           <ListboxOptions className="absolute z-[80] mt-1 max-h-48 w-full overflow-y-scroll rounded-md bg-white shadow-lg border border-hairline no-scrollbar">
             {options.map((option, idx) => (
               <ListboxOption
@@ -153,8 +216,45 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
               </ListboxOption>
             ))}
           </ListboxOptions>
-        </div>
-      </Listbox>
+        </Listbox>
+
+        {locales && locales.length > 0 && (
+          <Listbox
+            as="div"
+            value={selectedLocale}
+            onChange={setSelectedLocale}
+            className="relative flex-1"
+          >
+            <ListboxButton
+              aria-label={t("a11y.selectLanguage")}
+              className="w-full flex items-center justify-between rounded-md border border-hairline bg-white px-4 py-3 text-left text-sm cursor-pointer"
+            >
+              <span className="flex items-center gap-x-2 text-ink">
+                <span className="leading-tight">{currentLocaleLabel}</span>
+              </span>
+              <ChevronDown size="16" />
+            </ListboxButton>
+
+            <ListboxOptions className="absolute z-[80] mt-1 max-h-48 w-full overflow-y-scroll rounded-md bg-white shadow-lg border border-hairline no-scrollbar">
+              <ListboxOption
+                value=""
+                className="cursor-pointer select-none px-4 py-2.5 hover:bg-surface-card data-[focus]:bg-surface-card text-sm"
+              >
+                English
+              </ListboxOption>
+              {localeOptions.map((opt) => (
+                <ListboxOption
+                  key={opt.code}
+                  value={opt.code}
+                  className="cursor-pointer select-none px-4 py-2.5 hover:bg-surface-card data-[focus]:bg-surface-card text-sm"
+                >
+                  {opt.label}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
+          </Listbox>
+        )}
+      </div>
 
       {/* Continue CTA — primary button, full-width */}
       <button
@@ -173,7 +273,7 @@ const CountryPopup = ({ regions }: CountryPopupProps) => {
       <p className="text-xs text-muted text-center mt-4">
         {t(
           "countryPopup.navHint",
-          "You can change your country anytime from the menu."
+          "You can change your country and language anytime from the menu."
         )}
       </p>
     </Modal>

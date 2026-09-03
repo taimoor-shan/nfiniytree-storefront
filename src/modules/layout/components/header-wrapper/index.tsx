@@ -18,15 +18,10 @@ export default function HeaderWrapper({
 
   // Track top bar height responsively
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)")
+    const mq = window.matchMedia("(min-width: 640px)")
 
     const update = () => {
       setTopBarH(mq.matches ? 48 : 40)
-
-      // Mobile: always reset to visible
-      if (!mq.matches) {
-        setHidden(false)
-      }
     }
 
     update()
@@ -36,12 +31,7 @@ export default function HeaderWrapper({
   }, [])
 
   useEffect(() => {
-    const mq = window.matchMedia("(min-width: 1024px)")
-
     const onScroll = () => {
-      // Completely disable scroll behavior on mobile
-      if (!mq.matches) return
-
       if (ticking.current) return
       ticking.current = true
 
