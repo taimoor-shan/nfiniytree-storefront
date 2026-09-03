@@ -12,6 +12,7 @@ type HeroProps = {
     title: string
     excerpt?: string | null
     featured_image?: string | null
+    hero_video_url?: string | null
   } | null
 }
 
@@ -21,6 +22,7 @@ const Hero = ({ page }: HeroProps) => {
   const excerpt = page?.excerpt || t("hero.fallbackExcerpt")
 
   const heroImage = normalizeImageUrl(page?.featured_image)
+  const heroVideo = normalizeImageUrl(page?.hero_video_url)
 
   return (
     <div
@@ -46,6 +48,33 @@ const Hero = ({ page }: HeroProps) => {
           sizes="100vw"
           quality={75}
           className="object-cover object-center"
+        />
+      )}
+      {/*
+        Background video. Rendered only on desktop (md+) via Tailwind's
+        `hidden md:block` so mobile clients never download the file. On
+        desktop it sits on top of the <Image> poster and replaces it visually;
+        the poster is what the user sees during the brief moment between
+        layout and the first painted frame. `preload="none"` defers the
+        metadata fetch until the browser decides — autoplay still starts the
+        download immediately because the element is in the DOM, but the
+        attribute documents the intent and means the first byte is not the
+        whole file. `key={heroVideo}` forces a remount when the CMS URL
+        changes, otherwise swapping a video would not retrigger the source
+        load.
+      */}
+      {heroVideo && (
+        <video
+          key={heroVideo}
+          src={heroVideo}
+          poster={heroImage ?? undefined}
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          aria-hidden
+          className="absolute inset-0 hidden md:block w-full h-full object-cover object-center"
         />
       )}
        {/* <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/20 to-transparent pointer-events-none" /> */}
