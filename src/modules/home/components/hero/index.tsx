@@ -26,7 +26,7 @@ const Hero = ({ page }: HeroProps) => {
 
   return (
     <div
-      className="h-[600px] lg:h-[calc(100vh-125px)] w-full border-b border-hairline relative bg-surface-card bg-center bg-cover flex items-end justify-center px-6 sm:px-28"
+      className="h-[550px] lg:h-[calc(100vh-125px)] w-full border-b border-hairline relative bg-surface-card bg-center bg-cover flex items-end justify-center px-6 sm:px-28"
     >
       {/* Was an inline `background-image`, which the preload scanner cannot see
           and next/image cannot optimize — so the homepage's largest asset (a
@@ -90,7 +90,7 @@ const Hero = ({ page }: HeroProps) => {
         <span className="text-center">
           <Heading
             level="h1"
-            className="lg:text-5xl text-3xl text-ink mb-5 font-serif text-white font-normal leading-tight"
+            className="lg:text-[3.5em] text-3xl text-ink mb-5 font-serif text-white font-normal leading-snug"
           >
             {title}
           </Heading>
