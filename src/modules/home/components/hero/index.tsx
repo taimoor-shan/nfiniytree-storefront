@@ -47,7 +47,7 @@ const Hero = ({ page }: HeroProps) => {
           preload
           sizes="100vw"
           quality={75}
-          className="object-cover object-center"
+          className="object-cover object-right"
         />
       )}
       {/*

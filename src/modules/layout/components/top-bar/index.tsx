@@ -225,12 +225,13 @@ export default function TopBar({
                   <span className="leading-tight">{currentLocaleLabel}</span>
                 </span>
               }
+              align="right"
             >
               <ul className="py-2">
                 <li>
                   <button
                     className={`w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated ${
-                      !currentLocale ? "font-semibold" : ""
+                      !currentLocale ? "text-primary" : ""
                     }`}
                     onClick={() => handleLocaleChange("")}
                     disabled={isPending}
@@ -243,7 +244,7 @@ export default function TopBar({
                     <button
                       className={`w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated ${
                         currentLocale?.toLowerCase() === opt.code.toLowerCase()
-                          ? "font-semibold"
+                          ? "text-primary"
                           : ""
                       }`}
                       onClick={() => handleLocaleChange(opt.code)}
@@ -279,7 +280,7 @@ export default function TopBar({
                   <li key={opt.countryCode}>
                     <button
                       className={`w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated whitespace-nowrap ${
-                        countryCode === opt.countryCode ? "font-semibold" : ""
+                        countryCode === opt.countryCode ? "text-primary" : ""
                       }`}
                       onClick={() => handleCountryChange(opt.countryCode)}
                     >

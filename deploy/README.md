@@ -5,57 +5,54 @@ header set by Cloudflare. The header is only safe to trust if the request is
 known to have come from Cloudflare's edge — i.e. the VPS does **not** accept
 direct internet traffic on `:80` / `:443`.
 
-## Required Nginx change (apply on the VPS)
-
-In the storefront's `server { }` block (typically
-`/etc/nginx/sites-enabled/infinytree.conf` or similar), **before** any
-`location` rules, paste the contents of `deploy/nginx/cloudflare-only.conf`
-from this repo. The block lists Cloudflare's published IPv4 and IPv6 ranges
-followed by `deny all;`.
-
-Then:
+## Apply on the VPS
 
 ```bash
-sudo nginx -t && sudo systemctl reload nginx
+# 1. Copy the lockdown script to the VPS, then run it
+sudo bash cloudflare-lockdown.sh
+
+# 2. Confirm Certbot renewal still works
+sudo certbot renew --dry-run
+
+# 3. Run the verification script
+bash verify-cf-ipcountry.sh
 ```
 
-## Required Nginx check (apply on the VPS)
+The lockdown script (`deploy/scripts/cloudflare-lockdown.sh`):
 
-Verify no rule strips `CF-IPCountry` before it reaches Node:
+- Backs up `/etc/nginx/sites-enabled/medusa` to a timestamped file.
+- Writes the Cloudflare IP allowlist to `/etc/nginx/conf.d/cloudflare-only.conf`.
+- Inserts an `include` of that allowlist into the `:443` and `:80` server blocks
+  (block-aware, idempotent — safe to re-run).
+- For `:80`, also inserts an `allow all` exception for
+  `/.well-known/acme-challenge/` *unless* Certbot is using `dns-01`.
+- Validates with `nginx -t` and **automatically rolls back** the config change
+  on validation failure.
+- Reloads Nginx only if validation passed.
 
-```bash
-sudo grep -rn -E 'more_clear_input_headers|proxy_set_header.*CF-IPCountry' /etc/nginx/
-```
+The verification script (`deploy/scripts/verify-cf-ipcountry.sh`):
 
-You should see no `more_clear_input_headers CF-IPCountry` line. A custom
-`proxy_set_header` is fine; only `more_clear_input_headers` would remove the
-header (and only with the `headers-more` Nginx module loaded).
+- Asserts the direct origin is 403 on both `:443` and `:80`.
+- Asserts the request through Cloudflare still returns 307 with
+  `CF-IPCountry` and the right `Vary` / `Cache-Control`.
+- Asserts the `selected-country` cookie round-trips (no second redirect).
 
-## Production verification (run after the Nginx change)
+The rollback script (`deploy/scripts/cloudflare-rollback.sh`):
 
-```bash
-# 1. Cloudflare headers reach origin
-curl -sI https://infinytree.com/ | grep -iE 'cf-|cf_ipcountry'
-
-# 2. Direct origin is now blocked
-curl -sI -H "CF-IPCountry: HU" https://212.227.28.191/ \
-  --resolve infinytree.com:443:212.227.28.191
-# Expect: HTTP/1.1 403
-
-# 3. Legitimate visitor flow still works
-curl -sI https://infinytree.com/
-# Expect: 307 to /<region>/ + Set-Cookie: selected-country=<region>
-#          Cache-Control: no-store
-#          Vary: Cookie, CF-IPCountry
-
-# 4. XX / unknown values fall through
-curl -sI -H "CF-IPCountry: XX" https://infinytree.com/
-# Expect: 307 to /hu/ (DEFAULT_REGION)
-```
+- Restores the most recent `medusa.bak.*` file and reloads Nginx. Use this if
+  the lockdown breaks something.
 
 ## Maintenance
 
 Cloudflare rarely changes its published IP ranges, but they do occasionally.
 Refresh `deploy/nginx/cloudflare-only.conf` from
 <https://www.cloudflare.com/ips-v4/> and
-<https://www.cloudflare.com/ips-v6/> on a weekly cadence and redeploy.
+<https://www.cloudflare.com/ips-v6/> on a weekly cadence and re-run
+`cloudflare-lockdown.sh` (it is idempotent).
+
+## What the Next.js side needs
+
+- `src/proxy.ts` reads `CF-IPCountry` via `src/lib/geo/client-country.ts`.
+- `x-dev-country` is honored only when `NODE_ENV !== "production"` — use
+  `curl -H "x-dev-country: DE" http://localhost:8000/` to exercise the geo
+  path during local development without Cloudflare in the loop.
