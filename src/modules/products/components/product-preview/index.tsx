@@ -39,6 +39,11 @@ export default async function ProductPreview({
 
   const locale = await getLocale()
   const netPriceLabel = await translate("product.netPrice", locale)
+  const preOrderOfferLabel = await translate("product.preOrderOffer", locale)
+
+  const isDiscounted =
+    !!cheapestPrice &&
+    cheapestPrice.calculated_price_number < cheapestPrice.original_price_number
 
   return (
     <LocalizedClientLink href={`/products/${product.handle}`} className="group">
@@ -63,9 +68,17 @@ export default async function ProductPreview({
           </span>
         )}
         <div className="flex mt-4 justify-between flex-wrap gap-3">
-          <Text className=" text-lg md:text-xl" data-testid="product-title">
-            {product.title}
-          </Text>
+          <div className="something">
+            <Text className=" text-[20px] md:text-xl" data-testid="product-title">
+              {product.title}
+            </Text>
+            {isDiscounted && (
+              <Text className="text-xs uppercase tracking-wider text-primary-text mt-2">
+                {preOrderOfferLabel}
+              </Text>
+            )}
+          </div>
+
           <div className="flex items-center gap-x-2">
             {cheapestPrice && (
               <PreviewPrice

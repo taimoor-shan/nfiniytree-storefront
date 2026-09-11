@@ -465,3 +465,20 @@
 .outline-none{
   outline: none;
 }
+
+
+.original-price {
+  position: relative;
+  display: inline-block;
+}
+
+.original-price::after {
+  content: "";
+  position: absolute;
+  left: -4%;
+  top: 50%;
+  width: 100%;
+  height: 1.5px;
+  background: red;
+  transform: rotate(-12deg);
+}

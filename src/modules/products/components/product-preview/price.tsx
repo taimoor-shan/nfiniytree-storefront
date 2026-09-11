@@ -19,26 +19,28 @@ export default async function PreviewPrice({
       <div className="flex items-center gap-x-2">
         {isDiscounted && (
           <Text
-            className="line-through text-muted"
+            className="original-price text-lg"
             data-testid="original-price"
           >
             {price.original_price}
           </Text>
         )}
+        </div>
+        <div className="flex items-center gap-2">
         <Text
-          className={clx("text-primary-text text-lg md:text-xl", {
+          className={clx("text-primary-text text-lg", {
             "text-primary-text": isDiscounted,
           })}
           data-testid="price"
         >
           {price.calculated_price}
         </Text>
+        {netPriceLabel && (
+          <Text className="text-xs text-muted-foreground mt-0.5">
+            {netPriceLabel}
+          </Text>
+        )}
       </div>
-      {netPriceLabel && (
-        <Text className="text-xs text-muted-foreground mt-0.5">
-          {netPriceLabel}
-        </Text>
-      )}
     </div>
   )
 }

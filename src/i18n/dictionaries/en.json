@@ -111,6 +111,7 @@
   "product.notifyMe.error": "Something went wrong. Please try again.",
   "product.notifyMe.rateLimited": "You've already requested a notification. Please check your inbox or try again later.",
   "product.netPrice": "(+VAT)",
+  "product.preOrderOffer": "Pre-order Offer",
   "product.selectOption": "Select {title}",
   "newsletter.placeholder": "youremail@example.com",
   "newsletter.submit": "Submit",

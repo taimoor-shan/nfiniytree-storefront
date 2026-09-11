@@ -53,7 +53,7 @@ export default function ProductPrice({
             <p>
               <span className="text-body">{t("product.original")}: </span>
               <span
-                className="line-through"
+                className="original-price"
                 data-testid="original-product-price"
                 data-value={selectedPrice.original_price_number}
               >

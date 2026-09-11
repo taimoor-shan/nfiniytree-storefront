@@ -111,6 +111,7 @@
   "product.notifyMe.error": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
   "product.notifyMe.rateLimited": "Sie haben bereits eine Benachrichtigung angefordert. Bitte überprüfen Sie Ihren Posteingang oder versuchen Sie es später erneut.",
   "product.netPrice": "(+MwSt.)",
+  "product.preOrderOffer": "Vorbestellungsangebot",
   "product.selectOption": "{title} auswählen",
   "newsletter.placeholder": "ihre.email@beispiel.com",
   "newsletter.submit": "Anmelden",

@@ -111,6 +111,7 @@
   "product.notifyMe.error": "Hiba történt. Kérjük, próbálja újra.",
   "product.notifyMe.rateLimited": "Már kért értesítést. Kérjük, ellenőrizze a postaládáját, vagy próbálja újra később.",
   "product.netPrice": "(+ÁFA)",
+  "product.preOrderOffer": "Előrendelési ajánlat",
   "product.selectOption": "{title} kiválasztása",
   "newsletter.placeholder": "az.email@példa.hu",
   "newsletter.submit": "Feliratkozás",
