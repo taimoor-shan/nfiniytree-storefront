@@ -47,7 +47,7 @@ const Hero = ({ page }: HeroProps) => {
           preload
           sizes="100vw"
           quality={75}
-          className="object-cover object-right"
+          className="object-cover object-bottom"
         />
       )}
       {/*
@@ -90,7 +90,7 @@ const Hero = ({ page }: HeroProps) => {
         <span className="text-center">
           <Heading
             level="h1"
-            className="lg:text-[3.5em] text-3xl text-ink mb-5 font-serif text-white font-normal leading-snug"
+            className="lg:text-[3.5em] text-3xl text-ink mb-5 font-serif text-white font-normal leading-[1.2em]"
           >
             {title}
           </Heading>

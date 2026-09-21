@@ -35,7 +35,7 @@ export default async function Nav() {
         />
       }
     >
-      <header className="relative mx-auto border-b duration-200 bg-canvas border-hairline py-4 small:py-5">
+      <header className="relative mx-auto border-b duration-200 bg-surface-soft border-hairline py-4 small:py-5">
         {/* First focusable element on the page: lets keyboard and screen-reader
             users jump past the top bar and the whole nav to the page content.
             Visually hidden until focused, so the design is unchanged. */}
@@ -78,8 +78,8 @@ export default async function Nav() {
           </div>
 
           {/* Center: Desktop Nav */}
-          <div className="hidden h-full items-center justify-self-center small:flex">
-            <div className="flex items-center gap-x-8 whitespace-nowrap">
+          <div className="hidden h-full items-center justify-self-center small:flex me-0 lg:me-32">
+            <div className="flex items-center gap-x-8 whitespace-nowrap ">
               <LocalizedClientLink
                 className="hover:text-primary-text text-sm text-ink uppercase"
                 href="/"

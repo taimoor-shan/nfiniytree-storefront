@@ -1037,14 +1037,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@next/swc-darwin-x64@npm:15.3.5":
-  version: 15.3.5
-  resolution: "@next/swc-darwin-x64@npm:15.3.5"
-  checksum: 10/493a88551fd52f8f9e9aa7d2b58e84ae9ca44be8f28642bc36e8d5213b72fba56b68ea01dc5ba954f6bc63328fdb7fdc930916e36b6c2b02d82dc89cfd874bab
-  conditions: os=darwin & cpu=x64
-  languageName: node
-  linkType: hard
-
 "@next/swc-darwin-x64@npm:16.2.12":
   version: 16.2.12
   resolution: "@next/swc-darwin-x64@npm:16.2.12"
@@ -5628,7 +5620,6 @@ __metadata:
     "@medusajs/types": "npm:latest"
     "@medusajs/ui": "npm:latest"
     "@medusajs/ui-preset": "npm:latest"
-    "@next/swc-darwin-x64": "npm:15.3.5"
     "@radix-ui/react-accordion": "npm:^1.2.1"
     "@stripe/react-stripe-js": "npm:^5.3.0"
     "@stripe/stripe-js": "npm:^8.2.0"
