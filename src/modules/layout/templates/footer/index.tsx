@@ -200,16 +200,16 @@ export default async function Footer() {
         </div>
 
         <div className="border-t border-hairline pt-6 mt-8 lg:col-span-12 lg:row-start-3 lg:self-end">
-          <div className="lg:grid lg:grid-cols-12 space-y-2 sm:space-y-0 text-xs text-muted">
-            <div className="lg:col-span-9">
+          <div className="lg:grid lg:grid-cols-12 space-y-2 sm:space-y-0 text-sm text-muted">
+            <div className="lg:col-span-7">
               <p className="mb-0">
                 {dict["footer.allRightsReserved"]
                   .replace("{year}", String(currentYear))
                   .replace("{storeName}", storeName)}
               </p>
             </div>
-            <div className="lg:col-span-3">
-              <div className="flex space-x-6">
+            <div className="lg:col-span-5">
+              <div className="flex flex-wrap space-x-6 justify-end">
                 <LocalizedClientLink
                   href="/policies/terms"
                   className="hover:text-ink transition-colors"
