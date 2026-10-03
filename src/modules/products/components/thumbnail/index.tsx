@@ -23,8 +23,9 @@ type ThumbnailProps = {
    * What the image shows. Pass the product (and, where relevant, variant) name —
    * `alt="Olive Tree 120cm"` tells a screen-reader user and an image crawler
    * which product this card is for, where the previous hardcoded "Product image"
-   * told neither. Omitted only when the same information is already adjacent in
-   * text and the image is therefore decorative, in which case pass `alt=""`.
+   * told neither. Product images are never decorative: even when the name sits
+   * next to the image in text, pass it here so image search and SEO audits see a
+   * described image instead of `alt=""`.
    */
   alt?: string
   "data-testid"?: string
@@ -101,8 +102,8 @@ const ImageOrPlaceholder = ({
   return image ? (
     <Image
       src={normalizeImageUrl(image)}
-      // `alt` may legitimately be "" (decorative — the product name sits next to
-      // the image in text), so only fall back when it was not passed at all.
+      // Only fall back when `alt` was not passed at all; an explicit "" is
+      // respected as-is rather than replaced with the generic label.
       alt={alt ?? t("product.productImage")}
       className="absolute inset-0 object-cover object-center"
       draggable={false}

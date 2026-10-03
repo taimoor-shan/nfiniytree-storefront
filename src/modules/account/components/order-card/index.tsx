@@ -50,8 +50,9 @@ const OrderCard = ({ order }: OrderCardProps) => {
               className="flex flex-col gap-y-2"
               data-testid="order-item"
             >
-              {/* Decorative — `i.title` is rendered directly below. */}
-              <Thumbnail thumbnail={i.variant?.thumbnail || i.product?.thumbnail || i.thumbnail} images={i.variant?.images || i.product?.images || []} size="full" alt="" />
+              {/* Named like every other product image; `i.title` is rendered
+                  directly below, so a screen reader hears it twice — accepted. */}
+              <Thumbnail thumbnail={i.variant?.thumbnail || i.product?.thumbnail || i.thumbnail} images={i.variant?.images || i.product?.images || []} size="full" alt={i.product_title ?? i.title ?? ""} />
               <div className="flex items-center text-small-regular text-ink">
                 <span
                   className="text-ink font-semibold"

@@ -54,13 +54,11 @@ export default async function ProductPreview({
           size="full"
           isFeatured={isFeatured}
           eager={eager}
-          // Decorative here, deliberately. The image, the subtitle badge, the
-          // product name and the price all sit inside this one link, so the
-          // link already announces the product by name — repeating it in `alt`
-          // would make every card in the grid say the product name twice. The
-          // descriptive alt for image search lives on the PDP gallery, which is
-          // the canonical page forr the product's images.
-          alt=""
+          // Named, not decorative: every product image carries real alt text for
+          // image search and SEO audits, not just the PDP gallery. The card is a
+          // single link, so a screen reader reads the product name here and
+          // again in the title below — a repeat we accept on purpose.
+          alt={product.title}
         />
         {product.subtitle && (
           <span className="absolute top-3 left-3 z-10 text-xs px-2.5 py-1 rounded-full bg-primary-strong text-white uppercase tracking-wider border border-primary">

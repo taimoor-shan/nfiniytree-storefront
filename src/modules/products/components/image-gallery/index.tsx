@@ -66,7 +66,8 @@ const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
   const name = productTitle?.trim() || t("product.productImage")
 
   // "Sunset Olive Tree — image 2 of 5" instead of a bare "Product image":
-  // says which product and where in the set the shopper is.
+  // says which product and where in the set the shopper is. Shared by the hero
+  // and every thumbnail, so no image in the gallery is left unnamed.
   const describeImage = (index: number) =>
     t("a11y.productImageOf")
       .replace("{product}", name)
@@ -88,8 +89,10 @@ const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
                   : "border-transparent hover:border-hairline-strong"
               }`}
               onClick={() => goTo(index)}
-              // The button carries the name; the image inside it is decorative,
-              // so an alt would just repeat it.
+              // The button's accessible name is this aria-label, which wins over
+              // its content, so the image's alt is not announced a second time.
+              // The alt is for crawlers, image search and SEO audits, which read
+              // every <img> — thumbnails included, not just the hero.
               aria-label={t("a11y.viewImage")
                 .replace("{index}", String(index + 1))
                 .replace("{total}", String(images.length))}
@@ -98,7 +101,7 @@ const ImageGallery = ({ images, productTitle }: ImageGalleryProps) => {
               {!!image.url && (
                 <Image
                   src={normalizeImageUrl(image.url)}
-                  alt=""
+                  alt={describeImage(index)}
                   fill
                   sizes="100px"
                   style={{ objectFit: "cover" }}
