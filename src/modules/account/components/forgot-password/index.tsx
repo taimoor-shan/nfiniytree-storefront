@@ -8,12 +8,32 @@ import Input from "@modules/common/components/input"
 import { useActionState, useState } from "react"
 import { useParams } from "next/navigation"
 
-const ForgotPassword = () => {
+type Props = {
+  /** The request action. Defaults to the shop customer's. */
+  action?: (
+    state: string | null | undefined,
+    formData: FormData
+  ) => Promise<string | null | undefined>
+  /** Where "back to sign in" goes. Defaults to the shop account. */
+  backHref?: string
+  title?: string
+  description?: string
+  defaultEmail?: string
+}
+
+const ForgotPassword = ({
+  action = requestPasswordReset,
+  backHref,
+  title,
+  description,
+  defaultEmail,
+}: Props) => {
   const { t } = useTranslation()
-  const [message, formAction, isPending] = useActionState(requestPasswordReset, null)
+  const [message, formAction, isPending] = useActionState(action, null)
   const [submitted, setSubmitted] = useState(false)
   const params = useParams()
   const countryCode = (params.countryCode as string) || "en"
+  const backToLoginHref = backHref ?? `/${countryCode}/account`
 
   const handleFormAction = (formData: FormData) => {
     setSubmitted(true)
@@ -28,7 +48,7 @@ const ForgotPassword = () => {
           {t("account.resetLinkSent")}
         </p>
         <a
-          href={`/${countryCode}/account`}
+          href={backToLoginHref}
           className="text-link text-small-regular hover:underline"
         >
           {t("account.backToLogin")}
@@ -39,9 +59,11 @@ const ForgotPassword = () => {
 
   return (
     <div className="max-w-sm w-full flex flex-col items-center" data-testid="forgot-password-page">
-      <h1 className="text-large-semi uppercase mb-6">{t("account.forgotPassword")}</h1>
+      <h1 className="text-large-semi uppercase mb-6">
+        {title ?? t("account.forgotPassword")}
+      </h1>
       <p className="text-center text-base-regular text-ink mb-8">
-        {t("account.forgotPasswordPrompt")}
+        {description ?? t("account.forgotPasswordPrompt")}
       </p>
       <form className="w-full" action={handleFormAction}>
         <div className="flex flex-col w-full gap-y-2">
@@ -51,6 +73,7 @@ const ForgotPassword = () => {
             type="email"
             title={t("common.emailNotValid")}
             autoComplete="email"
+            defaultValue={defaultEmail}
             required
             data-testid="forgot-password-email-input"
           />
@@ -61,10 +84,7 @@ const ForgotPassword = () => {
         </SubmitButton>
       </form>
       <span className="text-center text-ink text-small-regular mt-6">
-        <a
-          href={`/${countryCode}/account`}
-          className="text-link hover:underline"
-        >
+        <a href={backToLoginHref} className="text-link hover:underline">
           {t("account.backToLogin")}
         </a>
       </span>
