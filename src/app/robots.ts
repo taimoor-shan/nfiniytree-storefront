@@ -32,6 +32,9 @@ export default function robots(): MetadataRoute.Robots {
           "/*/account",
           "/*/account/*",
           "/*/order/*",
+          // Sales reps' private commission portal.
+          "/*/sales-portal",
+          "/*/sales-portal/*",
           // Internal search / filtered listings: infinite parameter space,
           // all of it duplicating the canonical category and store pages.
           "/*?sortBy=",

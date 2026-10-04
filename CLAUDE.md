@@ -77,6 +77,7 @@ Next.js App Router storefront using the Medusa.js SDK.
 | `src/modules/*/components/` | Feature-specific UI components |
 | `src/modules/*/templates/` | Page-level composition templates |
 | `src/modules/common/` | Shared components, icons, modal |
+| `src/modules/sales-portal/` | Sales reps' commission portal — shell, tables, formatting helpers |
 | `src/modules/skeletons/` | Loading skeleton placeholders |
 | `src/types/` | TypeScript definitions |
 
@@ -89,6 +90,7 @@ Next.js App Router storefront using the Medusa.js SDK.
 - **Checkout** — Multi-step: Addresses → Shipping → Payment. Payment abstracted behind `isManual()`/`isStripeLike()` checks. Stripe wrapper for card payments, express checkout option
 - **Locale** — Country-code routing via `getCountryCode()` middleware. Locale cookie via `setLocaleCookie()`. Header extraction via `getLocaleHeader()`
 - **Auth** — `retrieveCustomer()`, login/signup/signout/transferCart. Auth headers on every data call via `getAuthHeaders()`
+- **Sales portal** — `/[countryCode]/sales-portal` is the commission portal for sales reps (Medusa `sales_rep` actor, from `medusa-plugin-sales-commission`). The rep's JWT has its own cookie (`_sales_rep_jwt`, `getSalesRepAuthHeaders()`) and is never mixed with the customer's. Reads go through `src/lib/data/sales-portal.ts` (always `no-store`; 401/403/404 become `signed_out`/`no_access`/`not_found` results, not thrown errors); sign-in and password reset are server actions in `sales-portal-actions.ts` that reuse the customer `Login`/`ForgotPassword`/`ResetPassword` components through their optional props. The `(portal)` layout renders the sign-in form while nobody is signed in, and every page also checks its own result, because a layout is not re-run on client-side navigation. Everything under it is `noindex` and disallowed in `robots.ts`. Reps get access from the Medusa admin (Sales Reps → Portal access); there is no sign-up
 
 ## Memory
 
