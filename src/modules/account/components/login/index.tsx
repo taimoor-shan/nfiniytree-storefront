@@ -10,11 +10,27 @@ import { useActionState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
 
 type Props = {
-  setCurrentView: (view: LOGIN_VIEW) => void
+  /** When given, shows the "become a member" link that switches to registration. */
+  setCurrentView?: (view: LOGIN_VIEW) => void
+  /** The sign-in action. Defaults to the shop customer's sign-in. */
+  action?: (
+    state: string | null | undefined,
+    formData: FormData
+  ) => Promise<string | null | undefined>
+  /** Defaults to the shop account's forgot-password page. */
+  forgotPasswordHref?: string
+  title?: string
+  description?: string
 }
 
-const Login = ({ setCurrentView }: Props) => {
-  const [message, formAction] = useActionState(login, null)
+const Login = ({
+  setCurrentView,
+  action = login,
+  forgotPasswordHref,
+  title,
+  description,
+}: Props) => {
+  const [message, formAction] = useActionState(action, null)
   const { t } = useTranslation()
   const params = useParams()
   const searchParams = useSearchParams()
@@ -26,9 +42,11 @@ const Login = ({ setCurrentView }: Props) => {
       className="max-w-sm w-full flex flex-col items-center"
       data-testid="login-page"
     >
-      <h1 className="text-large-semi uppercase mb-6">{t("account.welcomeBack")}</h1>
+      <h1 className="text-large-semi uppercase mb-6">
+        {title ?? t("account.welcomeBack")}
+      </h1>
       <p className="text-center text-base-regular text-ink mb-8">
-        {t("account.signInPrompt")}
+        {description ?? t("account.signInPrompt")}
       </p>
       <form className="w-full" action={formAction}>
         {returnUrl && <input type="hidden" name="returnUrl" value={returnUrl} />}
@@ -53,7 +71,7 @@ const Login = ({ setCurrentView }: Props) => {
         </div>
         <div className="flex justify-end mt-1">
           <a
-            href={`/${countryCode}/account/forgot-password`}
+            href={forgotPasswordHref ?? `/${countryCode}/account/forgot-password`}
             className="text-small-regular text-link hover:underline"
           >
             {t("account.forgotPassword") || "Forgot password?"}
@@ -64,17 +82,19 @@ const Login = ({ setCurrentView }: Props) => {
           {t("account.signIn")}
         </SubmitButton>
       </form>
-      <span className="text-center text-ink text-small-regular mt-6">
-        {t("account.notMember")}{" "}
-        <button
-          onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
-          className="text-link"
-          data-testid="register-button"
-        >
-          {t("account.joinUs")}
-        </button>
-        .
-      </span>
+      {setCurrentView && (
+        <span className="text-center text-ink text-small-regular mt-6">
+          {t("account.notMember")}{" "}
+          <button
+            onClick={() => setCurrentView(LOGIN_VIEW.REGISTER)}
+            className="text-link"
+            data-testid="register-button"
+          >
+            {t("account.joinUs")}
+          </button>
+          .
+        </span>
+      )}
     </div>
   )
 }

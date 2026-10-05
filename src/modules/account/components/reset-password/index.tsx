@@ -8,7 +8,26 @@ import Input from "@modules/common/components/input"
 import { useActionState } from "react"
 import { useRouter, useSearchParams, useParams } from "next/navigation"
 
-const ResetPassword = () => {
+type Props = {
+  /** The update action. Defaults to the shop customer's. */
+  action?: (
+    email: string,
+    token: string,
+    password: string
+  ) => Promise<{ success: boolean; error: string | null }>
+  /** Where to go after the password is changed. Defaults to the shop account. */
+  successHref?: string
+  /** Where "request a new link" goes. Defaults to the shop account's. */
+  requestNewHref?: string
+  description?: string
+}
+
+const ResetPassword = ({
+  action = resetPassword,
+  successHref,
+  requestNewHref,
+  description,
+}: Props) => {
   const { t } = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -37,9 +56,9 @@ const ResetPassword = () => {
     }
 
     try {
-      const result = await resetPassword(email, token, password)
+      const result = await action(email, token, password)
       if (result.success) {
-        router.push(`/${countryCode}/account`)
+        router.push(successHref ?? `/${countryCode}/account`)
         return null
       }
       return result.error || "Failed to reset password"
@@ -57,7 +76,7 @@ const ResetPassword = () => {
         <p className="text-center text-base-regular text-ink mb-8">
           {t("account.invalidLinkPrompt") || "This password reset link is invalid or has expired. Please request a new one."}
         </p>
-        <a href={`/${countryCode}/account/forgot-password`} className="text-link text-small-regular hover:underline">
+        <a href={requestNewHref ?? `/${countryCode}/account/forgot-password`} className="text-link text-small-regular hover:underline">
           {t("account.requestNewLink") || "Request a new reset link"}
         </a>
       </div>
@@ -68,7 +87,8 @@ const ResetPassword = () => {
     <div className="max-w-sm w-full flex flex-col items-center" data-testid="reset-password-page">
       <h1 className="text-large-semi uppercase mb-6">{t("account.resetPassword") || "Reset Your Password"}</h1>
       <p className="text-center text-base-regular text-ink mb-8">
-        {t("account.resetPasswordPrompt") || "Enter your new password below."}
+        {description ??
+          (t("account.resetPasswordPrompt") || "Enter your new password below.")}
       </p>
       <form className="w-full" action={formAction}>
         <div className="flex flex-col w-full gap-y-4">
