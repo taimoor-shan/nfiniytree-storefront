@@ -103,6 +103,13 @@ export default async function Nav() {
               >
                 {dict["nav.about"]}
               </LocalizedClientLink>
+              <LocalizedClientLink
+                className="hover:text-primary-text text-sm text-ink uppercase"
+                href="/customer-care"
+                data-testid="nav-faqs-link"
+              >
+                {dict["nav.faqs"]}
+              </LocalizedClientLink>
 
               <LocalizedClientLink
                 className="hover:text-primary-text text-sm text-ink uppercase"
