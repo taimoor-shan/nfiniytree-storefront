@@ -1,3 +1,4 @@
+import { serverBackendUrl } from "@lib/util/backend-url"
 import { getLocaleHeader } from "@lib/util/get-locale-header"
 import Medusa, { FetchArgs, FetchInput } from "@medusajs/js-sdk"
 
@@ -38,3 +39,13 @@ sdk.client.fetch = async <T>(
 
   return originalFetch<T>(input, nextInit)
 }
+
+/**
+ * For the sales commission plugin's own routes (/sales-portal/*,
+ * /sales-invites/*), which the public address doesn't send to Medusa. Server
+ * code only: see `serverBackendUrl`.
+ */
+export const portalSdk = new Medusa({
+  baseUrl: serverBackendUrl(),
+  publishableKey: PUBLISHABLE_KEY,
+})

@@ -2,6 +2,7 @@
 
 import { sdk } from "@lib/config"
 import { translate } from "@lib/i18n/dictionaries"
+import { serverBackendUrl } from "@lib/util/backend-url"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import {
@@ -84,10 +85,11 @@ export async function resetSalesRepPassword(
 }
 
 // The recruiting calls read the error's `code` from the response body, which
-// the SDK's fetch drops, so they use plain fetch against the same backend.
+// the SDK's fetch drops, so they use plain fetch. They go to the address this
+// server reaches Medusa at, because the public one doesn't route the plugin's
+// /sales-portal and /sales-invites paths to it.
 
-const BACKEND_URL =
-  process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000"
+const BACKEND_URL = serverBackendUrl()
 
 type BackendResult =
   | { ok: true; data: any }

@@ -1,5 +1,6 @@
 import "server-only"
-import { sdk } from "@lib/config"
+import { portalSdk } from "@lib/config"
+import { MISROUTED_HINT } from "@lib/util/backend-url"
 import {
   PortalBalances,
   PortalClient,
@@ -24,6 +25,12 @@ export type PortalResult<T> =
 
 const PERIOD = /^\d{4}-(0[1-9]|1[0-2])$/
 
+/** What to log for a failed call. A reply that isn't JSON means the wrong address. */
+const failure = (error: any) =>
+  error instanceof SyntaxError
+    ? `${error.message}. ${MISROUTED_HINT}`
+    : error?.message ?? error
+
 const portalFetch = async <T>(
   path: string,
   query?: Record<string, string | number | undefined>
@@ -35,7 +42,7 @@ const portalFetch = async <T>(
   }
 
   try {
-    const data = await sdk.client.fetch<T>(path, {
+    const data = await portalSdk.client.fetch<T>(path, {
       method: "GET",
       headers,
       query,
@@ -48,9 +55,16 @@ const portalFetch = async <T>(
     // or the rep was deactivated.
     if (error?.status === 401) return { ok: false, reason: "signed_out" }
     if (error?.status === 403) return { ok: false, reason: "no_access" }
-    if (error?.status === 404) return { ok: false, reason: "not_found" }
+    if (error?.status === 404) {
+      // A signed-in rep always has a profile, so a 404 there means the request
+      // never reached the plugin
+      if (path === "/sales-portal/me") {
+        console.error(`[sales-portal] ${path} returned 404: ${MISROUTED_HINT}`)
+      }
+      return { ok: false, reason: "not_found" }
+    }
 
-    console.error(`[sales-portal] ${path} failed:`, error?.message ?? error)
+    console.error(`[sales-portal] ${path} failed:`, failure(error))
     return { ok: false, reason: "error" }
   }
 }
@@ -118,7 +132,7 @@ export const getInvite = async (
   }
 
   try {
-    const { invite } = await sdk.client.fetch<{ invite: PortalInvite }>(
+    const { invite } = await portalSdk.client.fetch<{ invite: PortalInvite }>(
       `/sales-invites/${token}`,
       { method: "GET", cache: "no-store" }
     )
@@ -127,7 +141,7 @@ export const getInvite = async (
   } catch (error: any) {
     if (error?.status === 404) return { ok: false, reason: "not_found" }
 
-    console.error("[sales-portal] invite lookup failed:", error?.message ?? error)
+    console.error("[sales-portal] invite lookup failed:", failure(error))
     return { ok: false, reason: "error" }
   }
 }
