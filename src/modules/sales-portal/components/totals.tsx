@@ -34,6 +34,11 @@ const Totals = ({
         [t("salesPortal.totals.total"), money(total.total)],
         [t("salesPortal.totals.paid"), money(total.paid)]
       )
+      // What carried over: the month starts and ends with this much still owed
+      if (total.opening !== 0) {
+        cells.push([t("salesPortal.totals.opening"), money(total.opening)])
+      }
+      cells.push([t("salesPortal.totals.closing"), money(total.closing)])
 
       return (
         <div

@@ -28,13 +28,17 @@ const PortalShell = ({
           {t("salesPortal.signedInAs")} {rep.name} ({rep.email})
         </p>
       </div>
-      <div className="flex items-center gap-x-6">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
         <PortalNav
           items={[
             { href: "/sales-portal", label: t("salesPortal.nav.overview") },
             {
               href: "/sales-portal/payouts",
               label: t("salesPortal.nav.payouts"),
+            },
+            {
+              href: "/sales-portal/recruits",
+              label: t("salesPortal.nav.recruits"),
             },
           ]}
         />

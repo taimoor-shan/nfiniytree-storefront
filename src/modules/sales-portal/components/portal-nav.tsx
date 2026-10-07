@@ -18,7 +18,10 @@ const PortalNav = ({ items }: { items: Item[] }) => {
       : pathname === `/${countryCode}${href}`
 
   return (
-    <nav className="flex items-center gap-x-6" data-testid="sales-portal-nav">
+    <nav
+      className="flex flex-wrap items-center gap-x-6 gap-y-1"
+      data-testid="sales-portal-nav"
+    >
       {items.map((item) => (
         <LocalizedClientLink
           key={item.href}

@@ -1,13 +1,15 @@
 import "server-only"
 import { sdk } from "@lib/config"
 import {
+  PortalBalances,
   PortalClient,
-  PortalLine,
+  PortalInvite,
   PortalMonth,
   PortalOrder,
   PortalPayout,
+  PortalRecruits,
   PortalRep,
-  PortalTotals,
+  PortalStatement,
 } from "@/types/sales-portal"
 import { getSalesRepAuthHeaders } from "./cookies"
 
@@ -61,10 +63,17 @@ export const getPortalMe = () =>
   portalFetch<{ sales_rep: PortalRep }>("/sales-portal/me")
 
 export const getPortalStatement = (period?: string) =>
-  portalFetch<{ period: string; lines: PortalLine[]; totals: PortalTotals[] }>(
-    "/sales-portal/statement",
-    { period: validPeriod(period) }
-  )
+  portalFetch<PortalStatement>("/sales-portal/statement", {
+    period: validPeriod(period),
+  })
+
+/** What the rep is owed across every month, what is pending, and the next payout day. */
+export const getPortalBalances = () =>
+  portalFetch<PortalBalances>("/sales-portal/balance")
+
+/** The reps this rep invited, how far along each is, and what Level 2 earns from each. */
+export const getPortalRecruits = () =>
+  portalFetch<PortalRecruits>("/sales-portal/recruits")
 
 export const getPortalClients = (period?: string) =>
   portalFetch<{ period: string; clients: PortalClient[] }>(
@@ -90,3 +99,35 @@ export const getPortalClientOrders = (customerId: string, offset = 0) =>
 
 export const getPortalPayouts = () =>
   portalFetch<{ payouts: PortalPayout[] }>("/sales-portal/payouts")
+
+const INVITE_TOKEN = /^[A-Za-z0-9_-]{43}$/
+
+/**
+ * What a candidate sees on their invite page. Public: the personal link is the
+ * credential, so there is no sign-in. An unknown, mistyped or withdrawn link
+ * comes back as not found.
+ */
+export const getInvite = async (
+  token: string
+): Promise<
+  | { ok: true; data: PortalInvite }
+  | { ok: false; reason: "not_found" | "error" }
+> => {
+  if (!INVITE_TOKEN.test(token)) {
+    return { ok: false, reason: "not_found" }
+  }
+
+  try {
+    const { invite } = await sdk.client.fetch<{ invite: PortalInvite }>(
+      `/sales-invites/${token}`,
+      { method: "GET", cache: "no-store" }
+    )
+
+    return { ok: true, data: invite }
+  } catch (error: any) {
+    if (error?.status === 404) return { ok: false, reason: "not_found" }
+
+    console.error("[sales-portal] invite lookup failed:", error?.message ?? error)
+    return { ok: false, reason: "error" }
+  }
+}
