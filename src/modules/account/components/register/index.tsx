@@ -3,6 +3,7 @@
 import { useTranslation } from "@/lib/i18n"
 import { useActionState } from "react"
 import Input from "@modules/common/components/input"
+import TurnstileWidget from "@modules/common/components/turnstile-widget"
 import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
@@ -68,6 +69,7 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="password-input"
           />
         </div>
+        <TurnstileWidget />
         <ErrorMessage
           error={typeof message === "string" ? message : null}
           data-testid="register-error"
