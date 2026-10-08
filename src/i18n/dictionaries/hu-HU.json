@@ -678,5 +678,7 @@
   "salesPortal.join.approvedText": "Nézze meg az e-mailjeit: ott talál egy linket a jelszava beállításához. Utána jelentkezzen be az értékesítői portálra.",
   "salesPortal.join.signIn": "Bejelentkezés az értékesítői portálra",
   "salesPortal.join.closedTitle": "Ez a meghívó lezárult",
-  "salesPortal.join.closedText": "Itt nincs több teendő."
+  "salesPortal.join.closedText": "Itt nincs több teendő.",
+  "turnstile.failed": "Az ellenőrzés sikertelen volt. Kérjük, próbálja újra.",
+  "turnstile.unavailable": "Az ellenőrzés nem tölthető be. Kapcsolja ki a tartalomblokkolókat ezen az oldalon, és próbálja újra, vagy vegye fel velünk közvetlenül a kapcsolatot."
 }

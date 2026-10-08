@@ -679,5 +679,7 @@
   "salesPortal.join.approvedText": "Check your email for a link to set your password, then sign in to the sales portal.",
   "salesPortal.join.signIn": "Sign in to the sales portal",
   "salesPortal.join.closedTitle": "This invitation is closed",
-  "salesPortal.join.closedText": "There is nothing more to do here."
+  "salesPortal.join.closedText": "There is nothing more to do here.",
+  "turnstile.failed": "Verification failed. Please try again.",
+  "turnstile.unavailable": "The verification could not be loaded. Turn off content blockers for this site and try again, or contact us directly."
 }

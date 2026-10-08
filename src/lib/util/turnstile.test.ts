@@ -10,8 +10,11 @@
  *  4. A token Cloudflare refuses is rejected
  *  5. Our configuration or Cloudflare at fault counts as unavailable
  *  6. A broken or hung Cloudflare counts as unavailable
+ *  7. The translated messages exist in every dictionary
  */
 
+import { readFileSync } from "node:fs"
+import { join } from "node:path"
 import { verifyTurnstile } from "./turnstile"
 
 // ---------------------------------------------------------------------------
@@ -209,6 +212,23 @@ async function main() {
       fetchImpl: hanging,
     })
     assert(hung.status === "unavailable", "a request that hangs past the timeout")
+  }
+
+  section("7. The translated messages exist in every dictionary")
+  for (const locale of ["en", "de-DE", "de-AT", "hu-HU"]) {
+    const dictionary = JSON.parse(
+      readFileSync(
+        join(process.cwd(), "src/i18n/dictionaries", `${locale}.json`),
+        "utf8"
+      )
+    ) as Record<string, string>
+
+    for (const key of ["turnstile.failed", "turnstile.unavailable"]) {
+      assert(
+        typeof dictionary[key] === "string" && dictionary[key].trim().length > 0,
+        `${locale} has ${key}`
+      )
+    }
   }
 }
 
