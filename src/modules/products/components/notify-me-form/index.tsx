@@ -4,6 +4,7 @@ import { Button, clx } from "@medusajs/ui"
 import { useState } from "react"
 import { sdk } from "@lib/config"
 import { useTranslation } from "@lib/i18n/client"
+import TurnstileWidget from "@modules/common/components/turnstile-widget"
 
 type NotifyMeFormProps = {
   productId: string
@@ -33,6 +34,10 @@ export default function NotifyMeForm({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // Read the form before the first await: the event is gone after it.
+    const turnstileToken = new FormData(e.currentTarget).get(
+      "cf-turnstile-response"
+    )
     setStatus("loading")
     setErrorMessage("")
     try {
@@ -46,6 +51,9 @@ export default function NotifyMeForm({
           variantTitle,
           productUrl: window.location.href,
         },
+        headers: turnstileToken
+          ? { "x-turnstile-token": String(turnstileToken) }
+          : undefined,
       })
       setStatus("success")
     } catch (err: any) {
@@ -53,6 +61,9 @@ export default function NotifyMeForm({
         setErrorMessage(
           err.message || t("product.notifyMe.rateLimited")
         )
+      } else if (err.status === 403) {
+        // Only the backend's Turnstile check answers 403 on this route.
+        setErrorMessage(t("turnstile.failed"))
       } else {
         const message = Array.isArray(err.message)
           ? err.message.map((m: any) => m.message || m).join(", ")
@@ -109,6 +120,7 @@ export default function NotifyMeForm({
           {t("product.notifyMe.submit")}
         </Button>
       </div>
+      <TurnstileWidget />
       {status === "error" && errorMessage && (
         <p className="text-xs text-error" role="alert">
           {errorMessage}

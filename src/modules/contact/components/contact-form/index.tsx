@@ -3,6 +3,7 @@
 import { Button, Heading, Text } from "@medusajs/ui"
 import Input from "@modules/common/components/input"
 import Textarea from "@modules/common/components/textarea"
+import TurnstileWidget from "@modules/common/components/turnstile-widget"
 import { useEffect, useRef, useState } from "react"
 import { sdk } from "@lib/config"
 import { useTranslation } from "@lib/i18n/client"
@@ -34,6 +35,9 @@ export default function ContactForm() {
       subject: formData.get("subject"),
       message: formData.get("message"),
     }
+    // The widget puts the visitor's Turnstile token in the form. It travels as
+    // a header so the backend can check it before it validates the message.
+    const turnstileToken = formData.get("cf-turnstile-response")
 
     try {
       // Use standard fetch here because custom /store/contact route might not be in the generated SDK typings yet
@@ -41,6 +45,9 @@ export default function ContactForm() {
       await sdk.client.fetch("/store/contact", {
         method: "POST",
         body: data,
+        headers: turnstileToken
+          ? { "x-turnstile-token": String(turnstileToken) }
+          : undefined,
       })
 
       setStatus("success")
@@ -51,9 +58,13 @@ export default function ContactForm() {
       // err.message from the SDK FetchError is either the response body's `message`
       // field or the HTTP statusText — both are user-safe to display.
       // If the backend returned a Zod validation error array, stringify it.
-      const message = Array.isArray(err.message)
-        ? err.message.map((m: any) => m.message || m).join(", ")
-        : err.message
+      const message =
+        err.status === 403
+          ? // Only the backend's Turnstile check answers 403 on this route.
+            t("turnstile.failed")
+          : Array.isArray(err.message)
+            ? err.message.map((m: any) => m.message || m).join(", ")
+            : err.message
       setErrorMessage(message || t("contact.form.error"))
     }
   }
@@ -126,6 +137,8 @@ export default function ContactForm() {
         helperText={t("contact.form.messagePlaceholder")}
         data-testid="contact-message-input"
       />
+
+      <TurnstileWidget />
 
       {status === "error" && (
         <Text role="alert" className="text-error text-sm">
