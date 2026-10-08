@@ -12,6 +12,7 @@ import {
 } from "./cookies"
 import { getLocale } from "./locale-actions"
 import { localizeError } from "./localize-error"
+import { turnstileError } from "./turnstile"
 
 // Sales reps sign in, reset passwords and register through Medusa's own auth
 // routes (/auth/sales_rep/emailpass), the same way customers do with the
@@ -21,6 +22,9 @@ export async function salesRepLogin(
   _currentState: unknown,
   formData: FormData
 ) {
+  const blocked = await turnstileError(formData)
+  if (blocked) return blocked
+
   const email = formData.get("email") as string
   const password = formData.get("password") as string
 
@@ -55,6 +59,9 @@ export async function requestSalesRepPasswordReset(
   _currentState: unknown,
   formData: FormData
 ) {
+  const blocked = await turnstileError(formData)
+  if (blocked) return blocked
+
   const email = formData.get("email") as string
 
   if (!email) {
