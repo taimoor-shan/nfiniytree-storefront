@@ -72,6 +72,17 @@ const remotePatterns = [
  */
 const nextConfig = {
   reactStrictMode: true,
+  // The Turnstile site key is public and is baked into the browser bundle when
+  // `next build` runs. Defining it here, empty or not, makes the server read
+  // that same build-time value, so "no site key means the check is off" can
+  // never disagree with the widgets the browser actually received. (A key that
+  // was only set at runtime reached the server but not the browser: the server
+  // enforced the check while no widget was ever sent, and every sign-in failed.)
+  // Set it before building; changing it needs a rebuild.
+  env: {
+    NEXT_PUBLIC_TURNSTILE_SITE_KEY:
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
+  },
   typescript: {
     ignoreBuildErrors: true,
   },

@@ -11,9 +11,11 @@
  *  5. Our configuration or Cloudflare at fault counts as unavailable
  *  6. A broken or hung Cloudflare counts as unavailable
  *  7. The translated messages exist in every dictionary
+ *  8. The site key is baked in at build time, so the server and the browser agree
  */
 
 import { readFileSync } from "node:fs"
+import { createRequire } from "node:module"
 import { join } from "node:path"
 import { verifyTurnstile } from "./turnstile"
 
@@ -228,6 +230,41 @@ async function main() {
         typeof dictionary[key] === "string" && dictionary[key].trim().length > 0,
         `${locale} has ${key}`
       )
+    }
+  }
+  section("8. The site key is baked in at build time, so the server and the browser agree")
+  {
+    // Next.js inlines the NEXT_PUBLIC_* values that exist when `next build` runs. One that is
+    // only set later stays a live read on the server and is undefined in the browser, so the
+    // server enforced the check while no widget was ever sent. `env` in next.config.js defines
+    // the value in every build, empty or not, so both sides always read the same one.
+    const root = createRequire(join(process.cwd(), "package.json"))
+    const configPath = root.resolve("./next.config.js")
+    const keys = ["NEXT_PUBLIC_TURNSTILE_SITE_KEY", "NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY"]
+    const saved = Object.fromEntries(keys.map((k) => [k, process.env[k]]))
+
+    const bakedInValue = (siteKey: string | undefined) => {
+      // next.config.js refuses to load without a publishable key; any value will do here
+      process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ||= "pk_for_the_config_check"
+      if (siteKey === undefined) delete process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+      else process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY = siteKey
+      delete root.cache[configPath]
+
+      return root(configPath).env?.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+    }
+
+    try {
+      assert(bakedInValue(undefined) === "", "no key at build time is defined as empty, not left undefined")
+      assert(bakedInValue("") === "", "an empty key at build time stays empty")
+      assert(
+        bakedInValue("1x00000000000000000000AA") === "1x00000000000000000000AA",
+        "a key at build time is baked in"
+      )
+    } finally {
+      for (const k of keys) {
+        if (saved[k] === undefined) delete process.env[k]
+        else process.env[k] = saved[k]
+      }
     }
   }
 }
