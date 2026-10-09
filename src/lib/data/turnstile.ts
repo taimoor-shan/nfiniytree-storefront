@@ -19,12 +19,18 @@ export async function turnstileError(
     return null
   }
 
-  const outcome = await verifyTurnstile(formData.get("cf-turnstile-response"), {
+  const token = formData.get("cf-turnstile-response")
+  const outcome = await verifyTurnstile(token, {
     secret: process.env.TURNSTILE_SECRET_KEY,
     ip: (await headers()).get("cf-connecting-ip"),
   })
 
   if (outcome.status === "rejected") {
+    // Bots land here all day, but so does every real visitor when the widget or
+    // the keys are misconfigured, so say why. Never the token itself.
+    console.info(
+      `[turnstile] rejected (${token ? "token sent" : "no token"}): ${outcome.codes.join(", ") || "no error code"}`
+    )
     return translate("turnstile.failed", await getLocale())
   }
 
