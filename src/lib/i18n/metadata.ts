@@ -42,6 +42,10 @@ const STRUCTURED_METADATA_KEYS = new Set([
   "key_features",
   "care_instructions",
   "pot",
+  // Category SEO copy (see `src/lib/util/category-seo.ts`).
+  "seo_title",
+  "seo_description",
+  "seo_text",
 ])
 
 // ---------------------------------------------------------------------------
