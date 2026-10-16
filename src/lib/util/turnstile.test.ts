@@ -12,9 +12,10 @@
  *  6. A broken or hung Cloudflare counts as unavailable
  *  7. The translated messages exist in every dictionary
  *  8. The site key is baked in at build time, so the server and the browser agree
+ *  9. Production builds carry the real site key, and nothing secret is committed with it
  */
 
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { join } from "node:path"
 import { verifyTurnstile } from "./turnstile"
@@ -266,6 +267,33 @@ async function main() {
         else process.env[k] = saved[k]
       }
     }
+  }
+  section("9. Production builds carry the real site key, and nothing secret is committed with it")
+  {
+    // Next.js reads .env.production for `next build` and `yarn start` but not for `yarn dev`, so the
+    // production site key lives there: the server build needs no extra step, and local development
+    // stays off. The file is committed, so it may hold public NEXT_PUBLIC_ values only.
+    const file = join(process.cwd(), ".env.production")
+    const values: Record<string, string> = {}
+    if (existsSync(file)) {
+      for (const line of readFileSync(file, "utf8").split("\n")) {
+        const text = line.trim()
+        if (!text || text.startsWith("#")) continue
+        const at = text.indexOf("=")
+        values[text.slice(0, at)] = text.slice(at + 1)
+      }
+    }
+    const siteKey = values.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? ""
+
+    assert(
+      /^0x4[A-Za-z0-9_-]{15,}$/.test(siteKey),
+      ".env.production sets a real Turnstile site key (0x4...), not one of Cloudflare's dummy test keys"
+    )
+    assert(
+      Object.keys(values).length > 0 &&
+        Object.keys(values).every((key) => key.startsWith("NEXT_PUBLIC_")),
+      ".env.production holds only public NEXT_PUBLIC_ values, because the file is committed"
+    )
   }
 }
 
