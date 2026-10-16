@@ -6,6 +6,7 @@ import { LOGIN_VIEW } from "@modules/account/templates/login-template"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
+import TurnstileWidget from "@modules/common/components/turnstile-widget"
 import { useActionState } from "react"
 import { useParams, useSearchParams } from "next/navigation"
 
@@ -77,6 +78,7 @@ const Login = ({
             {t("account.forgotPassword") || "Forgot password?"}
           </a>
         </div>
+        <TurnstileWidget />
         <ErrorMessage error={message} data-testid="login-error-message" />
         <SubmitButton data-testid="sign-in-button" className="w-full mt-6">
           {t("account.signIn")}

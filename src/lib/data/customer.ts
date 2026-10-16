@@ -15,6 +15,7 @@ import {
 import { CACHE_TAGS } from "./cache"
 import { getLocale } from "./locale-actions"
 import { localizeError } from "./localize-error"
+import { turnstileError } from "./turnstile"
 import { translate } from "@lib/i18n/dictionaries"
 
 export const retrieveCustomer =
@@ -117,6 +118,9 @@ export async function createCustomerAccount({
 }
 
 export async function signup(_currentState: unknown, formData: FormData) {
+  const blocked = await turnstileError(formData)
+  if (blocked) return blocked
+
   const password = formData.get("password") as string
 
   try {
@@ -133,6 +137,9 @@ export async function signup(_currentState: unknown, formData: FormData) {
 }
 
 export async function login(_currentState: unknown, formData: FormData) {
+  const blocked = await turnstileError(formData)
+  if (blocked) return blocked
+
   const email = formData.get("email") as string
   const password = formData.get("password") as string
   const returnUrl = (formData.get("returnUrl") as string) || ""
@@ -248,6 +255,9 @@ export async function requestPasswordReset(
   _currentState: unknown,
   formData: FormData
 ) {
+  const blocked = await turnstileError(formData)
+  if (blocked) return blocked
+
   const email = formData.get("email") as string
 
   if (!email) {

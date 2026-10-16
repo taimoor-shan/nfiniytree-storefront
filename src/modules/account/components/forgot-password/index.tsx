@@ -5,6 +5,7 @@ import { requestPasswordReset } from "@lib/data/customer"
 import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
+import TurnstileWidget from "@modules/common/components/turnstile-widget"
 import { useActionState, useState } from "react"
 import { useParams } from "next/navigation"
 
@@ -78,6 +79,7 @@ const ForgotPassword = ({
             data-testid="forgot-password-email-input"
           />
         </div>
+        <TurnstileWidget />
         <ErrorMessage error={message} data-testid="forgot-password-error-message" />
         <SubmitButton data-testid="forgot-password-submit-button" className="w-full mt-6">
           {t("account.sendResetLink")}

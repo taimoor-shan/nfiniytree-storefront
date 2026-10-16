@@ -679,5 +679,7 @@
   "salesPortal.join.approvedText": "Prüfen Sie Ihre E-Mails: Dort finden Sie einen Link zum Festlegen Ihres Passworts. Danach melden Sie sich im Vertriebsportal an.",
   "salesPortal.join.signIn": "Im Vertriebsportal anmelden",
   "salesPortal.join.closedTitle": "Diese Einladung ist abgeschlossen",
-  "salesPortal.join.closedText": "Hier ist nichts mehr zu tun."
+  "salesPortal.join.closedText": "Hier ist nichts mehr zu tun.",
+  "turnstile.failed": "Die Überprüfung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
+  "turnstile.unavailable": "Die Überprüfung konnte nicht geladen werden. Deaktivieren Sie Inhaltsblocker für diese Website und versuchen Sie es erneut, oder kontaktieren Sie uns direkt."
 }
