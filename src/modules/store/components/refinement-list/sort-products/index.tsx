@@ -59,7 +59,7 @@ const SortProducts = ({
 
         <Select.Content
           position="popper"
-          className="rounded"
+          className="rounded z-10"
         >
           {sortOptions.map((option) => (
             <Select.Item
