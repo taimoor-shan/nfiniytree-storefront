@@ -5,7 +5,8 @@ import { getCategoryByHandle, listCategories } from "@lib/data/categories"
 import { listRegions } from "@lib/data/regions"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
-import { getSeoAlternates } from "@lib/util/page-metadata"
+import { getCategorySeo } from "@lib/util/category-seo"
+import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
 import { SITE_NAME } from "@lib/util/seo"
 import { StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
@@ -56,11 +57,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     // `title` used to be built as `name + " | Infinytree"` and then interpolated
     // again into `` `${title} | Infinytree` ``, so every category page shipped a
     // doubled suffix ("Palms | Infinytree | Infinytree").
-    const title = `${productCategory.name} | ${SITE_NAME}`
+    const locale = (await getLocale()) || "en"
+    const seo = getCategorySeo(productCategory, locale)
 
-    const locale = await getLocale()
+    const title = seo.title || `${productCategory.name} | ${SITE_NAME}`
+
     const description =
-      productCategory.description?.trim() ||
+      resolveDescription([seo.description], seo.text) ||
       (await translate("metadata.categoryDescription", locale)).replace(
         "{category}",
         productCategory.name
@@ -108,9 +111,12 @@ export default async function CategoryPage(props: Props) {
     notFound()
   }
 
+  const locale = (await getLocale()) || "en"
+
   return (
     <CategoryTemplate
       category={productCategory}
+      seoText={getCategorySeo(productCategory, locale).text}
       sortBy={sortBy}
       page={page}
       countryCode={params.countryCode}
