@@ -9,9 +9,11 @@ import {
 import { HttpTypes } from "@medusajs/types"
 import ReactCountryFlag from "react-country-flag"
 import { useEffect, useMemo, useState, useTransition } from "react"
-import { useParams, usePathname, useRouter } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
+import { goToMarket } from "@lib/context/market-context"
+import { stripMarketPrefix } from "@lib/i18n/market"
 
-import { updateRegion } from "@lib/data/cart"
+import { switchRegion, updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
 import { Locale } from "@lib/data/locales"
 import { getLocalizedLanguageName } from "@lib/util/locale-name"
@@ -39,8 +41,7 @@ const CountryPopup = ({
   const { t } = useTranslation()
   const { countryCode } = useParams()
   const pathname = usePathname()
-  const router = useRouter()
-  const currentPath = pathname.split(`/${countryCode}`)[1] ?? ""
+  const currentPath = stripMarketPrefix(pathname)
 
   const toggleState = useToggleState(false)
   const [selected, setSelected] = useState<CountryOption | undefined>(undefined)
@@ -128,17 +129,21 @@ const CountryPopup = ({
 
     toggleState.close()
 
-    // If the user picked a different locale, update it
+    const countryChanged = !!chosen && chosen !== countryCode
+
+    // A new language means a new URL prefix: save it, switch the country too
+    // if that changed, then load the page under the new prefix.
     if (localeChanged) {
       startLocaleTransition(async () => {
         await updateLocale(selectedLocale ?? "")
-        router.refresh()
-        document.dispatchEvent(new CustomEvent("localechange"))
+        if (countryChanged) await switchRegion(chosen)
+        goToMarket(countryChanged ? chosen : (countryCode as string), selectedLocale ?? "")
       })
+      return
     }
 
-    // If the user picked a different country, switch region
-    if (chosen && chosen !== countryCode) {
+    // Only the country changed: open the same page there, same language.
+    if (countryChanged) {
       updateRegion(chosen, currentPath)
     }
   }

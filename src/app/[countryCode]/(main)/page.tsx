@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { Metadata } from "next"
 import { Suspense } from "react"
 
@@ -38,7 +39,7 @@ export async function generateMetadata(props: {
       siteName: storeName,
       title: storeName,
       description,
-      url: `/${countryCode}`,
+      url: `/${await getMarketPrefix(countryCode)}`,
     },
   }
 }

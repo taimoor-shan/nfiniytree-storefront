@@ -2,6 +2,17 @@ import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
 import { CACHE_TAGS } from "./lib/data/cache"
 import { getRequestCountry } from "./lib/geo/client-country"
+import {
+  LOCALE_HEADER,
+  MARKET_HEADER,
+  defaultLocaleForCountry,
+  languageOf,
+  localeForLanguage,
+  localeForSegment,
+  marketPrefix,
+  MarketSegment,
+  parseMarketSegment,
+} from "./lib/i18n/market"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -81,7 +92,9 @@ async function getCountryCode(
     // the header is spoofable.
     const geoCountry = getRequestCountry(request)?.toLowerCase()
 
-    const urlCountryCode = request.nextUrl.pathname.split("/")[1]?.toLowerCase()
+    const urlCountryCode = parseMarketSegment(
+      request.nextUrl.pathname.split("/")[1]
+    )?.country
 
     const selectedCountryCookie = request.cookies
       .get("selected-country")
@@ -128,14 +141,46 @@ const CRAWLER_FILES = new Set([
 ])
 
 /**
- * Is this path segment shaped like an ISO-2 country code?
+ * Is this path segment shaped like a market (`hu`, `en-hu`)?
  *
- * Used to tell an *unsupported market* (`/us`, `/gb`) apart from an
+ * Used to tell an *unsupported market* (`/us`, `/en-gb`) apart from an
  * unprefixed route (`/store`, `/about`). No real route in this storefront is
- * two letters long, so a two-letter first segment is always a market attempt.
+ * shaped like that, so such a first segment is always a market attempt.
  */
-const isCountryCodeShaped = (segment: string | undefined) =>
-  !!segment && /^[a-z]{2}$/.test(segment)
+const isMarketShaped = (segment: string | undefined) =>
+  !!parseMarketSegment(segment)
+
+/** The locale cookie the language selector writes, if the visitor has one. */
+const LOCALE_COOKIE = "_medusa_locale"
+
+/**
+ * Serve a market URL. `/hu/...` goes straight to the `[countryCode]` route;
+ * `/en-hu/...` is rewritten to `/hu/...`, so every route and data call keeps
+ * working with a plain country code. The URL's locale and prefix travel to
+ * server components as request headers (`getLocale()`, `getMarketPrefix()`).
+ * Incoming copies of those headers are dropped so a visitor cannot set them.
+ */
+function serveMarket(
+  request: NextRequest,
+  segment: string,
+  market: MarketSegment,
+  locale: string
+) {
+  const headers = new Headers(request.headers)
+  headers.set(LOCALE_HEADER, locale)
+  headers.set(MARKET_HEADER, segment.toLowerCase())
+
+  if (!market.language) {
+    return NextResponse.next({ request: { headers } })
+  }
+
+  const url = request.nextUrl.clone()
+  url.pathname = `/${market.country}${request.nextUrl.pathname.slice(
+    segment.length + 1
+  )}`
+
+  return NextResponse.rewrite(url, { request: { headers } })
+}
 
 /**
  * Proxy to handle region selection and onboarding status.
@@ -170,9 +215,11 @@ export async function proxy(request: NextRequest) {
       }. Falling back to the default region.`
     )
 
-    const firstSegment = pathname.split("/")[1]?.toLowerCase()
-    if (firstSegment === DEFAULT_REGION) {
-      return NextResponse.next()
+    const firstSegment = pathname.split("/")[1]
+    const market = parseMarketSegment(firstSegment)
+    const locale = market && localeForSegment(market)
+    if (market?.country === DEFAULT_REGION && locale) {
+      return serveMarket(request, firstSegment, market, locale)
     }
 
     return redirectToCountry(request, DEFAULT_REGION)
@@ -185,11 +232,25 @@ export async function proxy(request: NextRequest) {
   // segment merely *contained* "hu" (`/human-touch`, `/hu-guide`) was served
   // as though it already carried a country code, skipping the redirect and
   // rendering against an unresolvable region.
-  const firstSegment = pathname.split("/")[1]?.toLowerCase()
-  const urlHasCountryCode = !!firstSegment && regionMap.has(firstSegment)
+  const firstSegment = pathname.split("/")[1] ?? ""
+  const market = parseMarketSegment(firstSegment)
+  const locale = market && localeForSegment(market)
 
-  if (urlHasCountryCode) {
-    return NextResponse.next()
+  if (market && locale && regionMap.has(market.country)) {
+    // `/hu-hu` is `/hu` under a second address. One URL per page: send it
+    // to the bare country permanently.
+    if (
+      market.language &&
+      market.language === languageOf(defaultLocaleForCountry(market.country))
+    ) {
+      const url = request.nextUrl.clone()
+      url.pathname = `/${market.country}${pathname.slice(
+        firstSegment.length + 1
+      )}`
+      return NextResponse.redirect(url, 308)
+    }
+
+    return serveMarket(request, firstSegment, market, locale)
   }
 
   if (countryCode) {
@@ -198,11 +259,24 @@ export async function proxy(request: NextRequest) {
     // 404s — a two-hop chain ending in an error, on URLs a crawler can reach
     // from any stale link or mistyped market. Replacing it lands on the real
     // equivalent page (`/us/store` → `/hu/store`) and terminates in a 200.
-    const strippedPath = isCountryCodeShaped(firstSegment)
-      ? pathname.slice(firstSegment!.length + 1) || "/"
+    const strippedPath = isMarketShaped(firstSegment)
+      ? pathname.slice(firstSegment.length + 1) || "/"
       : pathname
 
-    return redirectToCountry(request, countryCode, strippedPath)
+    // Keep the language the URL asked for (`/en-us` → `/en-hu`); otherwise
+    // use the language the visitor last picked, else the market's own.
+    const requestedLocale = market?.language
+      ? localeForLanguage(market.language, countryCode)
+      : null
+    const cookieLocale = request.cookies.get(LOCALE_COOKIE)?.value
+    const prefix =
+      requestedLocale !== null
+        ? marketPrefix(countryCode, requestedLocale)
+        : cookieLocale !== undefined
+          ? marketPrefix(countryCode, cookieLocale)
+          : countryCode
+
+    return redirectToCountry(request, countryCode, strippedPath, prefix)
   }
 
   // Handle case where no valid country code exists (empty regions)
@@ -231,19 +305,21 @@ export async function proxy(request: NextRequest) {
  *    caching or cross-serving the per-visitor redirect.
  *
  * `targetPath` defaults to the request path; callers pass an explicit value to
- * strip an unsupported country segment rather than prefix it.
+ * strip an unsupported country segment rather than prefix it. `prefix` is the
+ * market segment to land on (`en-hu`), the bare country by default.
  */
 function redirectToCountry(
   request: NextRequest,
   countryCode: string,
-  targetPath?: string
+  targetPath?: string,
+  prefix: string = countryCode
 ) {
   const pathname = targetPath ?? request.nextUrl.pathname
   const redirectPath = pathname === "/" ? "" : pathname
   const queryString = request.nextUrl.search || ""
 
   const response = NextResponse.redirect(
-    `${request.nextUrl.origin}/${countryCode}${redirectPath}${queryString}`,
+    `${request.nextUrl.origin}/${prefix}${redirectPath}${queryString}`,
     307
   )
 

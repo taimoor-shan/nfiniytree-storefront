@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { listProducts } from "@lib/data/products"
@@ -125,7 +126,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       siteName: SITE_NAME,
       title,
       description,
-      url: `/${countryCode}/products/${handle}`,
+      url: `/${await getMarketPrefix(countryCode)}/products/${handle}`,
       // Relative `/static/...`, resolved against `metadataBase` in the root
       // layout. Keeps social crawlers on the public storefront origin instead
       // of whatever origin Medusa's file provider happens to emit.

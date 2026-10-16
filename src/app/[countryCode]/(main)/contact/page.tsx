@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { Metadata } from "next"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
@@ -40,7 +41,7 @@ export async function generateMetadata(
       siteName: SITE_NAME,
       title,
       description,
-      url: `/${countryCode}/contact`,
+      url: `/${await getMarketPrefix(countryCode)}/contact`,
       images: page?.featured_image ? [{ url: page.featured_image }] : [],
     },
   }

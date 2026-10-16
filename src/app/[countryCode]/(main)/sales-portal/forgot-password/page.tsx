@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { requestSalesRepPasswordReset } from "@lib/data/sales-portal-actions"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
@@ -20,6 +21,7 @@ export default async function SalesPortalForgotPasswordPage({
   searchParams: Promise<{ email?: string | string[] }>
 }) {
   const { countryCode } = await params
+  const prefix = await getMarketPrefix(countryCode)
   const { email } = await searchParams
   const locale = await getLocale()
 
@@ -27,7 +29,7 @@ export default async function SalesPortalForgotPasswordPage({
     <div className="w-full flex justify-center px-8 py-16">
       <ForgotPassword
         action={requestSalesRepPasswordReset}
-        backHref={`/${countryCode}/sales-portal`}
+        backHref={`/${prefix}/sales-portal`}
         description={await translate("salesPortal.forgotPasswordPrompt", locale)}
         defaultEmail={typeof email === "string" ? email : undefined}
       />

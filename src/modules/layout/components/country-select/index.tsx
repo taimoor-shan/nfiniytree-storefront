@@ -13,6 +13,7 @@ import ReactCountryFlag from "react-country-flag"
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { useParams, usePathname } from "next/navigation"
 import { updateRegion } from "@lib/data/cart"
+import { stripMarketPrefix } from "@lib/i18n/market"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@lib/i18n"
 import { CountryOption, getCountryOptions } from "@lib/util/regions"
@@ -47,7 +48,7 @@ const CountrySelect = ({
   >(undefined)
 
   const { countryCode } = useParams()
-  const currentPath = usePathname().split(`/${countryCode}`)[1]
+  const currentPath = stripMarketPrefix(usePathname())
 
   const { state, close, toggle } = toggleState
 

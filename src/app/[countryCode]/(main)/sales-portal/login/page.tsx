@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { redirect } from "next/navigation"
 
 // The commission plugin links reps to <portal URL>/login. The sign-in form
@@ -8,6 +9,7 @@ export default async function SalesPortalLoginPage({
   params: Promise<{ countryCode: string }>
 }) {
   const { countryCode } = await params
+  const prefix = await getMarketPrefix(countryCode)
 
-  redirect(`/${countryCode}/sales-portal`)
+  redirect(`/${prefix}/sales-portal`)
 }

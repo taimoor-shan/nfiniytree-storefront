@@ -1,7 +1,9 @@
 "use client"
 
 import { useMemo, useTransition, useState } from "react"
-import { useParams, usePathname, useRouter } from "next/navigation"
+import { useParams, usePathname } from "next/navigation"
+import { goToMarket } from "@lib/context/market-context"
+import { stripMarketPrefix } from "@lib/i18n/market"
 import { updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
 import { getLocalizedLanguageName } from "@lib/util/locale-name"
@@ -111,7 +113,6 @@ export default function TopBar({
   regions,
   className = "",
 }: TopBarProps) {
-  const router = useRouter()
   const pathname = usePathname()
   const { countryCode } = useParams()
   const [isPending, startTransition] = useTransition()
@@ -173,16 +174,15 @@ export default function TopBar({
   /* -------------------------------------------------- */
   const handleLocaleChange = (code: string) => {
     startTransition(async () => {
+      // The cookie remembers the choice for visits to `/`; the URL carries
+      // the language, so open the same page under the new language prefix.
       await updateLocale(code)
-      router.refresh()
-      // Notify client components to re-read the locale cookie
-      document.dispatchEvent(new CustomEvent("localechange"))
+      goToMarket(countryCode as string, code)
     })
   }
 
   const handleCountryChange = (country: string) => {
-    const currentPath = pathname.split(`/${countryCode}`)[1] ?? pathname
-    updateRegion(country, currentPath)
+    updateRegion(country, stripMarketPrefix(pathname))
   }
 
   return (

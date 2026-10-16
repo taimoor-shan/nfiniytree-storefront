@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import React, { Suspense } from "react"
 import Features from "@modules/home/components/features"
 
@@ -44,7 +45,10 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
       {/* Product structured data. Rendered from the same server-fetched, priced
           product the page displays, so the markup can never drift from what a
           shopper sees. */}
-      <ProductJsonLd product={product} countryCode={countryCode} />
+      <ProductJsonLd
+        product={product}
+        market={await getMarketPrefix(countryCode)}
+      />
 
       <div
         className="content-container flex flex-col small:flex-row small:items-start sm:pt-12 pt-8 gap-y-8 small:gap-x-10 relative"

@@ -15,6 +15,8 @@ import {
 import { CACHE_TAGS } from "./cache"
 import { getRegion } from "./regions"
 import { getLocale } from "@lib/data/locale-actions"
+import { marketPrefix } from "@lib/i18n/market"
+import { getRequestMarketPrefix } from "./market"
 import { listCartShippingMethods } from "./fulfillment"
 import { validateVatNumber } from "@lib/util/vat"
 import { validatePhoneNumber } from "@lib/util/phone"
@@ -118,7 +120,7 @@ export async function getOrSetCart(countryCode: string) {
   if (!cart) {
     const locale = await getLocale()
     const cartResp = await sdk.store.cart.create(
-      { region_id: region.id, locale: locale || undefined },
+      { region_id: region.id, locale: locale && locale !== "en" ? locale : undefined },
       {},
       headers
     )
@@ -704,18 +706,25 @@ export async function placeOrder(cartId?: string) {
       cartRes.order.shipping_address?.country_code?.toLowerCase()
 
     removeCartId()
-    redirect(`/${countryCode}/order/${cartRes?.order.id}/confirmed`)
+    // The order's country, in the language the visitor is reading. Without a
+    // shipping country the proxy picks the market.
+    const prefix = countryCode
+      ? marketPrefix(countryCode, await getLocale())
+      : await getRequestMarketPrefix()
+    redirect(
+      `${prefix ? `/${prefix}` : ""}/order/${cartRes?.order.id}/confirmed`
+    )
   }
 
   return cartRes.cart
 }
 
 /**
- * Updates the country code param and revalidates the regions/products caches
- * @param regionId
- * @param countryCode
+ * Switches the visitor to another country (region, cart, cookie) and revalidates
+ * the regions/products caches, without navigating. For callers that load the
+ * new URL themselves (`goToMarket()`), e.g. when the language changes too.
  */
-export async function updateRegion(countryCode: string, currentPath: string) {
+export async function switchRegion(countryCode: string) {
   const cartId = await getCartId()
   const region = await getRegion(countryCode)
 
@@ -748,8 +757,16 @@ export async function updateRegion(countryCode: string, currentPath: string) {
 
   revalidateTag(CACHE_TAGS.regions, "max")
   revalidateTag(CACHE_TAGS.products, "max")
+}
 
-  redirect(`/${countryCode}${currentPath}`)
+/**
+ * Switches to another country and opens the same page there, keeping the
+ * language the visitor is reading (`/en-hu/store` → `/en-at/store`).
+ */
+export async function updateRegion(countryCode: string, currentPath: string) {
+  await switchRegion(countryCode)
+
+  redirect(`/${marketPrefix(countryCode, await getLocale())}${currentPath}`)
 }
 
 export async function listCartOptions() {

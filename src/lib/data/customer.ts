@@ -13,6 +13,7 @@ import {
   setAuthToken,
 } from "./cookies"
 import { CACHE_TAGS } from "./cache"
+import { getRequestMarketPrefix } from "./market"
 import { getLocale } from "./locale-actions"
 import { localizeError } from "./localize-error"
 import { turnstileError } from "./turnstile"
@@ -168,7 +169,7 @@ export async function login(_currentState: unknown, formData: FormData) {
   }
 }
 
-export async function signout(countryCode: string) {
+export async function signout() {
   await sdk.auth.logout()
 
   await removeAuthToken()
@@ -179,7 +180,10 @@ export async function signout(countryCode: string) {
 
   revalidateTag(CACHE_TAGS.products, "max")
 
-  redirect(`/${countryCode}/account`)
+  // Back to the account page of the market and language the visitor is in;
+  // without one the proxy picks the market.
+  const prefix = await getRequestMarketPrefix()
+  redirect(prefix ? `/${prefix}/account` : "/account")
 }
 
 export async function transferCart() {

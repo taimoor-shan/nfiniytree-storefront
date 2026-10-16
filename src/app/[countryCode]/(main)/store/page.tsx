@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { Metadata } from "next"
 
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -28,7 +29,7 @@ export async function generateMetadata(props: {
       siteName: SITE_NAME,
       title,
       description,
-      url: `/${countryCode}/store`,
+      url: `/${await getMarketPrefix(countryCode)}/store`,
     },
   }
 }
