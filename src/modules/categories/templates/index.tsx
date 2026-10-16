@@ -8,18 +8,14 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import PaginatedProducts from "@modules/store/templates/paginated-products"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { HttpTypes } from "@medusajs/types"
-import { toParagraphs } from "@lib/util/category-seo"
 
 export default function CategoryTemplate({
   category,
   sortBy,
   page,
   countryCode,
-  seoText,
 }: {
   category: HttpTypes.StoreProductCategory
-  /** Category copy for this language, shown under the grid. */
-  seoText?: string
   sortBy?: SortOptions
   page?: string
   countryCode: string
@@ -66,8 +62,13 @@ export default function CategoryTemplate({
         <RefinementList sortBy={sort} data-testid="sort-by-container" />
       </div>
 
-      {/* Content: subcategories, product grid, category copy */}
+      {/* Content: description, subcategories, product grid */}
       <div className="w-full">
+        {/* {category.description && (
+          <div className="mb-8 text-base-regular">
+            <p>{category.description}</p>
+          </div>
+        )} */}
         {/* {category.category_children && (
           <div className="mb-8 text-base-large">
             <ul className="grid grid-cols-1 gap-2">
@@ -95,18 +96,6 @@ export default function CategoryTemplate({
             countryCode={countryCode}
           />
         </Suspense>
-        {/* Below the grid so shoppers see products first; it is the text
-            search engines read to understand what the category is about. */}
-        {seoText && (
-          <div
-            className="mt-16 max-w-3xl flex flex-col gap-4 text-body"
-            data-testid="category-description"
-          >
-            {toParagraphs(seoText).map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   )
