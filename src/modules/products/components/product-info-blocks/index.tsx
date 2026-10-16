@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { HttpTypes } from "@medusajs/types"
 import {
   getLocalizedMetadata,
@@ -16,38 +15,11 @@ type ProductInfoBlocksProps = {
   locale?: string
 }
 
-function getLocaleFromCookie(): string {
-  if (typeof document === "undefined") return "en"
-  const match = document.cookie.match(/(?:^|;\s*)_medusa_locale=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) || "en" : "en"
-}
-
 const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksProps) => {
-  // Use the server-provided locale during SSR/hydration so the rendered
-  // tree matches.  Falls back to cookie detection when no prop is given.
-  const [locale, setLocale] = useState<string>(
-    () => localeProp || getLocaleFromCookie()
-  )
-
-  useEffect(() => {
-    const cookieLocale = getLocaleFromCookie()
-    if (cookieLocale !== "en" && cookieLocale !== locale) {
-      setLocale(cookieLocale)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    if (localeProp !== undefined) setLocale(localeProp)
-  }, [localeProp])
-
-  const { t } = useTranslation()
-
-  useEffect(() => {
-    const handler = () => setLocale(getLocaleFromCookie())
-    document.addEventListener("localechange", handler)
-    return () => document.removeEventListener("localechange", handler)
-  }, [])
+  // The page's language comes from its URL (`/en-hu`), not the cookie: the
+  // cookie only remembers the visitor's last choice.
+  const { t, locale: pageLocale } = useTranslation()
+  const locale = localeProp || pageLocale
 
   const rawMetadata = (product.metadata as Record<string, any>) || {}
   const metadata = getLocalizedMetadata(rawMetadata, locale)

@@ -5,8 +5,8 @@ import { listCollections } from "@lib/data/collections"
 import { listPages } from "@lib/data/pages"
 import { listProducts } from "@lib/data/products"
 import { listCountryCodes } from "@lib/data/regions"
-import { COUNTRY_TO_LOCALE } from "@lib/util/country-locale"
-import { DEFAULT_COUNTRY_CODE, buildUrl } from "@lib/util/seo"
+import { marketVariants } from "@lib/i18n/market"
+import { DEFAULT_COUNTRY_CODE, buildUrl, getHreflangs } from "@lib/util/seo"
 
 /**
  * `/sitemap.xml`
@@ -20,9 +20,10 @@ import { DEFAULT_COUNTRY_CODE, buildUrl } from "@lib/util/seo"
  * paginated listing URLs are excluded for the same reason: the canonical for
  * `/store?page=3` is `/store`.
  *
- * Every entry is emitted once per market, and each one carries the full
- * hreflang cluster via `alternates.languages` so the country variants are
- * declared in the sitemap as well as in the page head.
+ * Every entry is emitted once per language of every market (`/hu`, `/en-hu`,
+ * `/de-hu`, …), and each one carries the full hreflang cluster via
+ * `alternates.languages` so the variants are declared in the sitemap as well
+ * as in the page head.
  */
 
 /** Paths that exist as real routes for every market. */
@@ -97,28 +98,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
    * expects (`xhtml:link rel="alternate"` entries in the output).
    */
   const alternatesFor = (path: string) => {
-    const languages: Record<string, string> = {}
-
-    for (const code of countryCodes) {
-      const hreflang = COUNTRY_TO_LOCALE[code]
-      if (!hreflang) continue
-      languages[hreflang] = buildUrl(code, path)
-    }
-    languages["x-default"] = buildUrl(defaultCode, path)
-
+    const languages = getHreflangs(countryCodes, path)
     return Object.keys(languages).length > 1 ? { languages } : undefined
   }
 
   const entry = (
     path: string,
-    countryCode: string,
+    market: string,
     opts: {
       priority?: number
       changeFrequency?: MetadataRoute.Sitemap[number]["changeFrequency"]
       lastModified?: string | Date
     } = {}
   ): MetadataRoute.Sitemap[number] => ({
-    url: buildUrl(countryCode, path),
+    url: buildUrl(market, path),
     lastModified: opts.lastModified,
     changeFrequency: opts.changeFrequency,
     priority: opts.priority,
@@ -202,14 +195,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const routes: MetadataRoute.Sitemap = []
 
-  for (const countryCode of countryCodes) {
+  const markets = countryCodes.flatMap((code) =>
+    marketVariants(code).map(({ prefix }) => prefix)
+  )
+
+  for (const market of markets) {
     for (const { path, priority, changeFrequency } of STATIC_PATHS) {
-      routes.push(entry(path, countryCode, { priority, changeFrequency }))
+      routes.push(entry(path, market, { priority, changeFrequency }))
     }
 
     for (const product of products) {
       routes.push(
-        entry(`/products/${product.handle}`, countryCode, {
+        entry(`/products/${product.handle}`, market, {
           priority: 0.8,
           changeFrequency: "weekly",
           lastModified: product.updated_at ?? undefined,
@@ -220,7 +217,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const category of categories) {
       if (!category.handle) continue
       routes.push(
-        entry(`/categories/${category.handle}`, countryCode, {
+        entry(`/categories/${category.handle}`, market, {
           priority: 0.7,
           changeFrequency: "weekly",
           lastModified: category.updated_at ?? undefined,
@@ -231,7 +228,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     for (const collection of collections) {
       if (!collection.handle) continue
       routes.push(
-        entry(`/collections/${collection.handle}`, countryCode, {
+        entry(`/collections/${collection.handle}`, market, {
           priority: 0.7,
           changeFrequency: "weekly",
           lastModified: collection.updated_at ?? undefined,
@@ -241,9 +238,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // The CMS stores one record per locale, so the same slug comes back more
     // than once (`about` and `returns-and-refunds` each appear twice today).
-    // The storefront URL carries no locale — language is a cookie — so all of
-    // those records resolve to a single URL, and emitting one entry per record
-    // would repeat that URL inside the sitemap.
+    // A market URL shows the record for its own language (the backend falls
+    // back when one is missing), so each slug is one URL per market, and
+    // emitting one entry per record would repeat that URL inside the sitemap.
     const seenSlugs = new Set<string>()
 
     for (const page of cmsPages) {
@@ -255,7 +252,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       seenSlugs.add(page.slug)
 
       routes.push(
-        entry(`/pages/${page.slug}`, countryCode, {
+        entry(`/pages/${page.slug}`, market, {
           priority: 0.5,
           changeFrequency: "monthly",
         })

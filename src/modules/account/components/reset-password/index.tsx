@@ -6,7 +6,8 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import { useActionState } from "react"
-import { useRouter, useSearchParams, useParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useMarketPrefix } from "@lib/context/market-context"
 
 type Props = {
   /** The update action. Defaults to the shop customer's. */
@@ -31,8 +32,7 @@ const ResetPassword = ({
   const { t } = useTranslation()
   const router = useRouter()
   const searchParams = useSearchParams()
-  const params = useParams()
-  const countryCode = (params.countryCode as string) || "en"
+  const prefix = useMarketPrefix()
   const token = searchParams.get("token") || ""
   const email = searchParams.get("email") || ""
 
@@ -58,7 +58,7 @@ const ResetPassword = ({
     try {
       const result = await action(email, token, password)
       if (result.success) {
-        router.push(successHref ?? `/${countryCode}/account`)
+        router.push(successHref ?? `/${prefix}/account`)
         return null
       }
       return result.error || "Failed to reset password"
@@ -76,7 +76,7 @@ const ResetPassword = ({
         <p className="text-center text-base-regular text-ink mb-8">
           {t("account.invalidLinkPrompt") || "This password reset link is invalid or has expired. Please request a new one."}
         </p>
-        <a href={requestNewHref ?? `/${countryCode}/account/forgot-password`} className="text-link text-small-regular hover:underline">
+        <a href={requestNewHref ?? `/${prefix}/account/forgot-password`} className="text-link text-small-regular hover:underline">
           {t("account.requestNewLink") || "Request a new reset link"}
         </a>
       </div>

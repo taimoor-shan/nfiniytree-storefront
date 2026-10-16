@@ -5,7 +5,8 @@ import { getSiteUrl, SITE_NAME } from "@lib/util/seo"
 
 type ProductJsonLdProps = {
   product: HttpTypes.StoreProduct
-  countryCode: string
+  /** The URL prefix the page is shown under (`hu`, `en-hu`). */
+  market: string
 }
 
 /**
@@ -61,9 +62,9 @@ const isVariantAvailable = (variant: HttpTypes.StoreProductVariant): boolean => 
  */
 export default function ProductJsonLd({
   product,
-  countryCode,
+  market,
 }: ProductJsonLdProps) {
-  const productUrl = `${getSiteUrl()}/${countryCode.toLowerCase()}/products/${
+  const productUrl = `${getSiteUrl()}/${market.toLowerCase()}/products/${
     product.handle
   }`
 

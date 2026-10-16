@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
@@ -38,7 +39,7 @@ export async function generateMetadata(
       siteName: SITE_NAME,
       title,
       description,
-      url: `/${countryCode}/customer-service`,
+      url: `/${await getMarketPrefix(countryCode)}/customer-service`,
       images: page?.featured_image ? [{ url: page.featured_image }] : [],
     },
   }

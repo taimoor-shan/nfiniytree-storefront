@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { salesRepLogin } from "@lib/data/sales-portal-actions"
 import { getPortalMe } from "@lib/data/sales-portal"
 import Login from "@modules/account/components/login"
@@ -13,6 +14,7 @@ export default async function PortalLayout({
   params: Promise<{ countryCode: string }>
 }) {
   const { countryCode } = await params
+  const prefix = await getMarketPrefix(countryCode)
   const { t } = await getPortalTranslator()
   const me = await getPortalMe()
 
@@ -21,7 +23,7 @@ export default async function PortalLayout({
       <div className="w-full flex justify-center px-8 py-16">
         <Login
           action={salesRepLogin}
-          forgotPasswordHref={`/${countryCode}/sales-portal/forgot-password`}
+          forgotPasswordHref={`/${prefix}/sales-portal/forgot-password`}
           title={t("salesPortal.signInTitle")}
           description={t("salesPortal.signInPrompt")}
         />

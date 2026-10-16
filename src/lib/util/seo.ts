@@ -6,17 +6,14 @@
  * derived here so there is a single place that knows the URL shape.
  *
  * ---
- * URL shape: `https://<site>/<countryCode><path>`
- *
- * The country code is the only localisation carried in the URL. The UI
- * *language* lives in the `_medusa_locale` cookie, so `/at/store` renders in
- * German or English depending on the visitor's cookie. That means hreflang can
- * only ever express country targeting here, not language targeting — see the
- * note on `getAlternates()`.
+ * URL shape: `https://<site>/<market><path>`, where the market is the country
+ * (`/hu`, shown in the country's own language) or language-country (`/en-hu`).
+ * See `src/lib/i18n/market.ts`. Every language of every market is its own
+ * URL, so hreflang names both the language and the country (`en-HU`).
  */
 
 import { getBaseURL } from "./env"
-import { COUNTRY_TO_LOCALE } from "./country-locale"
+import { marketVariants } from "@lib/i18n/market"
 
 export const SITE_NAME = "Infinytree"
 
@@ -40,44 +37,29 @@ export const DEFAULT_COUNTRY_CODE = (
 /**
  * Absolute URL for a path inside a market.
  *
- * `path` is the route *without* the country prefix ("" or "/store" or
+ * `market` is the URL prefix (`hu`, `en-hu`). `path` is the route *without*
+ * that prefix ("" or "/store" or
  * "/products/olive-tree"). Query strings are deliberately not accepted:
  * canonical URLs must not carry filter/pagination parameters.
  */
-export const buildUrl = (countryCode: string, path: string = "") => {
+export const buildUrl = (market: string, path: string = "") => {
   const normalized =
     !path || path === "/" ? "" : path.startsWith("/") ? path : `/${path}`
 
-  return `${getSiteUrl()}/${countryCode.toLowerCase()}${normalized}`
+  return `${getSiteUrl()}/${market.toLowerCase()}${normalized}`
 }
 
 /**
- * Build `alternates` for Next's Metadata API: one canonical plus one hreflang
- * entry per market that actually serves this path.
- *
- * `countryCodes` must come from the live region list, so we never emit an
- * hreflang URL for a market that does not exist — an alternate pointing at a
- * 404 invalidates the whole cluster for Google.
- *
- * The hreflang value is the country's formatting locale (`at` → `de-AT`,
- * `hu` → `hu-HU`), which is the same country→locale map the price formatter
- * uses. A country with no mapping is skipped rather than guessed at.
+ * The hreflang cluster for a path: every language of every market
+ * (`hu-HU` → `/hu`, `en-HU` → `/en-hu`, `de-AT` → `/at`, …) plus `x-default`.
  */
-export const getAlternates = ({
-  countryCode,
-  path = "",
-  countryCodes,
-}: {
-  countryCode: string
-  path?: string
-  countryCodes: string[]
-}) => {
+export const getHreflangs = (countryCodes: string[], path: string = "") => {
   const languages: Record<string, string> = {}
 
   for (const code of countryCodes) {
-    const hreflang = COUNTRY_TO_LOCALE[code.toLowerCase()]
-    if (!hreflang) continue
-    languages[hreflang] = buildUrl(code, path)
+    for (const { prefix, hreflang } of marketVariants(code)) {
+      languages[hreflang] = buildUrl(prefix, path)
+    }
   }
 
   // `x-default` is what Google serves when no hreflang matches the user. The
@@ -91,8 +73,33 @@ export const getAlternates = ({
     languages["x-default"] = buildUrl(defaultCode, path)
   }
 
+  return languages
+}
+
+/**
+ * Build `alternates` for Next's Metadata API: the page's own URL as canonical
+ * plus one hreflang entry per language of every market.
+ *
+ * `countryCodes` must come from the live region list, so we never emit an
+ * hreflang URL for a market that does not exist — an alternate pointing at a
+ * 404 invalidates the whole cluster for Google.
+ *
+ * `market` is the prefix the page was requested under (`en-hu`), so each
+ * language version is its own canonical.
+ */
+export const getAlternates = ({
+  market,
+  path = "",
+  countryCodes,
+}: {
+  market: string
+  path?: string
+  countryCodes: string[]
+}) => {
+  const languages = getHreflangs(countryCodes, path)
+
   return {
-    canonical: buildUrl(countryCode, path),
+    canonical: buildUrl(market, path),
     // Omit the key entirely when there is only one market — a single-entry
     // hreflang cluster is noise.
     ...(Object.keys(languages).length > 1 ? { languages } : {}),

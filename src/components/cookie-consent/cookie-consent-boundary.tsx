@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { parseMarketSegment } from "@lib/i18n/market"
 import dynamic from "next/dynamic"
 import { usePathname } from "next/navigation"
 import { useTranslation } from "@lib/i18n/client"
@@ -29,7 +30,7 @@ const CookieSettings = dynamic(
  * `useTranslation` and builds:
  *  - the consent copy passed to the banner + settings dialog,
  *  - the localized cookie category labels,
- *  - the locale-aware privacy-policy URL (`/{countryCode}/policies/privacy`).
+ *  - the locale-aware privacy-policy URL (`/{market}/policies/privacy`).
  */
 export function CookieConsentBoundary({
   children,
@@ -41,8 +42,10 @@ export function CookieConsentBoundary({
 
   const countryCode = useMemo(() => {
     if (typeof pathname !== "string") return undefined
+    // The market prefix (`hu`, `en-hu`), so the policy link stays in the
+    // page's language.
     const [, first] = pathname.split("/")
-    return first && /^[a-z]{2}(-[A-Z]{2})?$/.test(first) ? first : undefined
+    return parseMarketSegment(first) ? first : undefined
   }, [pathname])
 
   const copy = useMemo<CookieConsentCopy>(

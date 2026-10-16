@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import { Metadata } from "next"
 import { notFound } from "next/navigation"
 
@@ -86,7 +87,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         siteName: SITE_NAME,
         title,
         description,
-        url: `/${countryCode}${path}`,
+        url: `/${await getMarketPrefix(countryCode)}${path}`,
       },
     }
   } catch (error) {

@@ -8,7 +8,8 @@ import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import TurnstileWidget from "@modules/common/components/turnstile-widget"
 import { useActionState } from "react"
-import { useParams, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
+import { useMarketPrefix } from "@lib/context/market-context"
 
 type Props = {
   /** When given, shows the "become a member" link that switches to registration. */
@@ -33,9 +34,8 @@ const Login = ({
 }: Props) => {
   const [message, formAction] = useActionState(action, null)
   const { t } = useTranslation()
-  const params = useParams()
   const searchParams = useSearchParams()
-  const countryCode = (params.countryCode as string) || "en"
+  const prefix = useMarketPrefix()
   const returnUrl = searchParams.get("returnUrl") || ""
 
   return (
@@ -72,7 +72,7 @@ const Login = ({
         </div>
         <div className="flex justify-end mt-1">
           <a
-            href={forgotPasswordHref ?? `/${countryCode}/account/forgot-password`}
+            href={forgotPasswordHref ?? `/${prefix}/account/forgot-password`}
             className="text-small-regular text-link hover:underline"
           >
             {t("account.forgotPassword") || "Forgot password?"}

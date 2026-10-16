@@ -8,10 +8,11 @@ import {
   Transition,
 } from "@headlessui/react"
 import { Fragment, useEffect, useMemo, useState, useTransition } from "react"
-import { useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { updateLocale } from "@lib/data/locale-actions"
+import { goToMarket } from "@lib/context/market-context"
 import { Locale } from "@lib/data/locales"
 import { useTranslation } from "@/lib/i18n"
 import {
@@ -65,7 +66,7 @@ const LanguageSelect = ({
   const { t } = useTranslation()
   const [current, setCurrent] = useState<LanguageOption | undefined>(undefined)
   const [isPending, startTransition] = useTransition()
-  const router = useRouter()
+  const { countryCode } = useParams() as { countryCode: string }
 
   // `undefined` means "not specified" → translated default. `null` still means
   // "no visible label".
@@ -110,11 +111,11 @@ const LanguageSelect = ({
 
   const handleChange = (option: LanguageOption) => {
     startTransition(async () => {
+      // The cookie remembers the choice for visits to `/`; the URL carries
+      // the language, so open the same page under the new language prefix.
       await updateLocale(option.code)
       close()
-      router.refresh()
-      // Notify client components to re-read the locale cookie
-      document.dispatchEvent(new CustomEvent("localechange"))
+      goToMarket(countryCode, option.code)
     })
   }
 

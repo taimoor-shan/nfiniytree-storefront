@@ -5,6 +5,7 @@ import type { Metadata } from "next"
 import { listCountryCodes } from "@lib/data/regions"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
+import { getMarketPrefix } from "@lib/data/market"
 import { translate } from "@lib/i18n"
 import { DEFAULT_COUNTRY_CODE, getAlternates, SITE_NAME } from "./seo"
 
@@ -30,7 +31,11 @@ export async function getSeoAlternates(countryCode: string, path: string = "") {
   // not exist.
   const countryCodes = discovered.length ? discovered : [DEFAULT_COUNTRY_CODE]
 
-  return getAlternates({ countryCode, path, countryCodes })
+  return getAlternates({
+    market: await getMarketPrefix(countryCode),
+    path,
+    countryCodes,
+  })
 }
 
 /**
@@ -122,7 +127,7 @@ export async function getCmsPageMetadata({
       siteName: SITE_NAME,
       title,
       description,
-      url: `/${countryCode}${path}`,
+      url: `/${await getMarketPrefix(countryCode)}${path}`,
       ...(page?.featured_image ? { images: [{ url: page.featured_image }] } : {}),
     },
   }

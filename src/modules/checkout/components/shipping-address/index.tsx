@@ -1,6 +1,8 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
+import { useMarketPrefix } from "@lib/context/market-context"
+import { stripMarketPrefix } from "@lib/i18n/market"
 import { Container, Heading, Text } from "@medusajs/ui"
 import { Radio, RadioGroup } from "@headlessui/react"
 import Checkbox from "@modules/common/components/checkbox"
@@ -40,6 +42,7 @@ const ShippingAddress = ({
   const { t } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
+  const marketPrefix = useMarketPrefix()
   const searchParams = useSearchParams()
 
   const customerMetadata = (customer?.metadata || {}) as Record<string, any>
@@ -428,7 +431,9 @@ const ShippingAddress = ({
     setPasswordError(null)
   }
 
-  const loginReturnUrl = `${pathname}${
+  // Rebuilt from the market prefix so the visitor comes back in the same
+  // language (`/en-hu/checkout`), however the router reports the path.
+  const loginReturnUrl = `/${marketPrefix}${stripMarketPrefix(pathname)}${
     searchParams.toString() ? `?${searchParams.toString()}` : ""
   }`
 

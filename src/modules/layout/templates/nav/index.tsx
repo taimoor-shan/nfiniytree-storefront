@@ -24,13 +24,16 @@ export default async function Nav() {
   ])
   const storeName = store?.name || "Infinytree"
   const dict = await getDictionary(currentLocale)
+  // The selectors list English as "" (the products' own text); a `/en-hu`
+  // URL resolves to "en".
+  const selectedLocale = currentLocale === "en" ? null : currentLocale
 
   return (
     <HeaderWrapper
       topBar={
         <TopBar
           locales={locales}
-          currentLocale={currentLocale}
+          currentLocale={selectedLocale}
           regions={regions as any}
         />
       }
@@ -54,7 +57,7 @@ export default async function Nav() {
             <SideMenu
               regions={regions}
               locales={locales}
-              currentLocale={currentLocale}
+              currentLocale={selectedLocale}
               storeName={storeName}
             />
           </div>

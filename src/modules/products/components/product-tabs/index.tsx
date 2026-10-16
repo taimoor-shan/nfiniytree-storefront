@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { HttpTypes } from "@medusajs/types"
 import { ArrowLeftRight, ArrowUpDown, Move3d } from "lucide-react"
 import { isSimpleProduct } from "@lib/util/product"
@@ -16,51 +15,16 @@ type ProductTabsProps = {
   product: HttpTypes.StoreProduct
   /**
    * Locale for metadata resolution, provided by the server so SSR and
-   * the client agree on the first render.  Falls back to cookie-based
-   * detection when not passed.
+   * the client agree on the first render. Falls back to the page's locale.
    */
   locale?: string
 }
 
-/** Read the _medusa_locale cookie client-side. */
-function getLocaleFromCookie(): string {
-  if (typeof document === "undefined") return "en"
-  const match = document.cookie.match(/(?:^|;\s*)_medusa_locale=([^;]*)/)
-  return match ? decodeURIComponent(match[1]) || "en" : "en"
-}
-
 const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
-  const { t } = useTranslation()
-
-  // Use the server-provided locale during SSR/hydration so the rendered
-  // tree matches.  The state is kept mutable so locale-change events
-  // (dispatched by the language switcher) trigger a re-render.
-  const [locale, setLocale] = useState<string>(
-    () => localeProp || getLocaleFromCookie()
-  )
-
-  // Sync with the cookie on mount (handles the edge case where the
-  // cookie changes between SSR and hydration, e.g. a very slow page).
-  useEffect(() => {
-    const cookieLocale = getLocaleFromCookie()
-    if (cookieLocale !== "en" && cookieLocale !== locale) {
-      setLocale(cookieLocale)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Keep the state in sync when the prop changes (e.g. client-side
-  // navigation between products with different locale props).
-  useEffect(() => {
-    if (localeProp !== undefined) setLocale(localeProp)
-  }, [localeProp])
-
-  // React to locale changes from the language switcher.
-  useEffect(() => {
-    const handler = () => setLocale(getLocaleFromCookie())
-    document.addEventListener("localechange", handler)
-    return () => document.removeEventListener("localechange", handler)
-  }, [])
+  // The page's language comes from its URL (`/en-hu`), not the cookie: the
+  // cookie only remembers the visitor's last choice.
+  const { t, locale: pageLocale } = useTranslation()
+  const locale = localeProp || pageLocale
 
   // Resolve locale-aware metadata once with the definitive locale.
   const rawMetadata = (product.metadata as Record<string, any>) || {}

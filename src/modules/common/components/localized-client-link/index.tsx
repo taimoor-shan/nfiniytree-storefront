@@ -1,12 +1,12 @@
 "use client"
 
 import Link from "next/link"
-import { useParams } from "next/navigation"
+import { useMarketPrefix } from "@lib/context/market-context"
 import React from "react"
 
 /**
- * Use this component to create a Next.js `<Link />` that persists the current country code in the url,
- * without having to explicitly pass it as a prop.
+ * Use this component to create a Next.js `<Link />` that keeps the current market prefix
+ * (`/hu`, `/en-hu`) in the url, without having to explicitly pass it as a prop.
  */
 const LocalizedClientLink = ({
   children,
@@ -20,10 +20,10 @@ const LocalizedClientLink = ({
   passHref?: true
   [x: string]: any
 }) => {
-  const { countryCode } = useParams()
+  const prefix = useMarketPrefix()
 
   return (
-    <Link href={`/${countryCode}${href}`} {...props}>
+    <Link href={`/${prefix}${href}`} {...props}>
       {children}
     </Link>
   )

@@ -40,7 +40,12 @@ export default async function PageLayout(props: { children: React.ReactNode }) {
 
   return (
     <>
-      <CountryPopup regions={regions ?? []} locales={locales} currentLocale={currentLocale} />
+      <CountryPopup
+        regions={regions ?? []}
+        locales={locales}
+        // English is "" in the selectors; a `/en-hu` URL resolves to "en".
+        currentLocale={currentLocale === "en" ? null : currentLocale}
+      />
       <Nav />
       {customer && cart && (
         <CartMismatchBanner customer={customer} cart={cart} />

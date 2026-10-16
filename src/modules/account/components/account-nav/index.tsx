@@ -3,7 +3,8 @@
 import { useTranslation } from "@/lib/i18n"
 import { clx } from "@medusajs/ui"
 import { ArrowRightOnRectangle } from "@medusajs/icons"
-import { useParams, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
+import { stripMarketPrefix } from "@lib/i18n/market"
 
 import ChevronDown from "@modules/common/icons/chevron-down"
 import User from "@modules/common/icons/user"
@@ -19,17 +20,16 @@ const AccountNav = ({
   customer: HttpTypes.StoreCustomer | null
 }) => {
   const route = usePathname()
-  const { countryCode } = useParams() as { countryCode: string }
   const { t } = useTranslation()
 
   const handleLogout = async () => {
-    await signout(countryCode)
+    await signout()
   }
 
   return (
     <div>
       <div className="small:hidden" data-testid="mobile-account-nav">
-        {route !== `/${countryCode}/account` ? (
+        {stripMarketPrefix(route) !== "/account" ? (
           <LocalizedClientLink
             href="/account"
             className="flex items-center gap-x-2 text-small-regular py-2"
@@ -180,9 +180,7 @@ const AccountNavLink = ({
   children,
   "data-testid": dataTestId,
 }: AccountNavLinkProps) => {
-  const { countryCode }: { countryCode: string } = useParams()
-
-  const active = route.split(countryCode)[1] === href
+  const active = stripMarketPrefix(route) === href
   return (
     <LocalizedClientLink
       href={href}

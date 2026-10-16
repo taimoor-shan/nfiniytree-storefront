@@ -7,7 +7,7 @@ import { SubmitButton } from "@modules/checkout/components/submit-button"
 import Input from "@modules/common/components/input"
 import TurnstileWidget from "@modules/common/components/turnstile-widget"
 import { useActionState, useState } from "react"
-import { useParams } from "next/navigation"
+import { useMarketPrefix } from "@lib/context/market-context"
 
 type Props = {
   /** The request action. Defaults to the shop customer's. */
@@ -32,9 +32,8 @@ const ForgotPassword = ({
   const { t } = useTranslation()
   const [message, formAction, isPending] = useActionState(action, null)
   const [submitted, setSubmitted] = useState(false)
-  const params = useParams()
-  const countryCode = (params.countryCode as string) || "en"
-  const backToLoginHref = backHref ?? `/${countryCode}/account`
+  const prefix = useMarketPrefix()
+  const backToLoginHref = backHref ?? `/${prefix}/account`
 
   const handleFormAction = (formData: FormData) => {
     setSubmitted(true)

@@ -2,20 +2,20 @@
 
 import { clx } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
-import { useParams, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
+import { stripMarketPrefix } from "@lib/i18n/market"
 
 type Item = { href: string; label: string }
 
 const PortalNav = ({ items }: { items: Item[] }) => {
-  const pathname = usePathname()
-  const { countryCode } = useParams() as { countryCode: string }
-  const root = `/${countryCode}/sales-portal`
+  const pathname = stripMarketPrefix(usePathname())
+  const root = "/sales-portal"
 
   // A client's orders belong to the overview.
   const isActive = (href: string) =>
-    href === "/sales-portal"
+    href === root
       ? pathname === root || pathname.startsWith(`${root}/clients/`)
-      : pathname === `/${countryCode}${href}`
+      : pathname === href
 
   return (
     <nav

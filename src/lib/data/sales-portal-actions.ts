@@ -11,6 +11,7 @@ import {
   setSalesRepAuthToken,
 } from "./cookies"
 import { getLocale } from "./locale-actions"
+import { getMarketPrefix } from "./market"
 import { localizeError } from "./localize-error"
 import { turnstileError } from "./turnstile"
 
@@ -50,7 +51,7 @@ export async function salesRepSignout(countryCode: string) {
   // site (the proxy adds the country when there is none).
   redirect(
     /^[a-z]{2}$/i.test(countryCode)
-      ? `/${countryCode}/sales-portal`
+      ? `/${await getMarketPrefix(countryCode)}/sales-portal`
       : "/sales-portal"
   )
 }

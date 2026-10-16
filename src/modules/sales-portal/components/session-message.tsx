@@ -1,3 +1,4 @@
+import { getMarketPrefix } from "@lib/data/market"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { PortalT } from "../lib/translator"
 import SignOutButton from "./sign-out-button"
@@ -5,7 +6,7 @@ import SignOutButton from "./sign-out-button"
 export type SessionReason = "signed_out" | "no_access" | "not_found" | "error"
 
 /** What to show when a portal page can't load its data. */
-const SessionMessage = ({
+const SessionMessage = async ({
   reason,
   countryCode,
   t,
@@ -14,6 +15,8 @@ const SessionMessage = ({
   countryCode: string
   t: PortalT
 }) => {
+  const prefix = await getMarketPrefix(countryCode)
+
   const copy: Record<SessionReason, { title: string; text: string }> = {
     signed_out: {
       title: t("salesPortal.title"),
@@ -41,7 +44,7 @@ const SessionMessage = ({
         // A full page load: the sign-in form comes from the layout, which a
         // client-side navigation would not run again.
         <a
-          href={`/${countryCode}/sales-portal`}
+          href={`/${prefix}/sales-portal`}
           className="text-link text-small-regular hover:underline"
         >
           {t("salesPortal.signInAgain")}
