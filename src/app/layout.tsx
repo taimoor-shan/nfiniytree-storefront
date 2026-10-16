@@ -1,5 +1,6 @@
 import { getBaseURL } from "@lib/util/env"
 import { Metadata } from "next"
+import { cookies } from "next/headers"
 import "styles/globals.css"
 // Only the two fonts actually instantiated below are imported. `Gelasio`,
 // `Fraunces` and `Inter` were imported and never used — each unused
@@ -7,7 +8,6 @@ import "styles/globals.css"
 // font family that never reaches a stylesheet.
 import { DM_Sans, Bodoni_Moda } from "next/font/google"
 import { getDictionary } from "@lib/i18n/dictionaries"
-import { getLocale } from "@lib/data/locale-actions"
 import { LocaleProvider } from "@lib/i18n/client"
 import { CookieConsentBoundary } from "@/components/cookie-consent/cookie-consent-boundary"
 
@@ -28,7 +28,8 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
-  const locale = (await getLocale()) ?? "en"
+  const cookieStore = await cookies()
+  const locale = cookieStore.get("_medusa_locale")?.value ?? "en"
   const dict = await getDictionary(locale)
 
   // Extract the language portion for the HTML lang attribute (e.g. "de-AT" → "de")

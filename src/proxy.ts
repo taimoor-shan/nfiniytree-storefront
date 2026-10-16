@@ -2,10 +2,6 @@ import { HttpTypes } from "@medusajs/types"
 import { NextRequest, NextResponse } from "next/server"
 import { CACHE_TAGS } from "./lib/data/cache"
 import { getRequestCountry } from "./lib/geo/client-country"
-import {
-  DEFAULT_LOCALE_HEADER,
-  defaultLocaleForCountry,
-} from "./lib/i18n/country-language"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -142,22 +138,6 @@ const isCountryCodeShaped = (segment: string | undefined) =>
   !!segment && /^[a-z]{2}$/.test(segment)
 
 /**
- * Pass the request on with the market's default language attached, so a
- * visitor without a language cookie (every crawler) gets `/hu` in Hungarian
- * and `/at` in German instead of English. The header is always overwritten,
- * so a client cannot supply its own.
- */
-function nextWithDefaultLocale(request: NextRequest, countryCode: string) {
-  const headers = new Headers(request.headers)
-  headers.delete(DEFAULT_LOCALE_HEADER)
-
-  const locale = defaultLocaleForCountry(countryCode)
-  if (locale) headers.set(DEFAULT_LOCALE_HEADER, locale)
-
-  return NextResponse.next({ request: { headers } })
-}
-
-/**
  * Proxy to handle region selection and onboarding status.
  */
 export async function proxy(request: NextRequest) {
@@ -192,7 +172,7 @@ export async function proxy(request: NextRequest) {
 
     const firstSegment = pathname.split("/")[1]?.toLowerCase()
     if (firstSegment === DEFAULT_REGION) {
-      return nextWithDefaultLocale(request, firstSegment)
+      return NextResponse.next()
     }
 
     return redirectToCountry(request, DEFAULT_REGION)
@@ -209,7 +189,7 @@ export async function proxy(request: NextRequest) {
   const urlHasCountryCode = !!firstSegment && regionMap.has(firstSegment)
 
   if (urlHasCountryCode) {
-    return nextWithDefaultLocale(request, firstSegment)
+    return NextResponse.next()
   }
 
   if (countryCode) {

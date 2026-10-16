@@ -2,25 +2,19 @@
 
 import { sdk } from "@lib/config"
 import { revalidateTag } from "next/cache"
-import { cookies as nextCookies, headers as nextHeaders } from "next/headers"
-import { DEFAULT_LOCALE_HEADER } from "@lib/i18n/country-language"
+import { cookies as nextCookies } from "next/headers"
 import { getAuthHeaders, getCartId } from "./cookies"
 import { CACHE_TAGS } from "./cache"
 
 const LOCALE_COOKIE_NAME = "_medusa_locale"
 
 /**
- * Gets the current locale: the visitor's cookie, else the default language of
- * the market in the URL (set by the proxy, see `country-language.ts`).
+ * Gets the current locale from cookies
  */
 export const getLocale = async (): Promise<string | null> => {
   try {
     const cookies = await nextCookies()
-    const cookieLocale = cookies.get(LOCALE_COOKIE_NAME)?.value
-    if (cookieLocale) return cookieLocale
-
-    const headers = await nextHeaders()
-    return headers.get(DEFAULT_LOCALE_HEADER) ?? null
+    return cookies.get(LOCALE_COOKIE_NAME)?.value ?? null
   } catch {
     return null
   }
