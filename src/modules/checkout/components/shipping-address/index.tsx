@@ -576,6 +576,15 @@ return (
           value={formData.customer_type}
         />
       </fieldset> */}
+      {/* The customer type must still be sent while the selector above is off:
+          setAddresses reads it from the form and treats a missing value as a
+          private customer, so without this no account is created and no VAT
+          number is checked, although this page asks for both. */}
+      <input
+        type="hidden"
+        name="customer_type"
+        value={formData.customer_type}
+      />
 
       {/* Company name — full width: business names run long, and it's the anchor
           of a B2B row, so it shouldn't visually pair with Address Line 1 */}
