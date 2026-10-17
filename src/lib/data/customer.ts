@@ -18,6 +18,12 @@ import { getLocale } from "./locale-actions"
 import { localizeError } from "./localize-error"
 import { turnstileError } from "./turnstile"
 import { translate } from "@lib/i18n/dictionaries"
+import { clearReferralCode, getReferralCode } from "./referral"
+import {
+  lookupReferrer,
+  normalizeReferralCode,
+  withReferral,
+} from "@lib/util/referral"
 
 export const retrieveCustomer =
   async (): Promise<HttpTypes.StoreCustomer | null> => {
@@ -78,6 +84,7 @@ export async function createCustomerAccount({
   phone,
   company_name,
   metadata,
+  referralCode,
 }: {
   email: string
   password: string
@@ -86,7 +93,13 @@ export async function createCustomerAccount({
   phone: string
   company_name?: string
   metadata?: Record<string, unknown>
+  /** A code the visitor typed; otherwise the client link they followed */
+  referralCode?: string | null
 }) {
+  // The sales rep behind the visitor's client link. The plugin links the new
+  // client to them when it sees the code in the customer's metadata.
+  const referral = referralCode ?? (await getReferralCode())
+
   const token = await sdk.auth.register("customer", "emailpass", {
     email,
     password,
@@ -99,7 +112,14 @@ export async function createCustomerAccount({
   }
 
   const { customer: createdCustomer } = await sdk.store.customer.create(
-    { email, first_name, last_name, phone, company_name, metadata },
+    {
+      email,
+      first_name,
+      last_name,
+      phone,
+      company_name,
+      metadata: withReferral(metadata, referral),
+    },
     {},
     headers
   )
@@ -115,6 +135,9 @@ export async function createCustomerAccount({
 
   await transferCart()
 
+  // One link, one account: the next person on this browser starts afresh
+  await clearReferralCode()
+
   return createdCustomer
 }
 
@@ -124,6 +147,20 @@ export async function signup(_currentState: unknown, formData: FormData) {
 
   const password = formData.get("password") as string
 
+  // A code typed into the form beats the link the visitor followed. A mistyped
+  // one is said so rather than dropped: it would cost the rep their client.
+  const typedCode = String(formData.get("referral_code") ?? "").trim()
+  let referralCode: string | null = null
+  if (typedCode) {
+    referralCode = normalizeReferralCode(typedCode)
+    if (
+      !referralCode ||
+      (await lookupReferrer(referralCode)).status === "unknown"
+    ) {
+      return translate("account.referralCodeUnknown", await getLocale())
+    }
+  }
+
   try {
     return await createCustomerAccount({
       email: formData.get("email") as string,
@@ -131,6 +168,7 @@ export async function signup(_currentState: unknown, formData: FormData) {
       first_name: formData.get("first_name") as string,
       last_name: formData.get("last_name") as string,
       phone: formData.get("phone") as string,
+      referralCode,
     })
   } catch (error: any) {
     return await localizeError(error)

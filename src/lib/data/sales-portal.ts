@@ -4,6 +4,7 @@ import { MISROUTED_HINT } from "@lib/util/backend-url"
 import {
   PortalBalances,
   PortalClient,
+  PortalClientLink,
   PortalInvite,
   PortalMonth,
   PortalOrder,
@@ -88,6 +89,16 @@ export const getPortalBalances = () =>
 /** The reps this rep invited, how far along each is, and what Level 2 earns from each. */
 export const getPortalRecruits = () =>
   portalFetch<PortalRecruits>("/sales-portal/recruits")
+
+/**
+ * The rep's client link and the clients who came through it. The code is made
+ * the first time it is asked for. The language tells the plugin which one the
+ * rep's emails about their clients are written in.
+ */
+export const getPortalClientLink = (locale?: string) =>
+  portalFetch<{ client_link: PortalClientLink }>("/sales-portal/client-link", {
+    locale,
+  })
 
 export const getPortalClients = (period?: string) =>
   portalFetch<{ period: string; clients: PortalClient[] }>(

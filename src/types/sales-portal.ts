@@ -172,3 +172,23 @@ export type PortalInvite = {
   expires_at: string
   applied_at: string | null
 }
+
+/** How far a client who came through the rep's link has got. */
+export type PortalReferredStatus = "registered" | "ordered" | "paid"
+
+/** The rep's client link: the code, whether it is on, and the clients who came through it. */
+export type PortalClientLink = {
+  code: string
+  /** False while the owner hasn't set the rep's standard rate: nobody is linked */
+  active: boolean
+  reason: "no_rate" | null
+  /** Percent a client who joins through the link is credited at */
+  rate: number | null
+  referred: {
+    id: string
+    name: string
+    joined_at: string
+    status: PortalReferredStatus
+  }[]
+  summary: Record<PortalReferredStatus, number>
+}

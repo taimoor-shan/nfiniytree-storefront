@@ -9,12 +9,15 @@ import ErrorMessage from "@modules/checkout/components/error-message"
 import { SubmitButton } from "@modules/checkout/components/submit-button"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { signup } from "@lib/data/customer"
+import ReferralCodeField from "./referral-code-field"
 
 type Props = {
   setCurrentView: (view: LOGIN_VIEW) => void
+  /** The sales rep whose client link the visitor followed, when there is one */
+  referrerName?: string | null
 }
 
-const Register = ({ setCurrentView }: Props) => {
+const Register = ({ setCurrentView, referrerName }: Props) => {
   const [message, formAction] = useActionState(signup, null)
   const { t } = useTranslation()
 
@@ -69,6 +72,24 @@ const Register = ({ setCurrentView }: Props) => {
             data-testid="password-input"
           />
         </div>
+        {referrerName ? (
+          <p
+            role="status"
+            className="mt-4 rounded-md bg-surface-soft p-4 text-small-regular text-ink"
+            data-testid="referrer-notice"
+          >
+            {t("account.referrerNotice").replaceAll("{name}", referrerName)}
+          </p>
+        ) : (
+          <details className="mt-4 text-small-regular" data-testid="referral-code-details">
+            <summary className="cursor-pointer text-link">
+              {t("account.haveReferralCode")}
+            </summary>
+            <div className="mt-2">
+              <ReferralCodeField />
+            </div>
+          </details>
+        )}
         <TurnstileWidget />
         <ErrorMessage
           error={typeof message === "string" ? message : null}

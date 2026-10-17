@@ -13,6 +13,13 @@ import {
   MarketSegment,
   parseMarketSegment,
 } from "./lib/i18n/market"
+import {
+  REFERRAL_COOKIE,
+  REFERRAL_PARAM,
+  normalizeReferralCode,
+  referralCookieOptions,
+  referralToRemember,
+} from "./lib/util/referral"
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL
 const PUBLISHABLE_API_KEY = process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
@@ -183,9 +190,45 @@ function serveMarket(
 }
 
 /**
- * Proxy to handle region selection and onboarding status.
+ * The proxy: picks the market (`serveRequest`), then remembers the sales rep's
+ * client link when the request carries one (`?ref=CODE`, on any page). Only
+ * those requests cost anything extra, and a link that can't be remembered
+ * never costs the visitor the page.
  */
 export async function proxy(request: NextRequest) {
+  const response = await serveRequest(request)
+
+  const param = request.nextUrl.searchParams.get(REFERRAL_PARAM)
+  if (param === null || response.status >= 400) {
+    return response
+  }
+
+  try {
+    const code = await referralToRemember({
+      param,
+      current: normalizeReferralCode(
+        request.cookies.get(REFERRAL_COOKIE)?.value
+      ),
+      signedIn: request.cookies.has("_medusa_jwt"),
+    })
+    if (code) {
+      response.cookies.set(REFERRAL_COOKIE, code, referralCookieOptions())
+    }
+  } catch (error) {
+    console.error(
+      `[proxy] Could not remember the client link: ${
+        error instanceof Error ? error.message : "unknown error"
+      }`
+    )
+  }
+
+  return response
+}
+
+/**
+ * Proxy to handle region selection and onboarding status.
+ */
+async function serveRequest(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   // Served before anything else: these responses must not be region-dependent

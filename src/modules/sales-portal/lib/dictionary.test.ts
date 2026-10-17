@@ -57,6 +57,9 @@ const families: Record<string, string[]> = {
   "salesPortal.status.": ["paid", "partial", "unpaid", "overpaid", "none"],
   "salesPortal.lineStatus.": ["pending", "earned", "payable", "reversed", "adjustment", "paid"],
   "salesPortal.line.": ["commission", "level2", "reversal", "adjustment", "payout"],
+  "salesPortal.clientLink.status.": ["registered", "ordered", "paid"],
+  "salesPortal.clientLink.pageError.": ["invalid", "other_site"],
+  "salesPortal.clientLink.rule": ["1", "2", "3", "4", "5"],
   "salesPortal.recruits.status.": [
     "active", "pending_approval", "invited", "expired", "inactive", "declined",
   ],

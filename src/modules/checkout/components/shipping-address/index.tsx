@@ -9,6 +9,7 @@ import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import MedusaRadio from "@modules/common/components/radio"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
+import ReferrerNotice from "../referrer-notice"
 import { useTranslation } from "@/lib/i18n"
 import { validateVatNumber } from "@lib/util/vat"
 import { validatePhoneNumber } from "@lib/util/phone"
@@ -747,6 +748,7 @@ return (
           )}
           {(isBusiness || createAccount) && (
             <>
+              <ReferrerNotice />
               <p className="text-base-regular">
                 {t("checkout.accountDescription")}
               </p>

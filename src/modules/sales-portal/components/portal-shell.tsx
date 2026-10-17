@@ -37,6 +37,10 @@ const PortalShell = ({
               label: t("salesPortal.nav.payouts"),
             },
             {
+              href: "/sales-portal/client-link",
+              label: t("salesPortal.nav.clientLink"),
+            },
+            {
               href: "/sales-portal/recruits",
               label: t("salesPortal.nav.recruits"),
             },
