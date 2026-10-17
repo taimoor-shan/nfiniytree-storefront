@@ -13,6 +13,7 @@ import {
   MarketSegment,
   parseMarketSegment,
 } from "./lib/i18n/market"
+import { TEAM_CARD_LOCALE, isTeamCardPath } from "./lib/team/card-path"
 import {
   REFERRAL_COOKIE,
   REFERRAL_PARAM,
@@ -190,6 +191,21 @@ function serveMarket(
 }
 
 /**
+ * Serve a team member's business card (`/team/martin-wolf`). The card is
+ * printed as a QR code, so it is one address that never moves: no market
+ * prefix, no redirect, and no region lookup, which keeps it up while the
+ * backend is down. It is always German, so the locale is set here the way
+ * `serveMarket` does it, and any market header the visitor sent is dropped.
+ */
+function serveTeamCard(request: NextRequest) {
+  const headers = new Headers(request.headers)
+  headers.set(LOCALE_HEADER, TEAM_CARD_LOCALE)
+  headers.delete(MARKET_HEADER)
+
+  return NextResponse.next({ request: { headers } })
+}
+
+/**
  * The proxy: picks the market (`serveRequest`), then remembers the sales rep's
  * client link when the request carries one (`?ref=CODE`, on any page). Only
  * those requests cost anything extra, and a link that can't be remembered
@@ -241,6 +257,11 @@ async function serveRequest(request: NextRequest) {
   // a storefront route. Checked up front so it costs no network call.
   if (pathname.includes(".")) {
     return NextResponse.next()
+  }
+
+  // A team business card lives outside the markets: no redirect into one.
+  if (isTeamCardPath(pathname)) {
+    return serveTeamCard(request)
   }
 
   let regionMap: Map<string, HttpTypes.StoreRegion>
