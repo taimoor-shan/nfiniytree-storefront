@@ -1,17 +1,20 @@
 /**
- * Market URLs: the first path segment names the country and, optionally, the
- * UI language.
+ * Market URLs: the first path segment names the UI language and the country,
+ * always both, so the two are independent.
  *
- *   /hu/store     Hungary, in Hungary's own language (Hungarian)
  *   /en-hu/store  Hungary, in English
  *   /de-hu/store  Hungary, in German
- *   /at/store     Austria, in German
- *   /en-at/store  Austria, in English
+ *   /de-at/store  Austria, in German
+ *   /en-de/store  Germany, in English
  *
  * This is how Shopify Markets lays out URLs. Every language of every market is
  * its own address, so search engines can index each one, and the language
  * selector switches by moving to the other address. The country keeps driving
  * prices, currency and shipping; the language only drives the text.
+ *
+ * A bare country (`/hu/store`, what Medusa's country selector and old links
+ * produce) is redirected to the visitor's language: the one they last picked
+ * (`_medusa_locale` cookie), else the country's usual language.
  *
  * The proxy rewrites `/en-hu/...` to the `[countryCode]` route for `hu` and
  * hands the language to server components in `LOCALE_HEADER`, so routes and
@@ -19,9 +22,10 @@
  * the URL's own prefix (`MARKET_HEADER`, `useMarketPrefix()`), so a visitor
  * stays in the language they are reading.
  *
- * Only languages with a dictionary in `src/i18n/dictionaries` can appear in a
- * URL. German has two dictionaries: Austria uses `de-AT`, every other market
- * `de-DE`.
+ * Only languages in `URL_LANGUAGES` can appear in a URL; each needs a
+ * dictionary in `src/i18n/dictionaries`. German has two dictionaries: Austria
+ * uses `de-AT`, every other market `de-DE` (`getLocale()` swaps to the other
+ * one when Medusa only has that one, see `matchLocale`).
  *
  * Pure functions only: this file is imported by the proxy, by server code and
  * by client components.
@@ -34,17 +38,19 @@ export const LOCALE_HEADER = "x-infinytree-locale"
 export const MARKET_HEADER = "x-infinytree-market"
 
 /** Languages that can appear in a URL, as their two-letter code. */
-export const URL_LANGUAGES = ["en", "de", "hu"] as const
+export const URL_LANGUAGES = ["en", "de"] as const
 
-/** The language a market is shown in when its URL names no language. */
-const COUNTRY_DEFAULT_LOCALE: Record<string, string> = {
-  hu: "hu-HU",
-  at: "de-AT",
-  de: "de-DE",
+/** The language a country is shown in until the visitor picks one. */
+const COUNTRY_DEFAULT_LANGUAGE: Record<string, string> = {
+  at: "de",
+  de: "de",
 }
 
-export const defaultLocaleForCountry = (country: string): string =>
-  COUNTRY_DEFAULT_LOCALE[country.toLowerCase()] ?? "en"
+export const defaultLanguageForCountry = (country: string): string =>
+  COUNTRY_DEFAULT_LANGUAGE[country.toLowerCase()] ?? "en"
+
+const isUrlLanguage = (language: string) =>
+  (URL_LANGUAGES as readonly string[]).includes(language)
 
 /** `"de-AT"` → `"de"`. An empty or missing locale is English. */
 export const languageOf = (locale: string | null | undefined): string =>
@@ -58,8 +64,6 @@ export const localeForLanguage = (
   switch (language.toLowerCase()) {
     case "en":
       return "en"
-    case "hu":
-      return "hu-HU"
     case "de":
       return country.toLowerCase() === "at" ? "de-AT" : "de-DE"
     default:
@@ -85,17 +89,17 @@ export const parseMarketSegment = (
   return match ? { country: match[2], language: match[1] } : null
 }
 
-/** The locale a market segment asks for, or null for an unsupported language. */
+/**
+ * The locale a market segment asks for, or null when the URL names no
+ * supported language (a bare country, `/hu-hu`), which the proxy redirects.
+ */
 export const localeForSegment = (segment: MarketSegment): string | null =>
-  segment.language
-    ? localeForLanguage(segment.language, segment.country)
-    : defaultLocaleForCountry(segment.country)
+  segment.language ? localeForLanguage(segment.language, segment.country) : null
 
 /**
- * The URL prefix for a country shown in a locale: the bare country for the
- * country's own language (`/hu`, never `/hu-hu`), `<language>-<country>`
- * otherwise. A locale that cannot appear in a URL falls back to the country's
- * own language.
+ * The URL prefix for a country shown in a locale: always
+ * `<language>-<country>` (`en-hu`, `de-de`). A locale that cannot appear in a
+ * URL falls back to the country's usual language.
  */
 export const marketPrefix = (
   country: string,
@@ -104,14 +108,42 @@ export const marketPrefix = (
   const code = country.toLowerCase()
   const language = languageOf(locale)
 
-  if (
-    !(URL_LANGUAGES as readonly string[]).includes(language) ||
-    language === languageOf(defaultLocaleForCountry(code))
-  ) {
-    return code
-  }
+  return `${
+    isUrlLanguage(language) ? language : defaultLanguageForCountry(code)
+  }-${code}`
+}
 
-  return `${language}-${code}`
+/**
+ * The prefix to send a visitor to in a country when the URL does not say
+ * which language: the one they last picked (the `_medusa_locale` cookie,
+ * where English is ""), else the country's usual language.
+ */
+export const preferredMarketPrefix = (
+  country: string,
+  cookieLocale: string | null | undefined
+): string =>
+  marketPrefix(
+    country,
+    cookieLocale === undefined || cookieLocale === null
+      ? defaultLanguageForCountry(country)
+      : cookieLocale
+  )
+
+/**
+ * The locale to use from the ones Medusa offers: the exact one if it is
+ * there, else another variant of the same language (`de-DE` → `de-AT`), else
+ * the locale itself. German content saved for one country is then shown in
+ * every German market, instead of falling back to English.
+ */
+export const matchLocale = (
+  locale: string,
+  available: readonly string[] | null | undefined
+): string => {
+  if (!available?.length) return locale
+  const exact = available.find((c) => c.toLowerCase() === locale.toLowerCase())
+  if (exact) return exact
+  const language = languageOf(locale)
+  return available.find((c) => languageOf(c) === language) ?? locale
 }
 
 /**

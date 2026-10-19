@@ -27,7 +27,10 @@ export function MarketPrefixProvider({
   )
 }
 
-/** The current URL prefix, or the country code when no provider is mounted. */
+/**
+ * The current URL prefix, or the bare country when no provider is mounted
+ * (the proxy then redirects it to the visitor's language).
+ */
 export function useMarketPrefix(): string {
   const prefix = useContext(MarketPrefixContext)
   const { countryCode } = useParams() as { countryCode?: string }

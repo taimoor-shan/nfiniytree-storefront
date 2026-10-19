@@ -5,13 +5,12 @@ import { getRequestCountry } from "./lib/geo/client-country"
 import {
   LOCALE_HEADER,
   MARKET_HEADER,
-  defaultLocaleForCountry,
-  languageOf,
   localeForLanguage,
   localeForSegment,
   marketPrefix,
   MarketSegment,
   parseMarketSegment,
+  preferredMarketPrefix,
 } from "./lib/i18n/market"
 import { TEAM_CARD_LOCALE, isTeamCardPath } from "./lib/team/card-path"
 import {
@@ -162,9 +161,8 @@ const isMarketShaped = (segment: string | undefined) =>
 const LOCALE_COOKIE = "_medusa_locale"
 
 /**
- * Serve a market URL. `/hu/...` goes straight to the `[countryCode]` route;
- * `/en-hu/...` is rewritten to `/hu/...`, so every route and data call keeps
- * working with a plain country code. The URL's locale and prefix travel to
+ * Serve a market URL. `/en-hu/...` is rewritten to `/hu/...`, so every route
+ * and data call keeps working with a plain country code. The URL's locale and prefix travel to
  * server components as request headers (`getLocale()`, `getMarketPrefix()`).
  * Incoming copies of those headers are dropped so a visitor cannot set them.
  */
@@ -177,10 +175,6 @@ function serveMarket(
   const headers = new Headers(request.headers)
   headers.set(LOCALE_HEADER, locale)
   headers.set(MARKET_HEADER, segment.toLowerCase())
-
-  if (!market.language) {
-    return NextResponse.next({ request: { headers } })
-  }
 
   const url = request.nextUrl.clone()
   url.pathname = `/${market.country}${request.nextUrl.pathname.slice(
@@ -286,7 +280,17 @@ async function serveRequest(request: NextRequest) {
       return serveMarket(request, firstSegment, market, locale)
     }
 
-    return redirectToCountry(request, DEFAULT_REGION)
+    return redirectToCountry(
+      request,
+      DEFAULT_REGION,
+      isMarketShaped(firstSegment)
+        ? pathname.slice(firstSegment.length + 1) || "/"
+        : pathname,
+      preferredMarketPrefix(
+        DEFAULT_REGION,
+        request.cookies.get(LOCALE_COOKIE)?.value
+      )
+    )
   }
 
   const countryCode = await getCountryCode(request, regionMap)
@@ -301,20 +305,22 @@ async function serveRequest(request: NextRequest) {
   const locale = market && localeForSegment(market)
 
   if (market && locale && regionMap.has(market.country)) {
-    // `/hu-hu` is `/hu` under a second address. One URL per page: send it
-    // to the bare country permanently.
-    if (
-      market.language &&
-      market.language === languageOf(defaultLocaleForCountry(market.country))
-    ) {
-      const url = request.nextUrl.clone()
-      url.pathname = `/${market.country}${pathname.slice(
-        firstSegment.length + 1
-      )}`
-      return NextResponse.redirect(url, 308)
-    }
-
     return serveMarket(request, firstSegment, market, locale)
+  }
+
+  // A real country without a supported language (`/hu`, `/hu-hu`): same
+  // country, in the visitor's language. Kept per-visitor (307) because the
+  // language comes from their cookie.
+  if (market && regionMap.has(market.country)) {
+    return redirectToCountry(
+      request,
+      market.country,
+      pathname.slice(firstSegment.length + 1) || "/",
+      preferredMarketPrefix(
+        market.country,
+        request.cookies.get(LOCALE_COOKIE)?.value
+      )
+    )
   }
 
   if (countryCode) {
@@ -336,9 +342,7 @@ async function serveRequest(request: NextRequest) {
     const prefix =
       requestedLocale !== null
         ? marketPrefix(countryCode, requestedLocale)
-        : cookieLocale !== undefined
-          ? marketPrefix(countryCode, cookieLocale)
-          : countryCode
+        : preferredMarketPrefix(countryCode, cookieLocale)
 
     return redirectToCountry(request, countryCode, strippedPath, prefix)
   }
@@ -370,13 +374,13 @@ async function serveRequest(request: NextRequest) {
  *
  * `targetPath` defaults to the request path; callers pass an explicit value to
  * strip an unsupported country segment rather than prefix it. `prefix` is the
- * market segment to land on (`en-hu`), the bare country by default.
+ * market segment to land on (`en-hu`).
  */
 function redirectToCountry(
   request: NextRequest,
   countryCode: string,
-  targetPath?: string,
-  prefix: string = countryCode
+  targetPath: string,
+  prefix: string
 ) {
   const pathname = targetPath ?? request.nextUrl.pathname
   const redirectPath = pathname === "/" ? "" : pathname

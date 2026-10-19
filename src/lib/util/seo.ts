@@ -13,7 +13,7 @@
  */
 
 import { getBaseURL } from "./env"
-import { marketVariants } from "@lib/i18n/market"
+import { marketPrefix, marketVariants } from "@lib/i18n/market"
 
 export const SITE_NAME = "Infinytree"
 
@@ -51,7 +51,8 @@ export const buildUrl = (market: string, path: string = "") => {
 
 /**
  * The hreflang cluster for a path: every language of every market
- * (`hu-HU` → `/hu`, `en-HU` → `/en-hu`, `de-AT` → `/at`, …) plus `x-default`.
+ * (`en-HU` → `/en-hu`, `de-HU` → `/de-hu`, `de-AT` → `/de-at`, …) plus
+ * `x-default`.
  */
 export const getHreflangs = (countryCodes: string[], path: string = "") => {
   const languages: Record<string, string> = {}
@@ -70,7 +71,7 @@ export const getHreflangs = (countryCodes: string[], path: string = "") => {
     : countryCodes[0]
 
   if (defaultCode) {
-    languages["x-default"] = buildUrl(defaultCode, path)
+    languages["x-default"] = buildUrl(marketPrefix(defaultCode, null), path)
   }
 
   return languages
