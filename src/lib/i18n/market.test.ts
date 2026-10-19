@@ -42,6 +42,10 @@ for (const country of ["hu", "at", "de"]) {
 assert.equal(marketPrefix("de", "de-DE"), "de-de")
 // A language the URL cannot carry falls back to the country's usual one
 assert.equal(marketPrefix("hu", "hu-HU"), "en-hu")
+// No locale yet: the country's usual language
+assert.equal(marketPrefix("at", null), "de-at")
+assert.equal(marketPrefix("de", undefined), "de-de")
+assert.equal(marketPrefix("hu", null), "en-hu")
 assert.equal(marketPrefix("at", "fr-FR"), "de-at")
 
 // No language in the URL: the visitor's pick, else the country's usual one

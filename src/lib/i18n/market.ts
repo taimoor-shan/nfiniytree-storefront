@@ -98,15 +98,20 @@ export const localeForSegment = (segment: MarketSegment): string | null =>
 
 /**
  * The URL prefix for a country shown in a locale: always
- * `<language>-<country>` (`en-hu`, `de-de`). A locale that cannot appear in a
- * URL falls back to the country's usual language.
+ * `<language>-<country>` (`en-hu`, `de-de`). No locale, or one that cannot
+ * appear in a URL, falls back to the country's usual language.
  */
 export const marketPrefix = (
   country: string,
   locale: string | null | undefined
 ): string => {
   const code = country.toLowerCase()
-  const language = languageOf(locale)
+  // No locale at all means "not chosen": the country's usual language. An
+  // empty string is the selector's explicit English.
+  const language =
+    locale === null || locale === undefined
+      ? defaultLanguageForCountry(code)
+      : languageOf(locale)
 
   return `${
     isUrlLanguage(language) ? language : defaultLanguageForCountry(code)
@@ -121,13 +126,7 @@ export const marketPrefix = (
 export const preferredMarketPrefix = (
   country: string,
   cookieLocale: string | null | undefined
-): string =>
-  marketPrefix(
-    country,
-    cookieLocale === undefined || cookieLocale === null
-      ? defaultLanguageForCountry(country)
-      : cookieLocale
-  )
+): string => marketPrefix(country, cookieLocale)
 
 /**
  * The locale to use from the ones Medusa offers: the exact one if it is
