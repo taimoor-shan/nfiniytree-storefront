@@ -15,9 +15,9 @@ export type BusinessCard = {
   firstName: string
   lastName: string
   organisation: string
-  /** The job title as the card shows it, e.g. "Sales Director". */
-  role: string
-  /** Where the role is based, from the specific to the general: `["Tirol", "Österreich"]`. */
+  /** The job title as the card shows it, e.g. "Sales Director". Optional: without one the card shows only the place. */
+  role?: string
+  /** Where the person is based, from the specific to the general: `["Tirol", "Österreich"]`. */
   place: readonly string[]
   /** The direct line in international format, no spaces: `+436648241498`. */
   phone: string
@@ -31,7 +31,7 @@ export const MARTIN_WOLF: BusinessCard = {
   firstName: "Martin",
   lastName: "Wolf",
   organisation: "InfinYtree",
-  role: "Sales Director",
+  // role: "Sales Director",
   place: ["Tirol", "Österreich"],
   phone: "+436648241498",
   phoneDisplay: "+43 664 8241498",
@@ -41,9 +41,21 @@ export const MARTIN_WOLF: BusinessCard = {
 export const fullName = (card: BusinessCard) =>
   `${card.firstName} ${card.lastName}`
 
-/** The title line saved to the phone: `Sales Director – Tirol, Österreich`. */
+/**
+ * The title line saved to the phone: `Sales Director – Tirol, Österreich`, or
+ * just `Tirol, Österreich` for a card without a role, as the page shows it.
+ */
 export const cardTitle = (card: BusinessCard) =>
-  `${card.role} – ${card.place.join(", ")}`
+  [card.role, card.place.join(", ")].filter(Boolean).join(" – ")
+
+/** The page's description for search results and link previews, in German. */
+export const cardDescription = (card: BusinessCard) => {
+  const who = card.role
+    ? `${fullName(card)}, ${card.role} ${card.place[0]} bei ${card.organisation}`
+    : `${fullName(card)} bei ${card.organisation} (${card.place[0]})`
+
+  return `Digitale Visitenkarte von ${who}: anrufen, eine E-Mail schreiben oder den Kontakt speichern.`
+}
 
 export const pagePath = (card: BusinessCard) => `/team/${card.slug}`
 

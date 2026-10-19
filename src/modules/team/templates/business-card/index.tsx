@@ -53,13 +53,13 @@ export default function BusinessCardTemplate({ card, siteUrl }: Props) {
           className="mx-auto mb-8 size-[8rem] rounded-full"
         />
 
-        <p className={eyebrow}>Persönliche Verkaufsberatung</p>
+        <p className={eyebrow}>Persönliche Beratung</p>
         <h1 className="my-2 text-[2rem] leading-[1.15] min-[360px]:text-[2.375rem]">
           {fullName(card)}
         </h1>
         <p className={eyebrow}>
-          {card.role}
-          <br />
+          {/* {card.role}
+          <br /> */}
           {card.place.join(" · ")}
         </p>
 

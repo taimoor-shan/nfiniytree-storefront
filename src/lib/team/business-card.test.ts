@@ -12,6 +12,7 @@
 import {
   MARTIN_WOLF,
   buildVCard,
+  cardDescription,
   cardTitle,
   escapeVCardText,
   fullName,
@@ -58,12 +59,31 @@ function section(title: string) {
 // Tests
 // ---------------------------------------------------------------------------
 
+// Martin's card has no role for now (it is commented out in business-card.ts).
+// The same card with one keeps the role paths covered.
+const withRole = { ...MARTIN_WOLF, role: "Sales Director" }
+
 section("1. The links built from a card")
 assertEqual(fullName(MARTIN_WOLF), "Martin Wolf", "full name")
 assertEqual(
   cardTitle(MARTIN_WOLF),
+  "Tirol, Österreich",
+  "without a role, the title saved to the phone is the place the card shows"
+)
+assertEqual(
+  cardTitle(withRole),
   "Sales Director – Tirol, Österreich",
-  "the title saved to the phone"
+  "with a role, the title is role and place"
+)
+assertEqual(
+  cardDescription(MARTIN_WOLF),
+  "Digitale Visitenkarte von Martin Wolf bei InfinYtree (Tirol): anrufen, eine E-Mail schreiben oder den Kontakt speichern.",
+  "the page description without a role"
+)
+assertEqual(
+  cardDescription(withRole),
+  "Digitale Visitenkarte von Martin Wolf, Sales Director Tirol bei InfinYtree: anrufen, eine E-Mail schreiben oder den Kontakt speichern.",
+  "the page description with a role"
 )
 assertEqual(telHref(MARTIN_WOLF), "tel:+436648241498", "call link keeps the + and no spaces")
 assertEqual(mailtoHref(MARTIN_WOLF), "mailto:martin@infinytree.com", "mail link")
@@ -90,20 +110,31 @@ assertEqual(
     "N:Wolf;Martin;;;",
     "FN:Martin Wolf",
     "ORG:InfinYtree",
-    "TITLE:Sales Director – Tirol\\, Österreich",
+    "TITLE:Tirol\\, Österreich",
     "TEL;TYPE=WORK,CELL:+436648241498",
     "EMAIL;TYPE=WORK:martin@infinytree.com",
     "URL:https://infinytree.com/",
     "END:VCARD",
     "",
   ].join("\r\n"),
-  "exact content: the prepared card, with the comma escaped and the canonical address"
+  "exact content: the prepared card without its role, comma escaped, canonical address"
 )
 assert(vcard.endsWith("END:VCARD\r\n"), "the last line ends in CRLF too")
 assert(!/(^|[^\r])\n/.test(vcard), "no bare line feeds")
 assert(
   vcard.split("\r\n").every((line) => Buffer.byteLength(line, "utf8") <= 75),
   "no line is longer than 75 bytes, so none needs folding"
+)
+assert(
+  buildVCard(withRole, "https://infinytree.com").includes(
+    "\r\nTITLE:Sales Director – Tirol\\, Österreich\r\n"
+  ),
+  "with a role, the title line carries role and place"
+)
+assert(!vcard.includes("undefined"), "nothing in the contact file reads 'undefined'")
+assert(
+  !cardDescription(MARTIN_WOLF).includes("undefined"),
+  "nor does the page description"
 )
 
 assertEqual(

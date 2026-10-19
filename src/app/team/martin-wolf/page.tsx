@@ -1,6 +1,11 @@
 import type { Metadata } from "next"
 
-import { MARTIN_WOLF, fullName, pagePath } from "@lib/team/business-card"
+import {
+  MARTIN_WOLF,
+  cardDescription,
+  fullName,
+  pagePath,
+} from "@lib/team/business-card"
 import { NOINDEX_METADATA, SITE_NAME, getSiteUrl } from "@lib/util/seo"
 import BusinessCardTemplate from "@modules/team/templates/business-card"
 import badge from "@modules/team/templates/business-card/infinytree-badge.jpg"
@@ -14,7 +19,7 @@ import badge from "@modules/team/templates/business-card/infinytree-badge.jpg"
 const card = MARTIN_WOLF
 
 const title = `${fullName(card)} | ${card.organisation}`
-const description = `Digitale Visitenkarte von ${fullName(card)}, ${card.role} ${card.place[0]} bei ${card.organisation}: anrufen, eine E-Mail schreiben oder den Kontakt speichern.`
+const description = cardDescription(card)
 
 // Setting `openGraph` on a page replaces the shop-wide share image, so the card
 // names its own: the round logo, a square that sits well in a chat preview.
