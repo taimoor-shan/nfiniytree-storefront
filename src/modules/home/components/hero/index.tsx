@@ -1,11 +1,20 @@
 "use client"
 
-import { Button, Heading } from "@medusajs/ui"
+import { Button, Heading, clx } from "@medusajs/ui"
 import { ChevronDown } from "lucide-react"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useTranslation } from "@lib/i18n/client"
-import Image from "next/image"
+import { getImageProps } from "next/image"
 import { normalizeImageUrl } from "@lib/util/image-url"
+
+// Phones get a portrait image that ships with the storefront, unlike the
+// desktop one, which editors set per page in the CMS. The image optimizer
+// caches every variant for 30 days (`minimumCacheTTL`), so a replacement needs
+// a new filename.
+const HERO_MOBILE_IMAGE = "/hero-mobile.jpg"
+// Tailwind's `md`: from here up the CMS image (and the video) take over. Keep
+// it in step with the `md:` classes below.
+const DESKTOP_MEDIA = "(min-width: 768px)"
 
 type HeroProps = {
   page?: {
@@ -24,6 +33,24 @@ const Hero = ({ page }: HeroProps) => {
   const heroImage = normalizeImageUrl(page?.featured_image)
   const heroVideo = normalizeImageUrl(page?.hero_video_url)
 
+  // Decorative (`alt=""`), full-bleed (`fill`), and the LCP element at every
+  // viewport (`eager` + `high`).
+  const imageProps = {
+    alt: "",
+    fill: true,
+    sizes: "100vw",
+    quality: 75,
+    loading: "eager",
+    fetchPriority: "high",
+  } as const
+  const mobileImage = getImageProps({
+    ...imageProps,
+    src: HERO_MOBILE_IMAGE,
+  }).props
+  const desktopImage = heroImage
+    ? getImageProps({ ...imageProps, src: heroImage }).props
+    : null
+
   return (
     <div
       className="h-[550px] lg:h-[calc(100vh-125px)] w-full border-b border-hairline relative bg-surface-card bg-center bg-cover flex items-end justify-center px-6 sm:px-28"
@@ -31,29 +58,42 @@ const Hero = ({ page }: HeroProps) => {
       {/* Was an inline `background-image`, which the preload scanner cannot see
           and next/image cannot optimize — so the homepage's largest asset (a
           1.6MB JPEG) was discovered late and downloaded at full size. As a real
-          <img> it is preloadable and served resized in AVIF/WebP.
-          `object-cover object-center` reproduces `bg-cover bg-center`, and
-          `fill` makes it absolutely positioned, so it sits behind the existing
-          z-10 content without affecting the flex layout. */}
-      {heroImage && (
-        <Image
-          src={heroImage}
+          <img> the scanner can find it, and it is served resized in AVIF/WebP.
+          `object-cover` reproduces `bg-cover`, and `fill` makes it absolutely
+          positioned, so it sits behind the existing z-10 content without
+          affecting the flex layout.
+
+          Phones show their own image, so this is art direction: a <picture>
+          whose <source> swaps in the CMS image from `md` up. The browser picks
+          one candidate before it fetches, so each viewport downloads a single
+          image; two <Image>s toggled with CSS would download both. For the same
+          reason there is no `preload` (the next/image docs advise against it
+          when the LCP image differs by viewport): it has no media query and
+          would preload both, so `fetchPriority="high"` does the prioritizing.
+          With no CMS image the <img> is hidden from `md` up, which leaves the
+          desktop hero as bare as it was before. */}
+      <picture>
+        {desktopImage && (
+          <source
+            media={DESKTOP_MEDIA}
+            srcSet={desktopImage.srcSet}
+            sizes={desktopImage.sizes}
+          />
+        )}
+        <img
+          {...mobileImage}
           alt=""
           aria-hidden
-          fill
-          // The homepage LCP element, and a single candidate at every viewport
-          // (one source image, full-bleed) — which is exactly the case `preload`
-          // is documented for.
-          preload
-          sizes="100vw"
-          quality={75}
-          className="object-cover object-bottom"
+          className={clx(
+            "object-cover object-center",
+            desktopImage ? "md:object-bottom" : "md:hidden"
+          )}
         />
-      )}
+      </picture>
       {/*
         Background video. Rendered only on desktop (md+) via Tailwind's
         `hidden md:block` so mobile clients never download the file. On
-        desktop it sits on top of the <Image> poster and replaces it visually;
+        desktop it sits on top of the <picture> poster and replaces it visually;
         the poster is what the user sees during the brief moment between
         layout and the first painted frame. `preload="none"` defers the
         metadata fetch until the browser decides — autoplay still starts the

@@ -70,9 +70,9 @@ export default async function ContactPage() {
             {page?.content ? (
               <>
                 {/* The page shell owns the h1 on every CMS page here — the
-                    backend's contact/about/customer-service bodies all start
-                    at h2, so authored content never supplies one. `about` and
-                    `customer-service` render it from `page.title`; contact
+                    backend's contact/about bodies both start at h2, so
+                    authored content never supplies one. `about` and
+                    `customer-care` render it from `page.title`; contact
                     rendered it from <Hero>, which is commented out above, so
                     this branch would ship with no h1 at all. Kept outside the
                     `prose` wrapper, as those two pages do, so the `.prose h1`

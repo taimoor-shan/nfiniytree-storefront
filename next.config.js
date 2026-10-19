@@ -126,6 +126,24 @@ const nextConfig = {
     ]
   },
   async redirects() {
+    // The customer-service page was merged into customer-care. Old links — the
+    // sitemap listed it for every market, and it may sit in emails or on print
+    // — must not 404, so the market-prefixed and the bare form both 308 to the
+    // page that replaced it. The bare form lands on `/customer-care`, which the
+    // proxy then sends on into the visitor's market.
+    const retiredPages = [
+      {
+        source: "/:market/customer-service",
+        destination: "/:market/customer-care",
+        permanent: true, // 308
+      },
+      {
+        source: "/customer-service",
+        destination: "/customer-care",
+        permanent: true, // 308
+      },
+    ]
+
     // Domain canonicalization. `NEXT_PUBLIC_BASE_URL` is the canonical origin,
     // so the `www.` host must 308 to it — one permanent hop, no chain. Skipped
     // unless the canonical origin is an https host, so local development on
@@ -138,7 +156,7 @@ const nextConfig = {
     // block below sends HSTS so browsers upgrade on their own from the second
     // visit onward — but the edge must still issue the first 301.
     if (!isBaseUrlHttps || !baseUrl || baseUrl.startsWith("www.")) {
-      return []
+      return retiredPages
     }
 
     return [
@@ -148,6 +166,7 @@ const nextConfig = {
         destination: `https://${baseUrl}/:path*`,
         permanent: true, // 308
       },
+      ...retiredPages,
     ]
   },
   async headers() {

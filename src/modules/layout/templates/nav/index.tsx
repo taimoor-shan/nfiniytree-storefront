@@ -111,7 +111,7 @@ export default async function Nav() {
                 href="/customer-care"
                 data-testid="nav-faqs-link"
               >
-                {dict["nav.faqs"]}
+                {dict["account.customerService"]}
               </LocalizedClientLink>
 
               <LocalizedClientLink

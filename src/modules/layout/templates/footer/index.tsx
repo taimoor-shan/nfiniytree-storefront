@@ -181,6 +181,14 @@ export default async function Footer() {
                 <li>
                   <LocalizedClientLink
                     className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/policies/affiliate"
+                  >
+                    {dict["footer.affiliatePolicy"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
                     href="/policies/imprint"
                   >
                     {dict["footer.imprint"]}
@@ -189,7 +197,7 @@ export default async function Footer() {
                 <li>
                   <LocalizedClientLink
                     className="text-primary-text hover:underline underline-offset-4 text-base"
-                    href="/customer-service"
+                    href="/customer-care"
                   >
                     {dict["account.customerService"]}
                   </LocalizedClientLink>

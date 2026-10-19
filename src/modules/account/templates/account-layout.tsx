@@ -33,7 +33,7 @@ const AccountLayout: React.FC<AccountLayoutProps> = async ({
             </span>
           </div>
           <div>
-            <UnderlineLink href="/customer-service">
+            <UnderlineLink href="/customer-care">
               {await translate("account.customerService", locale)}
             </UnderlineLink>
           </div>

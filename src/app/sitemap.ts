@@ -32,21 +32,26 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/store", priority: 0.9, changeFrequency: "daily" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
-  { path: "/customer-service", priority: 0.6, changeFrequency: "monthly" },
   { path: "/customer-care", priority: 0.6, changeFrequency: "monthly" },
   { path: "/policies/privacy", priority: 0.3, changeFrequency: "yearly" },
   { path: "/policies/terms", priority: 0.3, changeFrequency: "yearly" },
   { path: "/policies/shipping", priority: 0.3, changeFrequency: "yearly" },
   { path: "/policies/returns", priority: 0.3, changeFrequency: "yearly" },
   { path: "/policies/imprint", priority: 0.3, changeFrequency: "yearly" },
+  { path: "/policies/affiliate", priority: 0.3, changeFrequency: "yearly" },
 ]
 
 /**
  * CMS slugs that are already rendered by a dedicated route. Their content is
- * reachable at `/about`, `/contact`, `/customer-service`, `/customer-care` and
- * `/policies/*`, so including them again under `/pages/<slug>` would put two
- * URLs for the same content in the sitemap. `home` backs the homepage hero and
- * has no standalone page at all.
+ * reachable at `/about`, `/contact`, `/customer-care` and `/policies/*`, so
+ * including them again under `/pages/<slug>` would put two URLs for the same
+ * content in the sitemap. `home` backs the homepage hero and has no standalone
+ * page at all.
+ *
+ * `customer-service` is the one slug listed without a route: that page was
+ * merged into `customer-care` and `/customer-service` now redirects (see
+ * next.config.js). Until its CMS record is deleted, the generic `/pages/<slug>`
+ * route can still serve it and the sitemap would list it, so it stays here.
  *
  * Keep this in sync with STATIC_PATHS above: any path added there that is also
  * a CMS slug must be listed here, or the same content ships under two URLs.
@@ -62,6 +67,7 @@ const CMS_SLUGS_WITH_OWN_ROUTE = new Set([
   "shipping-policy",
   "returns-and-refunds",
   "imprint",
+  "affiliate-policy",
 ])
 
 /**
