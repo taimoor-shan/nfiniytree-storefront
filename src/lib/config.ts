@@ -23,13 +23,17 @@ sdk.client.fetch = async <T>(
     ...(init?.headers as Record<string, string | null>),
   }
 
-  try {
-    const localeHeader = await getLocaleHeader()
-    if (localeHeader?.["x-medusa-locale"] && !("x-medusa-locale" in headers)) {
-      headers["x-medusa-locale"] = localeHeader["x-medusa-locale"]
+  // A caller that sets the header itself (`listLocales()`, which `getLocale()`
+  // calls) must not resolve the locale here: that would loop.
+  if (!("x-medusa-locale" in headers)) {
+    try {
+      const localeHeader = await getLocaleHeader()
+      if (localeHeader?.["x-medusa-locale"]) {
+        headers["x-medusa-locale"] = localeHeader["x-medusa-locale"]
+      }
+    } catch {
+      // Ignore locale resolution errors
     }
-  } catch {
-    // Ignore locale resolution errors
   }
 
   const nextInit: FetchArgs = {

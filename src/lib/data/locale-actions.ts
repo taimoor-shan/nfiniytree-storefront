@@ -3,27 +3,40 @@
 import { sdk } from "@lib/config"
 import { revalidateTag } from "next/cache"
 import { cookies as nextCookies, headers as nextHeaders } from "next/headers"
-import { LOCALE_HEADER } from "@lib/i18n/market"
+import { LOCALE_HEADER, matchLocale } from "@lib/i18n/market"
 import { getAuthHeaders, getCartId } from "./cookies"
 import { CACHE_TAGS } from "./cache"
+import { listLocales } from "./locales"
 
 const LOCALE_COOKIE_NAME = "_medusa_locale"
 
 /**
- * Gets the current locale: the language in the URL (`/en-hu` → `en`, `/hu` →
- * `hu-HU`, set by the proxy, see `src/lib/i18n/market.ts`), else the
- * visitor's cookie for requests outside a market URL.
+ * Gets the current locale: the language in the URL (`/en-hu` → `en`,
+ * `/de-hu` → `de-DE`, set by the proxy, see `src/lib/i18n/market.ts`), else
+ * the visitor's cookie for requests outside a market URL.
+ *
+ * German comes in two variants (`de-AT`, `de-DE`). When Medusa only offers
+ * the other one, that one is used, so products, categories and pages keep
+ * their German text instead of falling back to English.
  */
 export const getLocale = async (): Promise<string | null> => {
+  let locale: string | null
   try {
-    const urlLocale = (await nextHeaders()).get(LOCALE_HEADER)
-    if (urlLocale) return urlLocale
-
-    const cookies = await nextCookies()
-    return cookies.get(LOCALE_COOKIE_NAME)?.value ?? null
+    locale =
+      (await nextHeaders()).get(LOCALE_HEADER) ??
+      (await nextCookies()).get(LOCALE_COOKIE_NAME)?.value ??
+      null
   } catch {
     return null
   }
+
+  if (!locale || locale === "en") return locale
+
+  const available = await listLocales()
+  return matchLocale(
+    locale,
+    available?.map((l) => l.code)
+  )
 }
 
 /**
