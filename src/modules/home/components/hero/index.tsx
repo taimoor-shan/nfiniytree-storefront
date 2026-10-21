@@ -149,7 +149,7 @@ const Hero = ({ page }: HeroProps) => {
             appearance, one focus stop. */}
         <Button size="large" className="mt-2" asChild>
           <LocalizedClientLink href="/store">
-            {t("hero.shopCollection")}
+            {t("hero.exploreCollection")}
           </LocalizedClientLink>
         </Button>
       </div>
