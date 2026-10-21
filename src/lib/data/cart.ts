@@ -452,10 +452,14 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
       // service_unavailable: fail-open — allow checkout, no rejection
     }
 
+    // A signed-in customer already has an account: the form shows them no
+    // password field, so none is asked for and no second account is made.
+    const customer = await retrieveCustomer()
+
     // Dynamic account creation: business customers must create an account,
     // private customers can opt in via "Create customer account".
     const createAccount = formData.get("create_customer_account") === "on"
-    const wantsAccount = isBusiness || createAccount
+    const wantsAccount = !customer && (isBusiness || createAccount)
     const password = String(formData.get("password") ?? "")
     const passwordRepeat = String(formData.get("password_repeat") ?? "")
 
@@ -507,7 +511,6 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     }
 
     // Keep the signed-in customer's record in sync with the checkout form.
-    const customer = await retrieveCustomer()
     if (customer) {
       const existingMetadata = (customer.metadata || {}) as Record<
         string,
@@ -567,7 +570,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
 
     // Create the account after the cart addresses are set — the guest cart
     // is transferred to the new customer inside createCustomerAccount.
-    if (!customer && wantsAccount) {
+    if (wantsAccount) {
       await createCustomerAccount({
         email: String(formData.get("email") ?? ""),
         password,
