@@ -9,6 +9,20 @@ import { getLocale } from "./locale-actions"
  */
 const KNOWN_ERROR_KEYS: Record<string, string> = {
   "invalid email or password": "account.invalidCredentials",
+  // Registering an email that already has an account.  Medusa answers 401, as
+  // it does for every registration failure, and the SDK's error carries no
+  // type or code, so this sentence is all that tells it from the others.
+  "identity with email already exists": "account.emailAlreadyRegistered",
+}
+
+/**
+ * The translation key of an error whose message is a known one, if it is.
+ */
+export const knownErrorKey = (error: any): string | undefined => {
+  const raw = String(error?.message ?? error ?? "").toLowerCase()
+  return Object.entries(KNOWN_ERROR_KEYS).find(([known]) =>
+    raw.includes(known)
+  )?.[1]
 }
 
 /**
@@ -18,9 +32,5 @@ const KNOWN_ERROR_KEYS: Record<string, string> = {
  */
 export const localizeError = async (error: any): Promise<string> => {
   const locale = await getLocale()
-  const raw = String(error?.message ?? error ?? "").toLowerCase()
-  const entry = Object.entries(KNOWN_ERROR_KEYS).find(([known]) =>
-    raw.includes(known)
-  )
-  return translate(entry?.[1] || "account.errorOccurred", locale)
+  return translate(knownErrorKey(error) || "account.errorOccurred", locale)
 }

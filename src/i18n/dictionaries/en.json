@@ -294,6 +294,7 @@
   "account.orderIdRequired": "Order ID is required",
   "account.addressIdRequired": "Address ID is required",
   "account.invalidCredentials": "Invalid email or password",
+  "account.emailAlreadyRegistered": "You already have an account with this email. Please log in to continue.",
   "addresses.newAddress": "New address",
   "addresses.addAddress": "Add address",
   "addresses.editAddress": "Edit address",

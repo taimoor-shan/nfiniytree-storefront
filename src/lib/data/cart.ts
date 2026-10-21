@@ -27,6 +27,7 @@ import {
   retrieveCustomer,
   updateCustomer,
 } from "./customer"
+import { knownErrorKey } from "./localize-error"
 
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
@@ -581,6 +582,13 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         phone: String(formData.get("shipping_address.phone") ?? ""),
         company_name: company || undefined,
         metadata: customerMetadata,
+      }).catch(async (error) => {
+        // A visitor who is signed out but whose email already has an account
+        // is shown the password fields (the form cannot know) and Medusa
+        // refuses the registration, creating nothing: say so in their
+        // language instead of in Medusa's English.
+        const key = knownErrorKey(error)
+        throw key ? new Error(await translate(key, locale)) : error
       })
 
       // Complete the freshly created profile: persist the checkout addresses

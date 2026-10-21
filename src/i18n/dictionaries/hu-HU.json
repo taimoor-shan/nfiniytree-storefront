@@ -294,6 +294,7 @@
   "account.orderIdRequired": "Rendelés-azonosító megadása kötelező",
   "account.addressIdRequired": "Cím-azonosító megadása kötelező",
   "account.invalidCredentials": "Érvénytelen e-mail-cím vagy jelszó",
+  "account.emailAlreadyRegistered": "Ehhez az e-mail-címhez már tartozik fiók. A folytatáshoz kérjük, jelentkezzen be.",
   "addresses.newAddress": "Új cím",
   "addresses.addAddress": "Cím hozzáadása",
   "addresses.editAddress": "Cím szerkesztése",

@@ -294,6 +294,7 @@
   "account.orderIdRequired": "Bestell-ID ist erforderlich",
   "account.addressIdRequired": "Adress-ID ist erforderlich",
   "account.invalidCredentials": "Ungültige E-Mail-Adresse oder ungültiges Passwort",
+  "account.emailAlreadyRegistered": "Zu dieser E-Mail-Adresse gibt es bereits ein Konto. Bitte melden Sie sich an, um fortzufahren.",
   "addresses.newAddress": "Neue Adresse",
   "addresses.addAddress": "Adresse hinzufügen",
   "addresses.editAddress": "Adresse bearbeiten",
