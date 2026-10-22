@@ -30,7 +30,7 @@ const OrderSummary = ({ order }: OrderSummaryProps) => {
     <div>
       <h2 className="text-base-semi">{t("order.summary")}</h2>
       <div className="text-small-regular text-ink my-2">
-        <div className="flex items-center justify-between text-base-regular text-ink mb-2">
+        <div className="flex flex-wrap items-center justify-between text-base-regular text-ink mb-2">
           <span>{t("cart.subtotal")}</span>
           <span>{getAmount((order as any).item_subtotal ?? order.subtotal)}</span>
         </div>

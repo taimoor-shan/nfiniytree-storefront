@@ -48,8 +48,8 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
       </Heading>
       <div>
         {payment && (
-          <div className="flex items-start gap-x-1 w-full">
-            <div className="flex flex-col w-1/3">
+          <div className="flex items-start gap-2 w-full">
+            <div className="flex flex-col">
               {/* <Text className="txt-medium-plus text-ink mb-1">
                 {t("checkout.payment")}
               </Text> */}

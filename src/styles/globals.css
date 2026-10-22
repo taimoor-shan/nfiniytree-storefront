@@ -360,7 +360,7 @@
   }
 
   .text-large-semi {
-    @apply text-base leading-6 font-semibold;
+    @apply text-2xl font-semibold;
   }
 
   .text-xl-regular {

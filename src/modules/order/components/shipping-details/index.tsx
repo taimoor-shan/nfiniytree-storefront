@@ -23,7 +23,7 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
       </Heading>
       <div className="flex items-start gap-x-8">
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col"
           data-testid="shipping-address-summary"
         >
           <Text className="txt-medium-plus text-ink mb-1">
@@ -71,7 +71,7 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3 "
+          className="flex flex-col"
           data-testid="shipping-contact-summary"
         >
           <Text className="txt-medium-plus text-ink mb-1">{t("order.contact")}</Text>
@@ -84,7 +84,7 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
         </div>
 
         <div
-          className="flex flex-col w-1/3"
+          className="flex flex-col"
           data-testid="shipping-method-summary"
         >
           <Text className="txt-medium-plus text-ink mb-1">{t("order.method")}</Text>

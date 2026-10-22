@@ -174,7 +174,7 @@ const Payment = ({
           )}
 
           {paidByGiftcard && (
-            <div className="flex flex-col w-1/3">
+            <div className="flex flex-col">
               <Text className="txt-medium-plus text-ink mb-1">
                 {t("checkout.payment")}
               </Text>
@@ -211,8 +211,8 @@ const Payment = ({
 
         <div className={isOpen ? "hidden" : "block"}>
           {cart && paymentReady && activeSession ? (
-            <div className="flex items-start gap-x-1 w-full">
-              <div className="flex flex-col w-1/3">
+            <div className="flex items-start gap-2 w-full">
+              <div className="flex flex-col">
                 <Text className="txt-medium-plus text-ink mb-1">
                   {t("checkout.payment")}
                 </Text>
@@ -249,7 +249,7 @@ const Payment = ({
               </div> */}
             </div>
           ) : paidByGiftcard ? (
-            <div className="flex flex-col w-1/3">
+            <div className="flex flex-col">
               <Text className="txt-medium-plus text-ink mb-1">
                 {t("checkout.payment")}
               </Text>

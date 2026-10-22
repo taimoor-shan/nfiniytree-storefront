@@ -22,7 +22,7 @@ export default function NewsletterForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col w-full mt-4 relative">
-      <div className="flex max-w-[400px]">
+      <div className="flex max-w-[320px]">
         <input
           type="email"
           name="email"
@@ -33,7 +33,7 @@ export default function NewsletterForm() {
           // The placeholder was the only visible cue and is not an accessible
           // name — it disappears on input and is not exposed reliably.
           aria-label={t("account.email")}
-          className="flex-grow border border-hairline px-4 rounded-l-sm bg-canvas text-base focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary text-ink"
+          className="flex-grow border border-primary px-4 rounded-l-sm bg-canvas text-base focus:outline-none focus:border-primary focus-visible:ring-1 focus-visible:ring-primary text-ink"
           required
           aria-required="true"
           disabled={status === "loading" || status === "success"}
