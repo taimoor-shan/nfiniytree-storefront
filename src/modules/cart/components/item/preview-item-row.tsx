@@ -15,7 +15,9 @@ type PreviewItemRowProps = {
 
 /**
  * Compact, stateless row for the checkout summary's narrow (360px) table.
- * Native table only — no quantity controls, no breakpoint switching.
+ * Native table only — no quantity controls, no breakpoint switching in the row
+ * itself: below `xsmall` (512px) the summary shows the order module's
+ * `MobileItemCard` instead (see ItemsPreviewTemplate).
  */
 const PreviewItemRow = ({
   item,
@@ -43,9 +45,12 @@ const PreviewItemRow = ({
         </LocalizedClientLink>
       </Table.Cell>
 
+      {/* `anywhere`, not `break-words`: only it lets this column shrink below the
+          name's longest word, which a table column otherwise never does — a long
+          German compound pushed the prices off a phone's screen. */}
       <Table.Cell className="text-left">
         <Text
-          className="txt-medium-plus text-ink break-words"
+          className="txt-medium-plus text-ink [overflow-wrap:anywhere]"
           data-testid="product-title"
         >
           {item.product_title}

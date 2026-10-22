@@ -6,6 +6,8 @@ import LineItemPrice from "@modules/common/components/line-item-price"
 import LineItemUnitPrice from "@modules/common/components/line-item-unit-price"
 import Thumbnail from "@modules/products/components/thumbnail"
 
+export { default as MobileItemCard } from "./mobile-item-card"
+
 type ItemProps = {
   item: HttpTypes.StoreCartLineItem | HttpTypes.StoreOrderLineItem
   currencyCode: string
@@ -13,6 +15,11 @@ type ItemProps = {
   countryCode?: string
 }
 
+/**
+ * An order line from `xsmall` (512px) up: a native table row. Below that
+ * `MobileItemCard` renders instead — three cells, two of them fixed-width, don't
+ * fit a phone.
+ */
 const Item = ({ item, currencyCode, countryCode }: ItemProps) => {
   return (
     <Table.Row className="w-full" data-testid="product-row">
@@ -27,9 +34,11 @@ const Item = ({ item, currencyCode, countryCode }: ItemProps) => {
         </div>
       </Table.Cell>
 
+      {/* `anywhere`, not `break-words`: only it lets this column shrink below the
+          name's longest word, which a table column otherwise never does. */}
       <Table.Cell className="text-left">
         <Text
-          className="txt-medium-plus text-ink"
+          className="txt-medium-plus text-ink [overflow-wrap:anywhere]"
           data-testid="product-name"
         >
           {item.product_title}
