@@ -139,6 +139,14 @@ export default async function Footer() {
                 <li>
                   <LocalizedClientLink
                     className="text-primary-text hover:underline underline-offset-4 text-base"
+                    href="/blog"
+                  >
+                    {dict["nav.blog"]}
+                  </LocalizedClientLink>
+                </li>
+                <li>
+                  <LocalizedClientLink
+                    className="text-primary-text hover:underline underline-offset-4 text-base"
                     href="/about"
                   >
                     {dict["nav.about"]}

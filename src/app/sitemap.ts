@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next"
 
+import { listBlogSitemap } from "@lib/data/blog"
 import { listCategories } from "@lib/data/categories"
 import { listCollections } from "@lib/data/collections"
 import { listPages } from "@lib/data/pages"
@@ -30,6 +31,7 @@ import { DEFAULT_COUNTRY_CODE, buildUrl, getHreflangs } from "@lib/util/seo"
 const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "", priority: 1.0, changeFrequency: "daily" },
   { path: "/store", priority: 0.9, changeFrequency: "daily" },
+  { path: "/blog", priority: 0.7, changeFrequency: "weekly" },
   { path: "/about", priority: 0.6, changeFrequency: "monthly" },
   { path: "/contact", priority: 0.6, changeFrequency: "monthly" },
   { path: "/customer-care", priority: 0.6, changeFrequency: "monthly" },
@@ -44,14 +46,17 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
 /**
  * CMS slugs that are already rendered by a dedicated route. Their content is
  * reachable at `/about`, `/contact`, `/customer-care` and `/policies/*`, so
- * including them again under `/pages/<slug>` would put two URLs for the same
- * content in the sitemap. `home` backs the homepage hero and has no standalone
- * page at all.
+ * including them again at `/<slug>` would put two URLs for the same content in
+ * the sitemap. `home` backs the homepage hero and has no standalone page at
+ * all.
+ *
+ * Every other published CMS page is listed automatically at `/<slug>`, which is
+ * where the catch-all route serves it, so a new page needs no entry here.
  *
  * `customer-service` is the one slug listed without a route: that page was
  * merged into `customer-care` and `/customer-service` now redirects (see
- * next.config.js). Until its CMS record is deleted, the generic `/pages/<slug>`
- * route can still serve it and the sitemap would list it, so it stays here.
+ * next.config.js). Until its CMS record is deleted, the catch-all route can
+ * still serve it and the sitemap would list it, so it stays here.
  *
  * Keep this in sync with STATIC_PATHS above: any path added there that is also
  * a CMS slug must be listed here, or the same content ships under two URLs.
@@ -199,6 +204,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     [] as Awaited<ReturnType<typeof listPages>>["pages"]
   )
 
+  // --- Blog ----------------------------------------------------------------
+  // Handles only: a post is one URL per market whatever languages it exists in.
+  const blog = await safe(
+    "blog",
+    () => listBlogSitemap(),
+    { posts: [], categories: [] } as Awaited<ReturnType<typeof listBlogSitemap>>
+  )
+
   const routes: MetadataRoute.Sitemap = []
 
   const markets = countryCodes.flatMap((code) =>
@@ -258,9 +271,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       seenSlugs.add(page.slug)
 
       routes.push(
-        entry(`/pages/${page.slug}`, market, {
+        entry(`/${page.slug}`, market, {
           priority: 0.5,
           changeFrequency: "monthly",
+        })
+      )
+    }
+
+    for (const post of blog.posts) {
+      routes.push(
+        entry(`/blog/${post.handle}`, market, {
+          priority: 0.6,
+          changeFrequency: "monthly",
+          lastModified: post.updated_at ?? undefined,
+        })
+      )
+    }
+
+    for (const category of blog.categories) {
+      routes.push(
+        entry(`/blog/category/${category.handle}`, market, {
+          priority: 0.4,
+          changeFrequency: "weekly",
         })
       )
     }

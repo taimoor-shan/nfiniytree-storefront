@@ -1,33 +1,19 @@
 "use server"
 
 import { sdk } from "@lib/config"
+import type { CmsPage } from "@/types/cms"
 import { getCacheOptions, CACHE_TAGS } from "./cache"
 
-type Page = {
-  id: string
-  title: string
-  slug: string
-  locale?: string
-  content?: string | null
-  excerpt?: string | null
-  featured_image?: string | null
-  hero_video_url?: string | null
-  seo_title?: string | null
-  seo_description?: string | null
-  status: "draft" | "published"
-  is_public: boolean
-  metadata?: Record<string, unknown> | null
-}
-
 type PagesResponse = {
-  pages: Page[]
+  pages: CmsPage[]
   count: number
   limit: number
   offset: number
 }
 
 type PageResponse = {
-  page: Page
+  /** Null when there is no such page: the backend answers 200, not 404. */
+  page: CmsPage | null
 }
 
 export const listPages = async ({
@@ -57,7 +43,9 @@ export const retrievePageBySlug = async (slug: string, locale?: string | null) =
   const next = getCacheOptions(CACHE_TAGS.pages)
 
   return sdk.client
-    .fetch<PageResponse>(`/store/pages/${slug}`, {
+    // Encoded because a slug may contain slashes (`guides/plant-care`), which
+    // the backend takes as one path segment.
+    .fetch<PageResponse>(`/store/pages/${encodeURIComponent(slug)}`, {
       method: "GET",
       query: locale ? { locale } : undefined,
       next,
