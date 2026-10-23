@@ -18,6 +18,7 @@
 export const CACHE_TAGS = {
   locales: "locales",
   pages: "pages",
+  blog: "blog",
   products: "products",
   categories: "categories",
   collections: "collections",

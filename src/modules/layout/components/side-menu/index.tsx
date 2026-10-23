@@ -35,6 +35,7 @@ const SideMenu = ({
     () => ({
       [t("nav.home")]: "/",
       [t("nav.store")]: "/store",
+      [t("nav.blog")]: "/blog",
       [t("nav.account")]: "/account",
       [t("nav.cart")]: "/cart",
     }),
