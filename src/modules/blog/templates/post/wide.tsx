@@ -17,7 +17,7 @@ import type { PostTemplateProps } from "./types"
  * back to the standard layout.
  */
 export default function WidePost(props: PostTemplateProps) {
-  const { post, dict, locale, related } = props
+  const { post, dict, locale, market, related } = props
 
   if (!post.featured_image) {
     return <StandardPost {...props} />
@@ -56,7 +56,7 @@ export default function WidePost(props: PostTemplateProps) {
       <div className="content-container py-10 lg:py-16">
         <div className="mx-auto max-w-3xl">
           <Breadcrumbs post={post} dict={dict} />
-          <PostBody post={post} />
+          <PostBody post={post} market={market} />
           <ShopCta dict={dict} />
           <BackToBlog dict={dict} />
         </div>

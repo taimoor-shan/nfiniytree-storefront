@@ -91,6 +91,7 @@ export default async function BlogPostPage(props: Props) {
         post={post}
         dict={dict}
         locale={locale}
+        market={market}
         related={related}
       />
     </>

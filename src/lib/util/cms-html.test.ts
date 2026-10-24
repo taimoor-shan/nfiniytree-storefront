@@ -3,7 +3,7 @@
  */
 import assert from "node:assert/strict"
 
-import { normalizeBodyHeadings } from "./cms-html"
+import { localizeBodyLinks, normalizeBodyHeadings } from "./cms-html"
 
 // A leading h1 that repeats the title is dropped
 assert.equal(
@@ -41,4 +41,29 @@ assert.equal(
   "<h12>odd</h12>"
 )
 
+// Root-relative links get the page's market prefix
+assert.equal(
+  localizeBodyLinks(
+    '<p><a href="/products/cherry-blossom-tree">tree</a> and <a class="x" href=\'/store?sort=new#top\'>shop</a></p>',
+    "de-at"
+  ),
+  '<p><a href="/de-at/products/cherry-blossom-tree">tree</a> and <a class="x" href=\'/de-at/store?sort=new#top\'>shop</a></p>'
+)
+// The home page is the market itself
+assert.equal(
+  localizeBodyLinks('<a href="/">Home</a>', "en-hu"),
+  '<a href="/en-hu">Home</a>'
+)
+// Already in a market, other sites, files, team cards and anchors stay
+const untouched = [
+  '<a href="/en-hu/store">a</a>',
+  '<a href="/hu/store">a</a>',
+  '<a href="https://example.com/store">a</a>',
+  '<a href="//cdn.example.com/x">a</a>',
+  '<a href="/static/guide.pdf">a</a>',
+  '<a href="/team/martin-wolf">a</a>',
+  '<a href="#faq">a</a>',
+  '<img src="/static/a.jpg">',
+].join("")
+assert.equal(localizeBodyLinks(untouched, "de-de"), untouched)
 console.log("cms-html.test.ts: ok")

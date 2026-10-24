@@ -3,7 +3,7 @@ import { clx } from "@medusajs/ui"
 import type { BlogPost } from "@/types/blog"
 import type { Dictionary } from "@lib/i18n"
 import { fillTemplate, formatPostDate } from "@lib/util/blog"
-import { normalizeBodyHeadings } from "@lib/util/cms-html"
+import { localizeBodyLinks, normalizeBodyHeadings } from "@lib/util/cms-html"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 
 import PostCard from "../post-card"
@@ -120,8 +120,11 @@ export function PostMeta({
   )
 }
 
-/** The article text from the rich-text editor. */
-export function PostBody({ post }: { post: BlogPost }) {
+/**
+ * The article text from the rich-text editor. Its shop links are given the
+ * page's market prefix (`market`, e.g. `de-at`).
+ */
+export function PostBody({ post, market }: { post: BlogPost; market: string }) {
   if (!post.content) {
     return null
   }
@@ -131,7 +134,10 @@ export function PostBody({ post }: { post: BlogPost }) {
       className="prose max-w-none text-lg leading-relaxed [&_a]:text-primary-text [&_h2]:font-display [&_h3]:font-display"
       data-testid="blog-post-content"
       dangerouslySetInnerHTML={{
-        __html: normalizeBodyHeadings(post.content, post.title),
+        __html: localizeBodyLinks(
+          normalizeBodyHeadings(post.content, post.title),
+          market
+        ),
       }}
     />
   )

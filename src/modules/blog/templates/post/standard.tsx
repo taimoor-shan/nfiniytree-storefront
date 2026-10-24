@@ -15,6 +15,7 @@ export default function StandardPost({
   post,
   dict,
   locale,
+  market,
   related,
 }: PostTemplateProps) {
   return (
@@ -47,7 +48,7 @@ export default function StandardPost({
               />
             </div>
           )}
-          <PostBody post={post} />
+          <PostBody post={post} market={market} />
           <ShopCta dict={dict} />
           <BackToBlog dict={dict} />
         </div>
