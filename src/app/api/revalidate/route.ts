@@ -44,8 +44,11 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   for (const tag of tags) {
     if (VALID_TAGS.has(tag)) {
-      // "max" profile = immediate expiration (Next.js 15.3+ requires 2nd arg)
-      revalidateTag(tag, "max")
+      // Expire at once: the next visit fetches fresh content and waits for it.
+      // The "max" profile would serve the old copy to that first visit while it
+      // refreshes in the background, so an editor who opens the page straight
+      // after saving (the admin's "View page" button) would see the old text.
+      revalidateTag(tag, { expire: 0 })
       revalidated.push(tag)
     } else {
       skipped.push(tag)
