@@ -396,7 +396,7 @@
   }
 
   .prose h1 {
-    @apply text-2xl leading-tight mb-4 sm:text-3xl md:text-5xl;
+    @apply text-2xl mb-4 sm:text-3xl md:text-5xl;
   }
 
   .prose h2 {
