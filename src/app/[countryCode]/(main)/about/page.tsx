@@ -94,7 +94,7 @@ export default async function AboutPage(props: AboutPageProps) {
                 {/* <p className="text-primary-text text-xs uppercase tracking-[0.2em] font-medium mb-4">
                   {dict["about.handmadeCollection"]}
                 </p> */}
-                <h1 className="font-display text-3xl lg:text-5xl text-on-dark leading-tight mb-4">
+                <h1 className="font-display text-3xl lg:text-[2.75rem] text-on-dark leading-tight mb-4">
                   {page.title}
                 </h1>
                 {page.excerpt && (
@@ -113,7 +113,7 @@ export default async function AboutPage(props: AboutPageProps) {
             <p className="text-primary-text text-xs uppercase tracking-[0.2em] font-medium mb-4">
               {dict["about.handmadeCollection"]}
             </p>
-            <h1 className="font-display text-3xl lg:text-5xl text-ink leading-tight mb-4">
+            <h1 className="font-display text-3xl lg:text-[2.75rem] text-ink leading-tight mb-4">
               {page.title}
             </h1>
             {page.excerpt && (

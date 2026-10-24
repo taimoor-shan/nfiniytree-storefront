@@ -38,7 +38,7 @@ export default function WidePost(props: PostTemplateProps) {
             <div className="flex max-w-3xl flex-col gap-y-4">
               <CategoryChips post={post} />
               <h1
-                className="font-display text-3xl leading-tight text-on-dark lg:text-5xl"
+                className="font-display text-3xl leading-tight text-on-dark lg:text-[2.75rem]"
                 data-testid="blog-post-title"
               >
                 {post.title}

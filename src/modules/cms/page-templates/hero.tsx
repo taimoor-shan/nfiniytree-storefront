@@ -22,7 +22,7 @@ export default function HeroPage({ page }: PageTemplateProps) {
           <div className="absolute inset-0 flex flex-col justify-end pb-16">
             <div className="content-container">
               <div className="max-w-3xl">
-                <h1 className="mb-4 font-display text-3xl leading-tight text-on-dark lg:text-5xl">
+                <h1 className="mb-4 font-display text-3xl leading-tight text-on-dark lg:text-[2.75rem]">
                   {page.title}
                 </h1>
                 {page.excerpt && (
@@ -37,7 +37,7 @@ export default function HeroPage({ page }: PageTemplateProps) {
       ) : (
         <section className="pb-8 pt-20 lg:pb-12 lg:pt-28">
           <div className="content-container text-center">
-            <h1 className="mb-4 font-display text-3xl leading-tight text-ink lg:text-5xl">
+            <h1 className="mb-4 font-display text-3xl leading-tight text-ink lg:text-[2.75rem]">
               {page.title}
             </h1>
             {page.excerpt && (

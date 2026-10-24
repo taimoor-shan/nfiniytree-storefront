@@ -45,7 +45,7 @@ export default async function BlogListTemplate({
     >
       <header className="mb-8 max-w-3xl">
         <h1
-          className="mb-4 font-display text-3xl leading-tight text-ink lg:text-5xl"
+          className="mb-4 font-display text-3xl leading-tight text-ink lg:text-[2.75rem]"
           data-testid="blog-page-title"
         >
           {category ? category.name : dict["blog.title"]}

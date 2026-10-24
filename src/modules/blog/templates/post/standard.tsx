@@ -26,7 +26,7 @@ export default function StandardPost({
           <header className="mb-8 flex flex-col gap-y-4">
             <CategoryChips post={post} />
             <h1
-              className="font-display text-3xl leading-tight text-ink lg:text-5xl"
+              className="font-display text-3xl leading-tight text-ink lg:text-[2.75rem]"
               data-testid="blog-post-title"
             >
               {post.title}

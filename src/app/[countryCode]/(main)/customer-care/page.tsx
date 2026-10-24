@@ -108,7 +108,7 @@ export default async function CustomerCarePage() {
           <div className="absolute inset-0 flex flex-col justify-end pb-16">
             <div className="content-container">
               <div className="max-w-3xl">
-                <h1 className="font-display text-3xl lg:text-5xl text-on-dark leading-tight mb-4">
+                <h1 className="font-display text-3xl lg:text-[2.75rem] text-on-dark leading-tight mb-4">
                   {page.title}
                 </h1>
                 {page.excerpt && (
@@ -124,7 +124,7 @@ export default async function CustomerCarePage() {
         /* Fallback when no featured image */
         <section className="pt-20 pb-8 lg:pt-28 lg:pb-12">
           <div className="content-container text-center">
-            <h1 className="font-display text-3xl lg:text-5xl text-ink leading-tight mb-4">
+            <h1 className="font-display text-3xl lg:text-[2.75rem] text-ink leading-tight mb-4">
               {page.title}
             </h1>
             {page.excerpt && (

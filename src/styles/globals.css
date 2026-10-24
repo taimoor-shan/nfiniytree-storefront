@@ -398,6 +398,9 @@
   .prose h1 {
     @apply text-2xl mb-4 sm:text-3xl md:text-5xl;
   }
+  h1{
+    line-height: 1.2 !important;
+  }
 
   .prose h2 {
     @apply mt-8 mb-6 text-3xl;
