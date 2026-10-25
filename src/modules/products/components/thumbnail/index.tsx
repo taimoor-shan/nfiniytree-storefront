@@ -105,7 +105,9 @@ const ImageOrPlaceholder = ({
       // Only fall back when `alt` was not passed at all; an explicit "" is
       // respected as-is rather than replaced with the generic label.
       alt={alt ?? t("product.productImage")}
-      className="absolute inset-0 object-cover object-center"
+      // Zooms with the card: the nearest `group` ancestor is the card's link,
+      // and the Container's overflow-hidden clips the growth to its frame.
+      className="absolute inset-0 object-cover object-center transition-transform duration-300 motion-safe:group-hover:scale-[1.03]"
       draggable={false}
       sizes={sizes ?? DEFAULT_SIZES[size]}
       loading={eager ? "eager" : undefined}
