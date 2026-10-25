@@ -507,7 +507,7 @@
   "cookie.category.necessary.title": "Szükséges",
   "cookie.category.necessary.description": "A weboldal megfelelő működéséhez elengedhetetlen sütik. Ezek nem kapcsolhatók ki.",
   "cookie.category.analytics.title": "Analitika",
-  "cookie.category.analytics.description": "Sütik, amelyek segítenek megérteni, hogyan használják a látogatók weboldalunkat.",
+  "cookie.category.analytics.description": "A Google Analytics sütijei, amelyek segítenek megérteni, hogyan használják a látogatók weboldalunkat.",
   "cookie.category.marketing.title": "Marketing",
   "cookie.category.marketing.description": "Reklámozáshoz és más weboldalakon történő nyomon követéshez használt sütik.",
   "cookie.category.preferences.title": "Beállítások",

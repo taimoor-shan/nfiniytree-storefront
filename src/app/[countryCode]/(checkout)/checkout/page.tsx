@@ -1,7 +1,9 @@
+import { beginCheckoutParams } from "@lib/analytics/ga4"
 import { retrieveCart } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listRegions } from "@lib/data/regions"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
+import GaEvent from "@modules/common/components/ga-event"
 import CheckoutForm from "@modules/checkout/templates/checkout-form"
 import CheckoutSummary from "@modules/checkout/templates/checkout-summary"
 import { Metadata } from "next"
@@ -29,6 +31,12 @@ export default async function Checkout() {
         <CheckoutForm cart={cart} customer={customer} regions={regions ?? []} />
       </PaymentWrapper>
       <CheckoutSummary cart={cart} />
+      {/* Once per cart and session: the steps and a payment redirect reload this page. */}
+      <GaEvent
+        name="begin_checkout"
+        params={beginCheckoutParams(cart)}
+        once={{ key: `begin_checkout:${cart.id}`, per: "session" }}
+      />
     </div>
   )
 }

@@ -36,6 +36,18 @@ import {
 const CookieConsentContext =
   React.createContext<CookieConsentContextValue | null>(null)
 
+/**
+ * Consent Mode defaults. A module constant: `GoogleConsentMode` pushes
+ * `consent default` whenever this prop changes, so an inline object sent it
+ * again on every render of the provider.
+ */
+const GOOGLE_CONSENT_DEFAULTS = {
+  analytics_storage: "denied",
+  ad_storage: "denied",
+  ad_user_data: "denied",
+  ad_personalization: "denied",
+} as const
+
 export const defaultCategories: CategoryConfig[] = [
   {
     key: "necessary",
@@ -383,12 +395,7 @@ export function CookieConsentProvider({
       {/* Automatically render GoogleConsentMode when Google scripts are detected */}
       {hasGoogleScripts && effectiveGoogleConsentMode?.enabled && (
         <GoogleConsentMode
-          defaults={{
-            analytics_storage: "denied",
-            ad_storage: "denied",
-            ad_user_data: "denied",
-            ad_personalization: "denied",
-          }}
+          defaults={GOOGLE_CONSENT_DEFAULTS}
           regions={effectiveGoogleConsentMode?.regions}
         />
       )}

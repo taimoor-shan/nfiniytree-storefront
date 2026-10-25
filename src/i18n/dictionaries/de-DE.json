@@ -507,7 +507,7 @@
   "cookie.category.necessary.title": "Notwendige",
   "cookie.category.necessary.description": "Unverzichtbare Cookies, die für das ordnungsgemäße Funktionieren der Website erforderlich sind. Diese können nicht deaktiviert werden.",
   "cookie.category.analytics.title": "Analyse",
-  "cookie.category.analytics.description": "Cookies, die uns helfen zu verstehen, wie Besucher mit unserer Website interagieren.",
+  "cookie.category.analytics.description": "Cookies von Google Analytics, die uns helfen zu verstehen, wie Besucher unsere Website nutzen.",
   "cookie.category.marketing.title": "Marketing",
   "cookie.category.marketing.description": "Cookies für Werbung und Tracking über Websites hinweg.",
   "cookie.category.preferences.title": "Präferenzen",

@@ -3,12 +3,7 @@
 import * as React from "react"
 import { useCookieConsent } from "./cookie-provider"
 import type { ConsentCategory, ScriptConfig } from "./types"
-import {
-  loadScript,
-  registerCleanup,
-  registerScript,
-  unregisterScript,
-} from "./script-manager"
+import { loadScript, registerCleanup, unregisterScript } from "./script-manager"
 
 export interface ConsentScriptProps {
   /** Unique identifier for the script */
@@ -93,7 +88,9 @@ export function ConsentScript({
       },
     }
 
-    registerScript(config)
+    // The provider registers it with the script manager and notices Google
+    // scripts. Registering here as well made the manager warn "already
+    // registered" for every script on every page load.
     ctxRegister(config)
 
     return () => {

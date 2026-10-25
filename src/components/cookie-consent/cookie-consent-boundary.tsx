@@ -110,7 +110,7 @@ export function CookieConsentBoundary({
         title: t("cookie.category.analytics.title", "Analytics"),
         description: t(
           "cookie.category.analytics.description",
-          "Cookies that help us understand how visitors interact with our website."
+          "Google Analytics cookies that help us understand how visitors use our website."
         ),
       },
       {
@@ -135,7 +135,9 @@ export function CookieConsentBoundary({
 
   const config = useMemo<CookieConsentConfig>(
     () => ({
-      consentVersion: "1.0.0",
+      // 1.1.0: Google Analytics joined the analytics category. Answers given
+      // before did not cover it, so every visitor is asked again.
+      consentVersion: "1.1.0",
       expirationDays: 365,
       // Bottom-right floating dark card — `cookie-consent-card` in DESIGN.md.
       position: "bottom-right",

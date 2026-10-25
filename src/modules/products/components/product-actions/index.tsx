@@ -1,7 +1,9 @@
 "use client"
 
+import { productParams, trackEvent } from "@lib/analytics/ga4"
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
+import { getProductPrice } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
@@ -199,6 +201,21 @@ export default function ProductActions({
 
   const quantityExceedsStock = quantity > maxQuantity
 
+  // GA4 `view_item`, once per product page, at the lowest price shown.
+  useEffect(() => {
+    const { cheapestPrice } = getProductPrice({ product, countryCode })
+    trackEvent(
+      "view_item",
+      productParams(product, {
+        amount: cheapestPrice?.calculated_price_number,
+        currency_code: cheapestPrice?.currency_code,
+      })
+    )
+    // A server refresh (after an add to cart) hands in a new `product` object
+    // for the same product; that is not a new view.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.id])
+
   const actionsRef = useRef<HTMLDivElement>(null)
 
   const inView = useIntersection(actionsRef, "0px")
@@ -222,6 +239,18 @@ export default function ProductActions({
         quantity,
         countryCode,
       })
+      trackEvent(
+        "add_to_cart",
+        productParams(
+          product,
+          {
+            amount: selectedVariant.calculated_price?.calculated_amount,
+            currency_code: selectedVariant.calculated_price?.currency_code,
+          },
+          selectedVariant,
+          quantity
+        )
+      )
       setQuantity(1)
       setAddedMessage(
         t("a11y.addedToCart").replace("{product}", product.title)

@@ -120,8 +120,12 @@ export function GoogleConsentMode({
     window.dataLayer = window.dataLayer || []
     window.gtag =
       window.gtag ||
-      function (...args: unknown[]): void {
-        ;(window.dataLayer as unknown[]).push(args)
+      function gtag(): void {
+        // `arguments`, as in Google's own snippet: gtag.js reads only
+        // Arguments objects from the data layer and ignores arrays, so a
+        // rest-parameter stub silently lost these consent commands.
+        // eslint-disable-next-line prefer-rest-params
+        ;(window.dataLayer as unknown[]).push(arguments)
       }
 
     window.gtag("consent", "default", {

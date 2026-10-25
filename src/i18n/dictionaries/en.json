@@ -507,7 +507,7 @@
   "cookie.category.necessary.title": "Necessary",
   "cookie.category.necessary.description": "Essential cookies required for the website to function properly. These cannot be disabled.",
   "cookie.category.analytics.title": "Analytics",
-  "cookie.category.analytics.description": "Cookies that help us understand how visitors interact with our website.",
+  "cookie.category.analytics.description": "Google Analytics cookies that help us understand how visitors use our website.",
   "cookie.category.marketing.title": "Marketing",
   "cookie.category.marketing.description": "Cookies used for advertising and tracking across websites.",
   "cookie.category.preferences.title": "Preferences",

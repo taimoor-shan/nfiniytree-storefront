@@ -10,6 +10,7 @@ import { getDictionary } from "@lib/i18n/dictionaries"
 import { getLocale } from "@lib/data/locale-actions"
 import { LocaleProvider } from "@lib/i18n/client"
 import { CookieConsentBoundary } from "@/components/cookie-consent/cookie-consent-boundary"
+import GoogleAnalytics from "@modules/common/components/google-analytics"
 
 const badoni = Bodoni_Moda({
   subsets: ["latin"],
@@ -56,7 +57,11 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
               and footer inside this wrapper, so a <main> here would swallow the
               banner/nav/footer landmarks and there would be no way to mark the
               actual page content. Each group declares its own <main>. */}
-          <CookieConsentBoundary>{props.children}</CookieConsentBoundary>
+          <CookieConsentBoundary>
+            {/* Inside the boundary: it loads only with the visitor's consent. */}
+            <GoogleAnalytics />
+            {props.children}
+          </CookieConsentBoundary>
         </LocaleProvider>
       </body>
     </html>
