@@ -65,7 +65,7 @@ export default async function ProductPreview({
             {product.subtitle}
           </span>
         )}
-        <div className="flex mt-4 justify-between flex-wrap gap-3">
+        <div className="flex mt-4 justify-between flex-wrap gap-1">
           <div className="something">
             <Text className=" text-[20px] md:text-xl" data-testid="product-title">
               {product.title}
