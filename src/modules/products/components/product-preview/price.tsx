@@ -15,11 +15,11 @@ export default async function PreviewPrice({
   const isDiscounted = price.calculated_price_number < price.original_price_number
 
   return (
-    <div className="flex flex-col items-end">
+    <div className="flex flex-col">
       <div className="flex items-center gap-x-2">
         {isDiscounted && (
           <Text
-            className="original-price text-lg"
+            className="original-price text-[1rem] text-muted"
             data-testid="original-price"
           >
             {price.original_price}
