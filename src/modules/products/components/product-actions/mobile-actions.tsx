@@ -168,6 +168,12 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                     ? t("product.selectVariant")
                     : !inStock
                     ? t("product.outOfStock")
+                    : // Made to order: tracked stock is gone but the variant
+                      // takes orders (same rule as in `product-actions`).
+                      variant.manage_inventory &&
+                      variant.allow_backorder &&
+                      (variant.inventory_quantity || 0) <= 0
+                    ? t("product.preOrder")
                     : t("product.addToCart")}
                 </Button>
               )}

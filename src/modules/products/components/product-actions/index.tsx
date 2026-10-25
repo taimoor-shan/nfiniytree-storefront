@@ -177,6 +177,17 @@ export default function ProductActions({
     return false
   }, [selectedVariant])
 
+  // Stock is tracked and gone, but the variant takes orders: the piece is made
+  // after it is ordered (the trees), so the button says "Pre-order" and a note
+  // explains the wait. Mirrors `MadeToOrder` in `product-jsonld`.
+  const madeToOrder = useMemo(
+    () =>
+      !!selectedVariant?.manage_inventory &&
+      !!selectedVariant.allow_backorder &&
+      (selectedVariant.inventory_quantity || 0) <= 0,
+    [selectedVariant]
+  )
+
   // Max quantity that can be added based on inventory
   const maxQuantity = useMemo(() => {
     if (!selectedVariant) return 1
@@ -339,9 +350,16 @@ export default function ProductActions({
                 ? t("product.selectVariant")
                 : quantityExceedsStock
                 ? t("product.notEnoughStock")
+                : madeToOrder
+                ? t("product.preOrder")
                 : t("product.addToCart")}
             </Button>
           </div>
+        )}
+        {madeToOrder && (
+          <p className="text-sm text-body" data-testid="made-to-order-note">
+            {t("product.madeToOrderNote")}
+          </p>
         )}
         {addError && (
           <p className="text-error text-xs" role="alert">

@@ -111,6 +111,12 @@ export default async function ContactPage() {
                     </a>
                   </div>
                   <div>
+                    <strong className="block text-ink font-medium mb-1">{dict["contact.phone"]}</strong>
+                    <a href="tel:+36202534505" className="hover:text-ink transition-colors">
+                      +36 20 253 4505
+                    </a>
+                  </div>
+                  <div>
                     <strong className="block text-ink font-medium mb-1">{dict["contact.companyName"]}</strong>
                     <p>{dict["contact.address"]}<br />{dict["contact.byAppointment"]}</p>
                   </div>

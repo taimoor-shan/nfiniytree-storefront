@@ -49,6 +49,22 @@ const isVariantAvailable = (variant: HttpTypes.StoreProductVariant): boolean => 
 }
 
 /**
+ * Tracked stock is gone but the variant takes orders: the piece is made after
+ * it is ordered. Google gets `MadeToOrder` rather than `InStock`, matching the
+ * "Pre-order" button in `product-actions`.
+ */
+const availabilityOf = (variant: HttpTypes.StoreProductVariant): string => {
+  if (!isVariantAvailable(variant)) return "https://schema.org/OutOfStock"
+  const madeToOrder =
+    variant.manage_inventory &&
+    variant.allow_backorder &&
+    (variant.inventory_quantity || 0) <= 0
+  return madeToOrder
+    ? "https://schema.org/MadeToOrder"
+    : "https://schema.org/InStock"
+}
+
+/**
  * Product structured data (JSON-LD) for the PDP.
  *
  * Only facts that exist in the Medusa record are emitted. There is deliberately
@@ -94,9 +110,7 @@ export default function ProductJsonLd({
         url: productUrl,
         price: amount,
         priceCurrency: currency.toUpperCase(),
-        availability: isVariantAvailable(variant)
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
+        availability: availabilityOf(variant),
         itemCondition: "https://schema.org/NewCondition",
         seller: { "@type": "Organization", name: SITE_NAME },
         ...(variant.sku ? { sku: variant.sku } : {}),

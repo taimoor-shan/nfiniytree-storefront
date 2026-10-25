@@ -39,6 +39,7 @@ export default function OrganizationJsonLd({
     image: `${site}${DEFAULT_OG_IMAGE.url}`,
     description,
     email: "info@infinytree.com",
+    telephone: "+36 20 253 4505",
     address: {
       "@type": "PostalAddress",
       streetAddress: "Podmaniczky utca 19. 3. em. 21. ajtó",
@@ -53,8 +54,16 @@ export default function OrganizationJsonLd({
       "@type": "ContactPoint",
       contactType: "customer service",
       email: "info@infinytree.com",
+      telephone: "+36 20 253 4505",
       availableLanguage: ["English", "German"],
       areaServed: AREA_SERVED,
+      // The contact page's business hours (`contact.hoursValue`).
+      hoursAvailable: {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "09:00",
+        closes: "17:00",
+      },
     },
   }
 
