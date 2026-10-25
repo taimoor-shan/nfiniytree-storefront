@@ -22,7 +22,7 @@ export default async function Nav() {
     getLocale(),
     retrieveStore(),
   ])
-  const storeName = store?.name || "Infinytree"
+  const storeName = store?.name || "InfinYtree"
   const dict = await getDictionary(currentLocale)
   // The selectors list English as "" (the products' own text); a `/en-hu`
   // URL resolves to "en".

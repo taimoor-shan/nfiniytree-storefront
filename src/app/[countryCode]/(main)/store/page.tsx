@@ -50,7 +50,9 @@ export default async function StorePage(props: Params) {
   const searchParams = await props.searchParams
   const { sortBy, page } = searchParams
   const locale = await getLocale()
-  const title = await translate("store.allProducts", locale)
+  // The page's h1, so it names what is sold ("Kunstbäume & Kunstpflanzen")
+  // rather than "All Products"; the homepage rail keeps `store.allProducts`.
+  const title = await translate("store.heading", locale)
   return (
     <StoreTemplate
       sortBy={sortBy}

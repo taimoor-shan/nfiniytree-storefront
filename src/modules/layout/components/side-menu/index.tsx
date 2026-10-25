@@ -24,7 +24,7 @@ const SideMenu = ({
   regions,
   locales,
   currentLocale,
-  storeName = "Infinytree",
+  storeName = "InfinYtree",
   triggerClassName,
 }: SideMenuProps) => {
   const { t } = useTranslation()

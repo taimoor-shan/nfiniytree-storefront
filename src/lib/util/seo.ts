@@ -15,7 +15,8 @@
 import { getBaseURL } from "./env"
 import { marketPrefix, marketVariants } from "@lib/i18n/market"
 
-export const SITE_NAME = "Infinytree"
+/** The brand, spelled as its logo spells it: a requirement, use it everywhere. */
+export const SITE_NAME = "InfinYtree"
 
 /**
  * The share image for pages without one of their own: the homepage hero cut

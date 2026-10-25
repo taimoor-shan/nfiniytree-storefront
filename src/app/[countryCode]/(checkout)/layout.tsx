@@ -11,7 +11,7 @@ export default async function CheckoutLayout({
   children: React.ReactNode
 }) {
   const store = await retrieveStore()
-  const storeName = store?.name || "Infinytree"
+  const storeName = store?.name || "InfinYtree"
   const locale = await getLocale()
 
   return (

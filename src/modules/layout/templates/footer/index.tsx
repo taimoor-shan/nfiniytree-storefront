@@ -12,7 +12,7 @@ import { CookieTriggerLocalized } from "@modules/layout/components/cookie-trigge
 
 export default async function Footer() {
   const store = await retrieveStore()
-  const storeName = store?.name || "Infinytree"
+  const storeName = store?.name || "InfinYtree"
   const locale = await getLocale()
   const dict = await getDictionary(locale)
   const { collections } = await listCollections({

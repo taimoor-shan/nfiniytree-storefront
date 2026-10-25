@@ -1,4 +1,4 @@
-import { DEFAULT_OG_IMAGE, getSiteUrl } from "@lib/util/seo"
+import { DEFAULT_OG_IMAGE, getSiteUrl, SITE_NAME } from "@lib/util/seo"
 
 type OrganizationJsonLdProps = {
   /** The homepage description, in the page's language. */
@@ -15,9 +15,8 @@ const AREA_SERVED = ["Hungary", "Austria", "Germany"]
  * `OnlineStore` and the site as a `WebSite`, linked by `@id`. Rendered on the
  * homepage, where Google reads the site name.
  *
- * The brand is spelled as its logo spells it ("InfinYtree"); page titles use
- * the plain form, so that is the `alternateName`. The company details are the
- * imprint's (`/policies/imprint`): change both together.
+ * The company details are the imprint's (`/policies/imprint`): change both
+ * together.
  */
 export default function OrganizationJsonLd({
   description,
@@ -28,8 +27,7 @@ export default function OrganizationJsonLd({
   const organization = {
     "@type": "OnlineStore",
     "@id": `${site}/#organization`,
-    name: "InfinYtree",
-    alternateName: "Infinytree",
+    name: SITE_NAME,
     legalName: "Deltalivings Korlátolt Felelősségű Társaság",
     url: site,
     logo: {
@@ -64,8 +62,7 @@ export default function OrganizationJsonLd({
     "@type": "WebSite",
     "@id": `${site}/#website`,
     url: site,
-    name: "InfinYtree",
-    alternateName: "Infinytree",
+    name: SITE_NAME,
     inLanguage,
     publisher: { "@id": `${site}/#organization` },
   }

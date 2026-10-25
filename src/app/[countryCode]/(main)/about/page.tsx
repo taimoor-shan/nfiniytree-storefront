@@ -195,7 +195,7 @@ export default async function AboutPage(props: AboutPageProps) {
             &ldquo;Where nature meets craftsmanship.&rdquo;
           </p>
           <p className="text-sm text-body">
-            Every Infinytree piece is handmade — unique, maintenance-free, and
+            Every InfinYtree piece is handmade — unique, maintenance-free, and
             designed to last.
           </p>
         </div>

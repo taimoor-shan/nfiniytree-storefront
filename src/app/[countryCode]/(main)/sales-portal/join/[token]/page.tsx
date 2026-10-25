@@ -158,7 +158,7 @@ export default async function SalesPortalJoinPage({
 
   return (
     <div className="content-container mx-auto max-w-xl py-16" data-testid="sales-portal-join">
-      <p className="mb-2 text-small-regular uppercase tracking-wide text-muted">Infinytree</p>
+      <p className="mb-2 text-small-regular uppercase tracking-wide text-muted">InfinYtree</p>
       {body}
     </div>
   )
