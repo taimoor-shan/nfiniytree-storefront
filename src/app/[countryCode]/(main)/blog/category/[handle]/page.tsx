@@ -7,7 +7,7 @@ import { getMarketPrefix } from "@lib/data/market"
 import { getDictionary, translate } from "@lib/i18n"
 import { parsePageNumber } from "@lib/util/blog"
 import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
-import { NOINDEX_METADATA, SITE_NAME } from "@lib/util/seo"
+import { DEFAULT_OG_IMAGE, NOINDEX_METADATA, SITE_NAME } from "@lib/util/seo"
 import BlogListTemplate from "@modules/blog/templates"
 
 type Props = {
@@ -50,6 +50,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}${path}`,
+      images: [DEFAULT_OG_IMAGE],
     },
   }
 }

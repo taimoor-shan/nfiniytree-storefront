@@ -18,6 +18,18 @@ import { marketPrefix, marketVariants } from "@lib/i18n/market"
 export const SITE_NAME = "Infinytree"
 
 /**
+ * The share image for pages without one of their own: the homepage hero cut
+ * to 1200 × 630, the size social networks expect. A page that sets `openGraph`
+ * replaces the root's file-based `opengraph-image`, so each one names it.
+ */
+export const DEFAULT_OG_IMAGE = {
+  url: "/og-default.jpg",
+  width: 1200,
+  height: 630,
+  alt: "InfinYtree handmade artificial trees and flower arrangements in a bright living room",
+}
+
+/**
  * The canonical origin, with any trailing slash removed.
  *
  * In production `NEXT_PUBLIC_BASE_URL` must be the canonical domain

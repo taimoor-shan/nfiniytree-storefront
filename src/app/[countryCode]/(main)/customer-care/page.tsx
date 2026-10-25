@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
 import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
-import { NOINDEX_METADATA, SITE_NAME } from "@lib/util/seo"
+import { DEFAULT_OG_IMAGE, NOINDEX_METADATA, SITE_NAME } from "@lib/util/seo"
 
 const SLUG = "customer-care"
 
@@ -77,7 +77,7 @@ export async function generateMetadata(
       title,
       ...(description ? { description } : {}),
       url: `/${await getMarketPrefix(countryCode)}/customer-care`,
-      images: page.featured_image ? [{ url: page.featured_image }] : [],
+      images: page.featured_image ? [{ url: page.featured_image }] : [DEFAULT_OG_IMAGE],
     },
   }
 }

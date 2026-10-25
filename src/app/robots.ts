@@ -40,9 +40,11 @@ export default function robots(): MetadataRoute.Robots {
           "/*?sortBy=",
           "/*?page=",
           "/*?q=",
-          // Next.js internals and the storefront's own API routes.
+          // The storefront's own API routes. `/_next/` stays open: Google
+          // renders pages with their CSS and JavaScript (`/_next/static`) and
+          // indexes product photos through the image optimizer
+          // (`/_next/image`), so blocking it hid both.
           "/api/",
-          "/_next/",
         ],
       },
     ],

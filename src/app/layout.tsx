@@ -25,6 +25,15 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
+  // Declared rather than left to the `/favicon.ico` convention: Google shows the
+  // icon next to every search result and wants a square multiple of 48 px.
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
 }
 
 export default async function RootLayout(props: { children: React.ReactNode }) {

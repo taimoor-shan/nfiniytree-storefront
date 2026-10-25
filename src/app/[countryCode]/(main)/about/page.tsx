@@ -5,7 +5,7 @@ import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
 import { getDictionary, translate } from "@lib/i18n/dictionaries"
 import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
-import { SITE_NAME } from "@lib/util/seo"
+import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
 import { Sparkles, Droplets, TreePine, Building2 } from "lucide-react"
 
 type AboutPageProps = {
@@ -37,7 +37,7 @@ export async function generateMetadata(props: AboutPageProps): Promise<Metadata>
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}/about`,
-      images: page?.featured_image ? [{ url: page.featured_image }] : [],
+      images: page?.featured_image ? [{ url: page.featured_image }] : [DEFAULT_OG_IMAGE],
     },
   }
 }

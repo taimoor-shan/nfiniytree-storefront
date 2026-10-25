@@ -15,7 +15,8 @@ import { retrieveStore } from "@lib/data/store"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
 import { getSeoAlternates } from "@lib/util/page-metadata"
-import { SITE_NAME } from "@lib/util/seo"
+import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
+import OrganizationJsonLd from "@modules/common/components/organization-jsonld"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
 export async function generateMetadata(props: {
@@ -25,10 +26,12 @@ export async function generateMetadata(props: {
   const store = await retrieveStore()
   const storeName = store?.name || SITE_NAME
   const locale = await getLocale()
+  // The store name alone ("InfinYtree") told searchers nothing about the shop.
+  const title = await translate("metadata.homeTitle", locale)
   const description = await translate("metadata.homeDescription", locale)
 
   return {
-    title: storeName,
+    title,
     description,
     // Self-referencing canonical plus the country cluster. Without this the
     // homepage had no canonical at all, so `/hu`, `/at` and `/de` competed with
@@ -37,9 +40,10 @@ export async function generateMetadata(props: {
     openGraph: {
       type: "website",
       siteName: storeName,
-      title: storeName,
+      title,
       description,
       url: `/${await getMarketPrefix(countryCode)}`,
+      images: [DEFAULT_OG_IMAGE],
     },
   }
 }
@@ -64,10 +68,11 @@ export default async function Home(props: {
   // separately — so it was a roundtrip the page paid for and discarded.
   const locale = (await getLocale()) || "en"
 
-  const [region, collectionsResult, homePage] = await Promise.all([
+  const [region, collectionsResult, homePage, description] = await Promise.all([
     getRegion(countryCode),
     listCollections({ fields: "id, handle, title" }),
     retrievePageBySlug("home", locale),
+    translate("metadata.homeDescription", locale),
   ])
 
   const { collections } = collectionsResult
@@ -78,6 +83,10 @@ export default async function Home(props: {
 
   return (
     <>
+      <OrganizationJsonLd
+        description={description}
+        inLanguage={locale.split("-")[0]}
+      />
       <Hero page={homePage} />
       {/* <About content={homePage?.content} /> */}
       <Features />

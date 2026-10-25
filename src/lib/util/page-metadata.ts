@@ -7,7 +7,12 @@ import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
 import { getMarketPrefix } from "@lib/data/market"
 import { translate } from "@lib/i18n"
-import { DEFAULT_COUNTRY_CODE, getAlternates, SITE_NAME } from "./seo"
+import {
+  DEFAULT_COUNTRY_CODE,
+  DEFAULT_OG_IMAGE,
+  getAlternates,
+  SITE_NAME,
+} from "./seo"
 
 /**
  * `alternates` for a page's `generateMetadata`, resolved against the live
@@ -128,7 +133,7 @@ export async function getCmsPageMetadata({
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}${path}`,
-      ...(page?.featured_image ? { images: [{ url: page.featured_image }] } : {}),
+      images: page?.featured_image ? [{ url: page.featured_image }] : [DEFAULT_OG_IMAGE],
     },
   }
 }

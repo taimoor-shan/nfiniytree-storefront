@@ -9,7 +9,7 @@ import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
 import { normalizeImageUrl } from "@lib/util/image-url"
 import { getSeoAlternates } from "@lib/util/page-metadata"
-import { SITE_NAME } from "@lib/util/seo"
+import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -105,17 +105,23 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   // The description used to be `product.title` — identical to the title, so
   // every product page shipped a duplicate-of-the-title description and Google
   // rewrote it. Prefer the real product copy, fall back to a localized template
-  // built from the product name only when there is no copy at all.
+  // built from the product name only when there is no copy at all. The
+  // subtitle comes after the description: it is a badge shared by several
+  // products ("One of a kind", "Premium Line"), and leading with it gave every
+  // product the same two-word description.
   const source =
-    product.subtitle?.trim() ||
     product.description?.trim() ||
+    product.subtitle?.trim() ||
     (await translate("metadata.productDescription", locale)).replace(
       "{product}",
       product.title
     )
 
   const description = toMetaDescription(source)
-  const image = product.thumbnail ? normalizeImageUrl(product.thumbnail) : null
+  // Products often have images but no `thumbnail`; without the first image as
+  // a fallback those product pages had no share image at all.
+  const imageUrl = product.thumbnail || product.images?.[0]?.url
+  const image = imageUrl ? normalizeImageUrl(imageUrl) : null
 
   return {
     title,
@@ -130,13 +136,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       // Relative `/static/...`, resolved against `metadataBase` in the root
       // layout. Keeps social crawlers on the public storefront origin instead
       // of whatever origin Medusa's file provider happens to emit.
-      images: image ? [{ url: image, alt: product.title }] : [],
+      images: image ? [{ url: image, alt: product.title }] : [DEFAULT_OG_IMAGE],
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       description,
-      images: image ? [image] : [],
+      images: [image || DEFAULT_OG_IMAGE.url],
     },
   }
 }

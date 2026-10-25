@@ -8,7 +8,7 @@ import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
 import { getCategorySeo } from "@lib/util/category-seo"
 import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
-import { SITE_NAME } from "@lib/util/seo"
+import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
 import { StoreRegion } from "@medusajs/types"
 import CategoryTemplate from "@modules/categories/templates"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -88,6 +88,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         title,
         description,
         url: `/${await getMarketPrefix(countryCode)}${path}`,
+        images: [DEFAULT_OG_IMAGE],
       },
     }
   } catch (error) {
