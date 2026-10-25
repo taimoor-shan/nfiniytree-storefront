@@ -22,13 +22,13 @@ export function Breadcrumbs({ post, dict }: { post: BlogPost } & WithDict) {
     <nav aria-label={dict["blog.breadcrumb"]} className="mb-6 text-sm text-muted">
       <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <li>
-          <LocalizedClientLink href="/" className="hover:text-ink">
+          <LocalizedClientLink href="/" className="hover:text-underline text-primary">
             {dict["nav.home"]}
           </LocalizedClientLink>
         </li>
         <li aria-hidden="true">/</li>
         <li>
-          <LocalizedClientLink href="/blog" className="hover:text-ink">
+          <LocalizedClientLink href="/blog" className="hover:text-underline text-primary">
             {dict["blog.title"]}
           </LocalizedClientLink>
         </li>
@@ -38,7 +38,7 @@ export function Breadcrumbs({ post, dict }: { post: BlogPost } & WithDict) {
             <li>
               <LocalizedClientLink
                 href={`/blog/category/${category.handle}`}
-                className="hover:text-ink"
+                className="hover:text-primary"
               >
                 {category.name}
               </LocalizedClientLink>
@@ -55,20 +55,21 @@ export function CategoryChips({ post }: { post: BlogPost }) {
     return null
   }
 
-  return (
-    <ul className="flex flex-wrap gap-2">
-      {post.categories.map((category) => (
-        <li key={category.id}>
-          <LocalizedClientLink
-            href={`/blog/category/${category.handle}`}
-            className="inline-block rounded-full bg-surface-card px-3 py-1 text-xs uppercase tracking-[0.15em] text-primary-text transition-colors hover:bg-surface-cream-strong"
-          >
-            {category.name}
-          </LocalizedClientLink>
-        </li>
-      ))}
-    </ul>
-  )
+  // return (
+  //   <ul className="flex flex-wrap gap-2">
+  //     {post.categories.map((category) => (
+  //       <li key={category.id}>
+  //         <LocalizedClientLink
+  //           href={`/blog/category/${category.handle}`}
+  //           className="inline-block rounded-full bg-surface-card px-3 py-1 text-xs uppercase tracking-[0.15em] text-primary-text transition-colors hover:bg-surface-cream-strong"
+  //         >
+  //           {category.name}
+  //         </LocalizedClientLink>
+  //       </li>
+  //     ))}
+  //   </ul>
+  // )
+  return null
 }
 
 /** Author, date and reading time, with "updated" when it changed after publishing. */
