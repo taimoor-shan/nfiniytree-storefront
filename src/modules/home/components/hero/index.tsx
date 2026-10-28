@@ -6,6 +6,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { useTranslation } from "@lib/i18n/client"
 import { getImageProps } from "next/image"
 import { normalizeImageUrl } from "@lib/util/image-url"
+import { SITE_NAME } from "@lib/util/seo"
 
 // Phones get a portrait image that ships with the storefront, unlike the
 // desktop one, which editors set per page in the CMS. The image optimizer
@@ -132,6 +133,14 @@ const Hero = ({ page }: HeroProps) => {
             level="h1"
             className="lg:text-[3.5em] text-3xl text-ink mb-5 font-serif text-white font-normal leading-[1.2em]"
           >
+            {/* The brand opens the page's only h1: the tagline alone left the
+                home page without its name where search engines look first.
+                The hidden colon makes the heading read "InfinYtree: …". Not
+                uppercase: the brand is spelled with its capital Y. */}
+            <span className="block mb-4 font-sans text-sm md:text-base font-medium tracking-[0.15em] leading-normal">
+              {SITE_NAME}
+            </span>
+            <span className="sr-only">: </span>
             {title}
           </Heading>
           <Heading
