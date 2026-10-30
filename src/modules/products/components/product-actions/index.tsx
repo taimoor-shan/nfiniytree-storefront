@@ -3,7 +3,7 @@
 import { productParams, trackEvent } from "@lib/analytics/ga4"
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
-import { getProductPrice } from "@lib/util/get-product-price"
+import { getProductPrice, isPriceOnRequest } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
@@ -61,6 +61,17 @@ export default function ProductActions({
   const [quantity, setQuantity] = useState(1)
   const countryCode = useParams().countryCode as string
 
+  // Nothing can be bought yet: the price is still to be agreed (no variant has
+  // one) and nothing is in stock. The options stay on show, greyed out and not
+  // selectable, and the visitor asks to be told about the product as a whole.
+  const notifyForProduct = useMemo(
+    () =>
+      (product.variants?.length ?? 0) > 0 &&
+      isPriceOnRequest(product) &&
+      !product.variants?.some(isVariantAvailable),
+    [product]
+  )
+
   // Ref to ensure preselection only runs once on mount, not on every
   // server re-fetch (which would override the user's manual selection).
   const preselectedRef = useRef(false)
@@ -68,6 +79,8 @@ export default function ProductActions({
   // Preselect the first available variant on mount (or first variant if none available)
   useEffect(() => {
     if (preselectedRef.current) return
+    // Preselecting would show one of the greyed-out options as chosen.
+    if (notifyForProduct) return
     if (!product.variants || product.variants.length === 0) return
 
     const firstAvailable =
@@ -75,7 +88,7 @@ export default function ProductActions({
     const variantOptions = optionsAsKeymap(firstAvailable.options)
     setOptions(variantOptions ?? {})
     preselectedRef.current = true
-  }, [product.variants])
+  }, [product.variants, notifyForProduct])
 
   // Compute which option values lead only to unavailable (out-of-stock) variants
   const unavailableOptionValueIds = useMemo(() => {
@@ -201,6 +214,9 @@ export default function ProductActions({
 
   const quantityExceedsStock = quantity > maxQuantity
 
+  // A variant without a price cannot be added: the cart refuses it.
+  const hasPrice = !!selectedVariant?.calculated_price?.calculated_amount
+
   // GA4 `view_item`, once per product page, at the lowest price shown.
   useEffect(() => {
     const { cheapestPrice } = getProductPrice({ product, countryCode })
@@ -285,7 +301,7 @@ export default function ProductActions({
                       updateOption={setOptionValue}
                       title={option.title ?? ""}
                       data-testid="product-options"
-                      disabled={!!disabled || isAdding}
+                      disabled={!!disabled || isAdding || notifyForProduct}
                       unavailableValueIds={unavailableOptionValueIds}
                     />
                   </div>
@@ -309,7 +325,7 @@ export default function ProductActions({
               : t("product.onlyLeftPlural").replace("{count}", String(maxQuantity))}
           </p>
         )}
-        {selectedVariant && !inStock ? (
+        {notifyForProduct || (selectedVariant && !inStock) ? (
           <div className="max-w-[350px]">
             <div className="flex flex-col gap-y-4" data-testid="oos-status">
               {/* `role="status"` used to sit on this heading, which overrode its
@@ -325,11 +341,9 @@ export default function ProductActions({
                 {t("product.notifyMe.description")}
               </p>
               <NotifyMeForm
-                key={selectedVariant.id}
+                key={notifyForProduct ? "product" : selectedVariant?.id}
                 productId={product.id}
-                productTitle={product.title}
-                variantId={selectedVariant.id}
-                variantTitle={selectedVariant.title}
+                variantId={notifyForProduct ? undefined : selectedVariant?.id}
                 defaultEmail={customerEmail}
                 disabled={!!disabled}
               />
@@ -368,6 +382,7 @@ export default function ProductActions({
                 !!disabled ||
                 isAdding ||
                 !isValidVariant ||
+                !hasPrice ||
                 quantityExceedsStock
               }
               variant="primary"
@@ -411,6 +426,7 @@ export default function ProductActions({
           options={options}
           updateOptions={setOptionValue}
           inStock={inStock}
+          notifyForProduct={notifyForProduct}
           handleAddToCart={handleAddToCart}
           isAdding={isAdding}
           addError={addError}

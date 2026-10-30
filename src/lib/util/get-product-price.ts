@@ -68,8 +68,10 @@ export function getProductPrice({
       return null
     }
 
+    // A variant whose price is 0 has no price to show (`getPricesForVariant`),
+    // so it must not stand in for the cheapest one and hide the priced ones.
     const cheapestVariant: any = product.variants
-      .filter((v: any) => !!v.calculated_price)
+      .filter((v: any) => !!v.calculated_price?.calculated_amount)
       .sort((a: any, b: any) => {
         return (
           a.calculated_price.calculated_amount -
@@ -101,4 +103,13 @@ export function getProductPrice({
     cheapestPrice: cheapestPrice(),
     variantPrice: variantPrice(),
   }
+}
+
+/**
+ * True when no variant of the product has a price in this market: the piece's
+ * price is not settled. The storefront then says "Price on request" instead of
+ * a price, never a zero or a placeholder, and the product cannot be bought.
+ */
+export function isPriceOnRequest(product: HttpTypes.StoreProduct): boolean {
+  return !getProductPrice({ product }).cheapestPrice
 }

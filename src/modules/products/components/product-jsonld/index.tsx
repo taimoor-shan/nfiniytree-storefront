@@ -93,13 +93,14 @@ export default function ProductJsonLd({
 
   // A variant carries a price only when the region resolved one, so variants
   // without `calculated_price` are dropped rather than published at price 0.
+  // A price of 0 counts as none, as it does on the page ("Price on request").
   const offers = (product.variants ?? [])
     .map((variant) => {
       const calculated = (variant as any).calculated_price
       const amount = calculated?.calculated_amount
       const currency = calculated?.currency_code
 
-      if (typeof amount !== "number" || !currency) {
+      if (typeof amount !== "number" || amount <= 0 || !currency) {
         return null
       }
 

@@ -21,6 +21,9 @@ type MobileActionsProps = {
   options: Record<string, string | undefined>
   updateOptions: (title: string, value: string) => void
   inStock?: boolean
+  /** Nothing can be bought yet (price still to be agreed, nothing in stock):
+   *  no option dialog, and the signup is for the product as a whole. */
+  notifyForProduct?: boolean
   handleAddToCart: () => void
   isAdding?: boolean
   /** Surfaced here too — the sticky bar is the only add-to-cart control
@@ -42,6 +45,7 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   options,
   updateOptions,
   inStock,
+  notifyForProduct,
   handleAddToCart,
   isAdding,
   addError,
@@ -70,6 +74,9 @@ const MobileActions: React.FC<MobileActionsProps> = ({
   }, [price])
 
   const isSimple = isSimpleProduct(product)
+  // With every option greyed out there is nothing to pick in the dialog.
+  const showOptionsButton = !isSimple && !notifyForProduct
+  const showNotifyMe = !!notifyForProduct || (!!variant && !inStock)
 
   return (
     <>
@@ -119,7 +126,9 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   </span>
                 </div>
               ) : (
-                <div></div>
+                <span data-testid="mobile-price-on-request">
+                  {t("product.priceOnRequest")}
+                </span>
               )}
             </div>
             {addError && (
@@ -128,9 +137,9 @@ const MobileActions: React.FC<MobileActionsProps> = ({
               </p>
             )}
             <div className={clx("grid grid-cols-2 w-full gap-x-4", {
-              "!grid-cols-1": isSimple
+              "!grid-cols-1": !showOptionsButton
             })}>
-              {!isSimple && <Button
+              {showOptionsButton && <Button
                 onClick={open}
                 variant="secondary"
                 className="w-full"
@@ -145,20 +154,22 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                   <ChevronDown />
                 </div>
               </Button>}
-              {variant && !inStock ? (
+              {showNotifyMe ? (
                 <NotifyMeForm
-                  key={variant.id}
+                  key={notifyForProduct ? "product" : variant?.id}
                   productId={product.id}
-                  productTitle={product.title}
-                  variantId={variant.id}
-                  variantTitle={variant.title}
+                  variantId={notifyForProduct ? undefined : variant?.id}
                   defaultEmail={customerEmail}
-                  className="col-span-2"
+                  className={notifyForProduct ? undefined : "col-span-2"}
                 />
               ) : (
                 <Button
                   onClick={handleAddToCart}
-                  disabled={!inStock || !variant}
+                  disabled={
+                    !inStock ||
+                    !variant ||
+                    !variant.calculated_price?.calculated_amount
+                  }
                   variant="primary"
                   className="w-full"
                   isLoading={isAdding}

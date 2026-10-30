@@ -9,6 +9,7 @@ import ProductTemplate from "@modules/products/templates"
 import { HttpTypes } from "@medusajs/types"
 import { normalizeImageUrl } from "@lib/util/image-url"
 import { getSeoAlternates } from "@lib/util/page-metadata"
+import { getProductSeo } from "@lib/util/product-copy"
 import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
 
 type Props = {
@@ -100,7 +101,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   }
 
   const locale = await getLocale()
-  const title = `${product.title} | ${SITE_NAME}`
+  // Copy written for search (the product's metadata `seo_title` and
+  // `seo_description`) is used as written; without it both are generated.
+  const seo = getProductSeo(product, locale || "en")
+  const title = seo.title ?? `${product.title} | ${SITE_NAME}`
 
   // The description used to be `product.title` — identical to the title, so
   // every product page shipped a duplicate-of-the-title description and Google
@@ -117,7 +121,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       product.title
     )
 
-  const description = toMetaDescription(source)
+  const description = seo.description ?? toMetaDescription(source)
   // Products often have images but no `thumbnail`; without the first image as
   // a fallback those product pages had no share image at all.
   const imageUrl = product.thumbnail || product.images?.[0]?.url

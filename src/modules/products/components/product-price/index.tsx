@@ -25,8 +25,19 @@ export default function ProductPrice({
 
   const selectedPrice = variant ? variantPrice : cheapestPrice
 
+  // No price is set yet (a piece whose price is still to be agreed): say so,
+  // never a skeleton that never resolves and never a zero.
   if (!selectedPrice) {
-    return <div className="block w-32 h-9 bg-gray-100 animate-pulse" />
+    return (
+      <div className="flex items-center mt-4 mb-2">
+        <span
+          className="text-lg font-bold text-primary-text"
+          data-testid="product-price-on-request"
+        >
+          {t("product.priceOnRequest")}
+        </span>
+      </div>
+    )
   }
 
   const isDiscounted =

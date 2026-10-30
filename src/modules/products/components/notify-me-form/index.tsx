@@ -8,9 +8,9 @@ import TurnstileWidget from "@modules/common/components/turnstile-widget"
 
 type NotifyMeFormProps = {
   productId: string
-  productTitle: string
-  variantId: string
-  variantTitle?: string
+  /** Left out when the signup is for the product as a whole, because there is
+   *  no variant to choose (see `notifyForProduct` in `product-actions`). */
+  variantId?: string
   defaultEmail?: string
   disabled?: boolean
   className?: string
@@ -18,9 +18,7 @@ type NotifyMeFormProps = {
 
 export default function NotifyMeForm({
   productId,
-  productTitle,
   variantId,
-  variantTitle,
   defaultEmail,
   disabled,
   className,
@@ -43,12 +41,11 @@ export default function NotifyMeForm({
     try {
       await sdk.client.fetch("/store/notify-me", {
         method: "POST",
+        // The backend names the product and variant from its catalog.
         body: {
           email,
           productId,
-          productTitle,
           variantId,
-          variantTitle,
           productUrl: window.location.href,
         },
         headers: turnstileToken

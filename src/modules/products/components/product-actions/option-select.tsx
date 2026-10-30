@@ -42,7 +42,7 @@ const OptionSelect: React.FC<OptionSelectProps> = ({
               onClick={() => updateOption(option.id, value.value)}
               key={value.id}
               className={clx(
-                "h-9 py-2 px-6 text-xs",
+                "h-9 py-2 px-6 text-xs disabled:cursor-not-allowed",
                 {
                   // `hover:!bg-primary` was forcing the lighter brand coral back
                   // under `.btn-primary`'s white label on hover, which is 3.28:1.

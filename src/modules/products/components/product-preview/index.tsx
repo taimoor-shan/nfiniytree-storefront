@@ -39,6 +39,7 @@ export default async function ProductPreview({
 
   const locale = await getLocale()
   const netPriceLabel = await translate("product.netPrice", locale)
+  const priceOnRequestLabel = await translate("product.priceOnRequest", locale)
   const preOrderOfferLabel = await translate("product.preOrderOffer", locale)
 
   const isDiscounted =
@@ -78,11 +79,18 @@ export default async function ProductPreview({
           </div>
 
           <div className="flex items-center gap-x-2">
-            {cheapestPrice && (
+            {cheapestPrice ? (
               <PreviewPrice
                 price={cheapestPrice}
                 netPriceLabel={netPriceLabel}
               />
+            ) : (
+              <Text
+                className="text-primary-text text-lg"
+                data-testid="price-on-request"
+              >
+                {priceOnRequestLabel}
+              </Text>
             )}
           </div>
         </div>

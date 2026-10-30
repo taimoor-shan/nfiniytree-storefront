@@ -42,10 +42,15 @@ const STRUCTURED_METADATA_KEYS = new Set([
   "key_features",
   "care_instructions",
   "pot",
-  // Category SEO copy (see `src/lib/util/category-seo.ts`).
+  // Category SEO copy (see `src/lib/util/category-seo.ts`), also read from a
+  // product's metadata (see `src/lib/util/product-copy.ts`).
   "seo_title",
   "seo_description",
   "seo_text",
+  // Product copy with no field of its own (see `src/lib/util/product-copy.ts`
+  // and `src/lib/util/approx-dimensions.ts`).
+  "short_description",
+  "approx_dimensions",
 ])
 
 // ---------------------------------------------------------------------------

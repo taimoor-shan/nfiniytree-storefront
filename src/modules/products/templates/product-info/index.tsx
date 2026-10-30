@@ -3,6 +3,7 @@ import { Heading, Text } from "@medusajs/ui"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { getLocale } from "@lib/data/locale-actions"
 import { getDictionary } from "@lib/i18n/dictionaries"
+import { getShortDescription } from "@lib/util/product-copy"
 
 type ProductInfoProps = {
   product: HttpTypes.StoreProduct
@@ -11,6 +12,10 @@ type ProductInfoProps = {
 const ProductInfo = async ({ product }: ProductInfoProps) => {
   const locale = (await getLocale()) || "en"
   const dict = await getDictionary(locale)
+  // A product with a short description shows it here and keeps its full
+  // description for a section of its own below (`ProductTabs`); every other
+  // product shows its description here.
+  const intro = getShortDescription(product, locale) ?? product.description
   return (
     <div id="product-info">
       <div className="">
@@ -48,7 +53,7 @@ const ProductInfo = async ({ product }: ProductInfoProps) => {
           className="text-body text-base whitespace-pre-line"
           data-testid="product-description"
         >
-          {product.description}
+          {intro}
         </Text>
 {/* 
         {(product.metadata as Record<string, any>)?.uniqueness_note && (

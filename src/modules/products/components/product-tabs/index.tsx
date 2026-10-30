@@ -3,6 +3,12 @@
 import { HttpTypes } from "@medusajs/types"
 import { ArrowLeftRight, ArrowUpDown, Move3d } from "lucide-react"
 import { isSimpleProduct } from "@lib/util/product"
+import {
+  ApproxDimensions,
+  formatDimension,
+  parseApproxDimensions,
+} from "@lib/util/approx-dimensions"
+import { getShortDescription } from "@lib/util/product-copy"
 import { useTranslation } from "@lib/i18n/client"
 import {
   getLocalizedMetadata,
@@ -54,6 +60,10 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
 
   const care = metadata?.care_instructions as string | undefined
 
+  // A piece sized as ranges rather than single figures (see
+  // `approx-dimensions.ts`).
+  const approxDimensions = parseApproxDimensions(metadata?.approx_dimensions)
+
   const potRaw = metadata?.pot
   let parsedPot: Record<string, any> | undefined = undefined
   if (typeof potRaw === "object" && potRaw !== null && !Array.isArray(potRaw)) {
@@ -71,6 +81,15 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
 
   const sections: { label: string; component: React.ReactNode }[] = []
 
+  // With a short description under the title, the full description gets its
+  // own section here (see `product-copy.ts`).
+  if (product.description && getShortDescription(product, locale)) {
+    sections.push({
+      label: t("product.description"),
+      component: <DescriptionTab text={product.description} />,
+    })
+  }
+
   sections.push({
     label: t("product.specifications"),
     component: (
@@ -78,6 +97,7 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
         product={product}
         pot={parsedPot}
         isConfigured={!isSimpleProduct(product)}
+        approxDimensions={approxDimensions}
       />
     ),
   })
@@ -112,6 +132,14 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
   )
 }
 
+const DescriptionTab = ({ text }: { text: string }) => {
+  return (
+    <div className="py-4">
+      <p className="text-base leading-loose whitespace-pre-line">{text}</p>
+    </div>
+  )
+}
+
 const KeyFeaturesTab = ({ features }: { features: string[] }) => {
   return (
     <div className="text-sm py-4">
@@ -140,9 +168,15 @@ type SpecificationsTabProps = {
   product: HttpTypes.StoreProduct
   pot?: Record<string, any>
   isConfigured?: boolean
+  approxDimensions?: ApproxDimensions | null
 }
 
-const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProps) => {
+const SpecificationsTab = ({
+  product,
+  pot,
+  isConfigured,
+  approxDimensions,
+}: SpecificationsTabProps) => {
   const { t } = useTranslation()
 
   // Dimension icons keyed by label (labels are managed by the backend)
@@ -156,14 +190,24 @@ const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProp
   // translated at render, units live in the values.
   const treeSpecs: Record<string, string> = {}
 
-  if (product.height) {
-    treeSpecs["Height"] = `${product.height} cm`
-  }
-  if (product.width) {
-    treeSpecs["Width"] = `${product.width} cm`
-  }
-  if (product.length) {
-    treeSpecs["Depth"] = `${product.length} cm`
+  // The exact figure when the product has one; otherwise the range from its
+  // metadata, marked as approximate.
+  let showsApproximate = false
+  for (const [key, exact, range] of [
+    ["Height", product.height, approxDimensions?.height],
+    ["Width", product.width, approxDimensions?.width],
+    ["Depth", product.length, approxDimensions?.depth],
+  ] as const) {
+    const dimension = formatDimension({
+      exact,
+      range,
+      // Medusa's own fields are in cm; a range carries its own unit.
+      unit: exact ? "cm" : approxDimensions?.unit ?? "cm",
+      approxLabel: t("product.approx"),
+    })
+    if (!dimension) continue
+    treeSpecs[key] = dimension.text
+    if (dimension.approximate) showsApproximate = true
   }
 
   if (product.weight) {
@@ -208,6 +252,14 @@ const SpecificationsTab = ({ product, pot, isConfigured }: SpecificationsTabProp
               </div>
             ))}
           </div>
+          {showsApproximate && (
+            <p
+              className="mt-4 text-xs text-muted"
+              data-testid="approx-dimensions-note"
+            >
+              {t("product.approxDimensionsNote")}
+            </p>
+          )}
         </div>
       )}
 
