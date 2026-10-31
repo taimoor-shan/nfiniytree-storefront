@@ -59,27 +59,38 @@ export const paymentInfoMap: Record<
 }
 
 /**
- * Maps Medusa payment statuses to customer-friendly business terms.
- * Never expose raw statuses like "authorized" / "captured" / "pending".
+ * Maps Medusa payment statuses to the dictionary keys of customer-friendly
+ * business terms. Never expose raw statuses like "authorized" / "captured" /
+ * "pending".
  */
-export const PAYMENT_STATUS_MAP: Record<string, string> = {
-  pending: "Awaiting Payment",
-  authorized: "Awaiting Payment",
-  captured: "Payment Received",
-  settled: "Payment Confirmed",
-  requires_action: "Awaiting Payment",
-  not_paid: "Awaiting Payment",
-  refunded: "Refunded",
-  partially_refunded: "Partially Refunded",
-  canceled: "Canceled",
+export const PAYMENT_STATUS_KEYS: Record<string, string> = {
+  pending: "order.payment.awaiting",
+  awaiting: "order.payment.awaiting",
+  authorized: "order.payment.awaiting",
+  partially_authorized: "order.payment.awaiting",
+  requires_action: "order.payment.awaiting",
+  not_paid: "order.payment.awaiting",
+  captured: "order.payment.received",
+  partially_captured: "order.payment.partiallyReceived",
+  settled: "order.payment.confirmed",
+  refunded: "order.payment.refunded",
+  partially_refunded: "order.payment.partiallyRefunded",
+  canceled: "order.payment.canceled",
 }
 
 /**
- * Returns a business-friendly label for a Medusa payment status.
+ * Returns a business-friendly label for a Medusa payment status, in the
+ * language `t` translates to.
  */
-export const getPaymentStatusLabel = (status?: string): string => {
-  if (!status) return "N/A"
-  return PAYMENT_STATUS_MAP[status] ?? status
+export const getPaymentStatusLabel = (
+  status: string | undefined,
+  t: (key: string) => string
+): string => {
+  if (!status) return t("common.notAvailable")
+  const key = PAYMENT_STATUS_KEYS[status]
+  if (key) return t(key)
+  // A status with no wording of its own: readable rather than raw
+  return status
     .split("_")
     .join(" ")
     .replace(/\b\w/g, (c) => c.toUpperCase())

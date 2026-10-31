@@ -1,5 +1,8 @@
+"use client"
+
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
+import { useTranslation } from "@/lib/i18n"
 
 type LineItemOptionsProps = {
   variant: HttpTypes.StoreProductVariant | undefined
@@ -12,13 +15,15 @@ const LineItemOptions = ({
   "data-testid": dataTestid,
   "data-value": dataValue,
 }: LineItemOptionsProps) => {
+  const { t } = useTranslation()
+
   return (
     <Text
       data-testid={dataTestid}
       data-value={dataValue}
       className="inline-block txt-medium text-body w-full overflow-hidden text-ellipsis"
     >
-      Variant: {variant?.title}
+      {t("common.variant")}: {variant?.title}
     </Text>
   )
 }

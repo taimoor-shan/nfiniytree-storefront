@@ -1,7 +1,8 @@
 /**
- * Every language must carry the same keys, and the blog strings the same
- * `{placeholders}`: a key missing from one file shows the raw key on the page,
- * and a missing placeholder shows a sentence with a hole in it.
+ * Every language must carry the same keys, and the blog strings and the
+ * withdrawal acknowledgement the same `{placeholders}`: a key missing from one
+ * file shows the raw key on the page, and a missing placeholder shows a
+ * sentence with a hole in it.
  *
  * Run:  npx tsx src/lib/i18n/dictionaries.test.ts
  */
@@ -11,6 +12,14 @@ import path from "node:path"
 
 const DIR = path.join(__dirname, "../../i18n/dictionaries")
 const LOCALES = ["en", "de-AT", "de-DE", "hu-HU"]
+
+// Texts that used to be hardcoded English: German or Hungarian that equals the
+// English means nobody translated it
+const WRITTEN_FOR_EVERY_LANGUAGE = (key: string) =>
+  key === "common.variant" ||
+  key === "common.notAvailable" ||
+  key.startsWith("order.payment.") ||
+  key === "checkout.withdrawalAcknowledgement"
 
 const load = (locale: string): Record<string, string> =>
   JSON.parse(fs.readFileSync(path.join(DIR, `${locale}.json`), "utf8"))
@@ -37,7 +46,11 @@ for (const locale of LOCALES.filter((l) => l !== "en")) {
   )
 
   for (const key of englishKeys.filter(
-    (k) => k === "nav.blog" || k.startsWith("blog.") || k.startsWith("metadata.blog")
+    (k) =>
+      k === "nav.blog" ||
+      k.startsWith("blog.") ||
+      k.startsWith("metadata.blog") ||
+      k === "checkout.withdrawalAcknowledgement"
   )) {
     assert.equal(
       placeholders(dictionary[key]),
@@ -46,6 +59,21 @@ for (const locale of LOCALES.filter((l) => l !== "en")) {
     )
     assert.notEqual(dictionary[key].trim(), "", `${locale} "${key}" is empty`)
   }
+
+  for (const key of englishKeys.filter(WRITTEN_FOR_EVERY_LANGUAGE)) {
+    assert.notEqual(dictionary[key], english[key], `${locale} "${key}" is still English`)
+  }
+}
+
+// The checkbox text names the decree through `{decree}`, which is filled from
+// `withdrawal.decree`, so its wording lives in one place per language
+for (const locale of LOCALES) {
+  const dictionary = load(locale)
+  assert.ok(
+    dictionary["checkout.withdrawalAcknowledgement"].includes("{decree}"),
+    `${locale} "checkout.withdrawalAcknowledgement" names the decree`
+  )
+  assert.notEqual(dictionary["withdrawal.decree"].trim(), "", `${locale} has the decree`)
 }
 
 console.log("dictionaries.test.ts: ok")

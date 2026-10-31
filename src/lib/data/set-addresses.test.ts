@@ -28,6 +28,8 @@
  *  4. A signed-out visitor whose email already has an account is told, in their
  *     language, to log in: no second account, and other failures keep their text
  *  5. The sign-up page's error text says the same
+ *  6. Delivery opens under the visitor's market prefix (`/de-at/…`), not a bare
+ *     country the proxy has to repair
  */
 
 import Module from "node:module"
@@ -242,7 +244,8 @@ async function submit(
   }
 }
 
-const toDelivery = { redirectedTo: "/at/checkout?step=delivery" }
+// The tests read the page in English unless they say otherwise: Austria, `/en-at`
+const toDelivery = { redirectedTo: "/en-at/checkout?step=delivery" }
 const sameOutcome = (a: Outcome, b: Outcome) =>
   JSON.stringify(a) === JSON.stringify(b)
 
@@ -427,6 +430,42 @@ async function main() {
   assert(
     (await localizeError(new Error("boom"))) === (await translate("account.errorOccurred", "en")),
     "anything else gets the generic one"
+  )
+
+  // =========================================================================
+  section("6. Delivery opens under the visitor's market prefix")
+  // =========================================================================
+
+  // The step after the address used to go to `/<country>/checkout`, without the
+  // language: the address bar showed `/at/checkout` until the proxy repaired it
+  // on a full load. Like `placeOrder` and `updateRegion`, it now goes to
+  // `/<language>-<country>`: the language of the page, the country they chose.
+  for (const [locale, country, prefix] of [
+    ["en", "at", "en-at"],
+    ["de-AT", "at", "de-at"],
+    ["de-DE", "de", "de-de"],
+    // Another country than the page's: the language they are reading stays
+    ["de-AT", "hu", "de-hu"],
+    ["en", "hu", "en-hu"],
+    // Hungarian is not a language of the URLs: the country's usual one
+    ["hu-HU", "hu", "en-hu"],
+  ] as const) {
+    outcome = await submit(
+      { ...privateBuyer, "shipping_address.country_code": country },
+      null,
+      { locale }
+    )
+    assert(
+      sameOutcome(outcome, { redirectedTo: `/${prefix}/checkout?step=delivery` }),
+      `${locale}, to ${country.toUpperCase()}: /${prefix}/checkout?step=delivery (got ${JSON.stringify(outcome)})`
+    )
+  }
+
+  // A returning customer's redirect is the same
+  outcome = await submit(business, returningCustomer, { locale: "de-AT" })
+  assert(
+    sameOutcome(outcome, { redirectedTo: "/de-at/checkout?step=delivery" }),
+    "a signed-in customer on /de-at is sent to /de-at/checkout"
   )
 }
 

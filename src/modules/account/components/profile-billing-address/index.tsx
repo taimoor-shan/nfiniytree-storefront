@@ -9,6 +9,7 @@ import NativeSelect from "@modules/common/components/native-select"
 import AccountInfo from "../account-info"
 import { HttpTypes } from "@medusajs/types"
 import { addCustomerAddress, updateCustomerAddress } from "@lib/data/customer"
+import { getCountryName } from "@lib/util/country-name"
 
 type MyInformationProps = {
   customer: HttpTypes.StoreCustomer
@@ -19,19 +20,23 @@ const ProfileBillingAddress: React.FC<MyInformationProps> = ({
   customer,
   regions,
 }) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const regionOptions = useMemo(() => {
     return (
       regions
         ?.map((region) => {
           return region.countries?.map((country) => ({
             value: country.iso_2,
-            label: country.display_name,
+            label: getCountryName(
+              country.iso_2,
+              locale,
+              country.display_name ?? ""
+            ),
           }))
         })
         .flat() || []
     )
-  }, [regions])
+  }, [regions, locale])
 
   const [successState, setSuccessState] = React.useState(false)
 

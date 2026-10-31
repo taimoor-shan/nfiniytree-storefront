@@ -7,6 +7,7 @@ import PaymentButton from "../payment-button"
 import { useSearchParams } from "next/navigation"
 import { CardBrandLogos } from "@modules/checkout/components/card-brand-logos"
 import CheckboxWithLabel from "@modules/common/components/checkbox"
+import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { useTranslation } from "@/lib/i18n"
 
 const hasConfiguredItems = (cart: any): boolean => {
@@ -57,17 +58,17 @@ const Review = ({ cart }: { cart: any }) => {
             <div className="w-full">
               <Text className="txt-medium-plus text-ink mb-1">
                 {t("checkout.byClicking")}{" "}
-                <a className="text-link" href="/policies/terms">
+                <LocalizedClientLink className="text-link" href="/policies/terms">
                   {t("footer.termsAndConditions")}
-                </a>
+                </LocalizedClientLink>
                 ,{" "}
-                <a className="text-link" href="/policies/returns">
+                <LocalizedClientLink className="text-link" href="/policies/returns">
                   {t("footer.returnsRefunds")}
-                </a>{" "}
+                </LocalizedClientLink>{" "}
                 {t("checkout.andAcknowledge")}{" "}
-                <a className="text-link" href="/policies/privacy">
+                <LocalizedClientLink className="text-link" href="/policies/privacy">
                   {t("footer.privacyPolicy")}
-                </a>
+                </LocalizedClientLink>
                 .
               </Text>
             </div>
@@ -78,9 +79,10 @@ const Review = ({ cart }: { cart: any }) => {
               <CheckboxWithLabel
                 checked={acknowledged}
                 onChange={() => setAcknowledged(!acknowledged)}
-                label={
-                  "I acknowledge that my order includes individually assembled/configured artificial tree compositions. I understand that for these configured products, the 14-day statutory right of withdrawal does not apply under Section 29(1)(c) of Hungarian Government Decree 45/2014 (II. 26.)."
-                }
+                label={t("checkout.withdrawalAcknowledgement").replace(
+                  "{decree}",
+                  t("withdrawal.decree")
+                )}
                 name="withdrawal-acknowledgement"
                 data-testid="withdrawal-acknowledgement-checkbox"
               />

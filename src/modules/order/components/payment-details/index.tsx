@@ -66,8 +66,8 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
                 className="txt-medium text-body mt-1"
                 data-testid="payment-status"
               >
-                {t("order.paymentStatus")}:{" "}
-                {getPaymentStatusLabel(order.payment_status)}
+                {t("order.paymentStatus")}{" "}
+                {getPaymentStatusLabel(order.payment_status, t)}
               </Text>
             </div>
           </div>

@@ -1,6 +1,7 @@
 "use client"
 
 import { getPaymentStatusLabel } from "@lib/constants"
+import { formatDate } from "@lib/util/date"
 import { HttpTypes } from "@medusajs/types"
 import { Text } from "@medusajs/ui"
 import { useTranslation } from "@/lib/i18n"
@@ -12,7 +13,7 @@ type OrderDetailsProps = {
 }
 
 const OrderDetails = ({ order, showStatus, isGuest }: OrderDetailsProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const formatStatus = (str: string) => {
     if (!str) return "N/A"
     const formatted = str.split("_").join(" ")
@@ -40,7 +41,7 @@ const OrderDetails = ({ order, showStatus, isGuest }: OrderDetailsProps) => {
       <Text className="mt-2">
         {orderDate}{" "}
         <span data-testid="order-date">
-          {new Date(order.created_at).toDateString()}
+          {formatDate(order.created_at, locale)}
         </span>
       </Text>
       <Text className="mt-2 text-primary-text">

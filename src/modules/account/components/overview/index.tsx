@@ -5,6 +5,7 @@ import { Container } from "@medusajs/ui"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
+import { formatDate } from "@lib/util/date"
 import { getOrderCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
 
@@ -109,7 +110,7 @@ const Overview = async ({ customer, orders }: OverviewProps) => {
                                 {tTotalAmount}
                               </span>
                               <span data-testid="order-created-date">
-                                {new Date(order.created_at).toDateString()}
+                                {formatDate(order.created_at, locale)}
                               </span>
                               <span
                                 data-testid="order-id"

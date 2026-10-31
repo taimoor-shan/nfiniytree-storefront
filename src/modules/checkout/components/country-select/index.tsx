@@ -6,6 +6,7 @@ import NativeSelect, {
   NativeSelectProps,
 } from "@modules/common/components/native-select"
 import { HttpTypes } from "@medusajs/types"
+import { getCountryName } from "@lib/util/country-name"
 import { getCountryOptions } from "@lib/util/regions"
 import { useTranslation } from "@lib/i18n/client"
 
@@ -16,7 +17,7 @@ const CountrySelect = forwardRef<
     regions?: HttpTypes.StoreRegion[]
   }
 >(({ placeholder, region, regions, defaultValue, ...props }, ref) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const resolvedPlaceholder = placeholder ?? t("common.country")
   const innerRef = useRef<HTMLSelectElement>(null)
 
@@ -28,7 +29,7 @@ const CountrySelect = forwardRef<
   const countryOptions = useMemo(() => {
     // Multi-region: show all countries from all regions (checkout use case)
     if (regions?.length) {
-      return getCountryOptions(regions).map((o) => ({
+      return getCountryOptions(regions, locale).map((o) => ({
         value: o.country,
         label: o.label,
       }))
@@ -39,13 +40,17 @@ const CountrySelect = forwardRef<
       return (
         region.countries?.map((country) => ({
           value: country.iso_2,
-          label: country.display_name,
+          label: getCountryName(
+            country.iso_2,
+            locale,
+            country.display_name ?? ""
+          ),
         })) ?? []
       )
     }
 
     return []
-  }, [region, regions])
+  }, [region, regions, locale])
 
   return (
     <NativeSelect

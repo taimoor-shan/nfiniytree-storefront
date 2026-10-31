@@ -3,14 +3,17 @@
 import { HttpTypes } from "@medusajs/types"
 import { clx } from "@medusajs/ui"
 import { getOrderProgress } from "@lib/util/order-progress"
+import { formatDate } from "@lib/util/date"
 import { useTranslation } from "@lib/i18n/client"
+
+const SHORT_DATE = { month: "short", day: "numeric" } as const
 
 type TimelineProps = {
   order: HttpTypes.StoreOrder
 }
 
 const Timeline = ({ order }: TimelineProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const { steps, currentStep, fulfillments } = getOrderProgress(order)
 
   return (
@@ -60,10 +63,7 @@ const Timeline = ({ order }: TimelineProps) => {
               </p>
               {step.date && (
                 <p className="text-xs text-muted mt-0.5">
-                  {new Date(step.date).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  })}
+                  {formatDate(step.date, locale, SHORT_DATE)}
                 </p>
               )}
             </div>
@@ -130,19 +130,13 @@ const Timeline = ({ order }: TimelineProps) => {
                   {f.shipped_at && (
                     <p className="text-xs text-muted">
                       {t("order.progress.shipped")}{" "}
-                      {new Date(f.shipped_at).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {formatDate(f.shipped_at, locale, SHORT_DATE)}
                     </p>
                   )}
                   {f.delivered_at && (
                     <p className="text-xs text-muted">
                       {t("order.progress.delivered")}{" "}
-                      {new Date(f.delivered_at).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {formatDate(f.delivered_at, locale, SHORT_DATE)}
                     </p>
                   )}
                   {f.tracking_url && (

@@ -4,7 +4,7 @@
  */
 
 /** Posts are dated in the shop's own time zone, wherever the server runs. */
-const SITE_TIME_ZONE = "Europe/Budapest"
+export const SITE_TIME_ZONE = "Europe/Budapest"
 
 /**
  * A locale `Intl` understands. English is the plain "en", for which the

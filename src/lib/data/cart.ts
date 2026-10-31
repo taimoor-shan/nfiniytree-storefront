@@ -699,9 +699,15 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     return e.message
   }
 
-  redirect(
-    `/${formData.get("shipping_address.country_code")}/checkout?step=delivery`
-  )
+  // The chosen country in the language the visitor is reading, as for
+  // `placeOrder`: a bare `/at/...` would only be repaired by the proxy.
+  const shippingCountry = String(
+    formData.get("shipping_address.country_code") ?? ""
+  ).toLowerCase()
+  const prefix = shippingCountry
+    ? marketPrefix(shippingCountry, await getLocale())
+    : await getRequestMarketPrefix()
+  redirect(`${prefix ? `/${prefix}` : ""}/checkout?step=delivery`)
 }
 
 /**

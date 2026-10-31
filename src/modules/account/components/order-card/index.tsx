@@ -6,6 +6,7 @@ import { Button } from "@medusajs/ui"
 import Thumbnail from "@modules/products/components/thumbnail"
 import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import { convertToLocale } from "@lib/util/money"
+import { formatDate } from "@lib/util/date"
 import { getOrderCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
 
@@ -14,7 +15,7 @@ type OrderCardProps = {
 }
 
 const OrderCard = ({ order }: OrderCardProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   // Historical orders format per their own shipping country.
   const cc = getOrderCountryCode(order)
 
@@ -31,7 +32,7 @@ const OrderCard = ({ order }: OrderCardProps) => {
       </div>
       <div className="flex items-center divide-x divide-gray-200 text-small-regular text-ink">
         <span className="pr-2" data-testid="order-created-at">
-          {new Date(order.created_at).toDateString()}
+          {formatDate(order.created_at, locale)}
         </span>
         <span className="px-2" data-testid="order-amount">
           {convertToLocale({
