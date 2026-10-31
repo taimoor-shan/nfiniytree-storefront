@@ -88,17 +88,18 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
           data-testid="shipping-method-summary"
         >
           <Text className="txt-medium-plus text-ink mb-1">{t("order.method")}</Text>
-          <Text className="txt-medium text-body">
-            {(order as any).shipping_methods[0]?.name} (
-            {convertToLocale({
-              amount: (order.shipping_methods?.[0] as any)?.subtotal
-                ?? order.shipping_methods?.[0].total
-                ?? 0,
-              currency_code: order.currency_code,
-              countryCode: cc,
-            })}
-            )
-          </Text>
+          {/* One line for each delivery: a pallet and a carton product ship apart. */}
+          {(order.shipping_methods ?? []).map((method) => (
+            <Text key={method.id} className="txt-medium text-body">
+              {method.name} (
+              {convertToLocale({
+                amount: (method as any).subtotal ?? method.total ?? 0,
+                currency_code: order.currency_code,
+                countryCode: cc,
+              })}
+              )
+            </Text>
+          ))}
         </div>
       </div>
       <Divider className="mt-8" />

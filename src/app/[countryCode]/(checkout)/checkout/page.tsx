@@ -1,5 +1,5 @@
 import { beginCheckoutParams } from "@lib/analytics/ga4"
-import { retrieveCart } from "@lib/data/cart"
+import { retrieveCartForCheckout } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import { listRegions } from "@lib/data/regions"
 import PaymentWrapper from "@modules/checkout/components/payment-wrapper"
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 }
 
 export default async function Checkout() {
-  const cart = await retrieveCart()
+  const cart = await retrieveCartForCheckout()
 
   if (!cart) {
     return notFound()

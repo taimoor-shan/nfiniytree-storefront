@@ -9,6 +9,7 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@/lib/i18n"
 import { getTaxRate } from "@lib/util/tax-rate"
+import { deliveryComplete } from "@lib/util/deliveries"
 
 type SummaryProps = {
   cart: HttpTypes.StoreCart & {
@@ -19,7 +20,9 @@ type SummaryProps = {
 function getCheckoutStep(cart: HttpTypes.StoreCart) {
   if (!cart?.shipping_address?.address_1 || !cart.email) {
     return "address"
-  } else if (cart?.shipping_methods?.length === 0) {
+  } else if (!deliveryComplete(cart)) {
+    // Also when a product was added after the delivery was chosen: a pallet
+    // and a carton product are delivered, and paid, separately.
     return "delivery"
   } else {
     return "payment"

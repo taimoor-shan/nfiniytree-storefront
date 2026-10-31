@@ -56,6 +56,13 @@ export const calculatePriceForShippingOption = async (
     )
     .then(({ shipping_option }) => shipping_option)
     .catch((e) => {
+      // The delivery then shows as unavailable. Why (no rates for this
+      // country, no exchange rate) is the shop owner's to fix, so it is logged.
+      console.error(
+        `[shipping] no price for delivery option ${optionId}: ${
+          e instanceof Error ? e.message : String(e)
+        }`
+      )
       return null
     })
 }

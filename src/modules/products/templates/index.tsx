@@ -14,6 +14,7 @@ import SkeletonProductActions from "@modules/skeletons/components/skeleton-produ
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
 import { getLocale } from "@lib/data/locale-actions"
+import { getProductVideo } from "@lib/util/product-video"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
 
@@ -56,7 +57,11 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
       >
         {/* Left Column - Image Gallery */}
         <div className="block w-full small:w-[55%] small:sticky small:top-28">
-          <ImageGallery images={images} productTitle={product.title} />
+          <ImageGallery
+            images={images}
+            productTitle={product.title}
+            video={getProductVideo(product)}
+          />
         </div>
 
         {/* Right Column - Product Details sticky wrapper */}

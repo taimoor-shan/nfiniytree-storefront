@@ -1,4 +1,4 @@
-import { retrieveCart } from "@lib/data/cart"
+import { retrieveCartForCheckout } from "@lib/data/cart"
 import { retrieveCustomer } from "@lib/data/customer"
 import CartTemplate from "@modules/cart/templates"
 import { Metadata } from "next"
@@ -23,7 +23,7 @@ export default async function Cart(props: {
 }) {
   const { countryCode } = await props.params
 
-  const cart = await retrieveCart().catch((error) => {
+  const cart = await retrieveCartForCheckout().catch((error) => {
     console.error(error)
     return notFound()
   })

@@ -29,6 +29,14 @@ import {
 } from "./customer"
 import { knownErrorKey } from "./localize-error"
 
+const DEFAULT_CART_FIELDS =
+  "*items, *items.tax_lines, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, *shipping_methods, *shipping_methods.tax_lines, *shipping_address"
+
+// The shipping profile (pallet, carton) of every product and of every delivery
+// chosen. A cart needs one delivery per profile; see `@lib/util/deliveries`.
+const DELIVERY_CART_FIELDS =
+  "items.variant.product.shipping_profile.id, shipping_methods.shipping_option.shipping_profile_id"
+
 /**
  * Retrieves a cart by its ID. If no ID is provided, it will use the cart ID from the cookies.
  * @param cartId - optional - The ID of the cart to retrieve.
@@ -36,8 +44,7 @@ import { knownErrorKey } from "./localize-error"
  */
 export async function retrieveCart(cartId?: string, fields?: string) {
   const id = cartId || (await getCartId())
-  fields ??=
-    "*items, *items.tax_lines, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, *shipping_methods, *shipping_methods.tax_lines, *shipping_address"
+  fields ??= DEFAULT_CART_FIELDS
 
   if (!id) {
     return null
@@ -62,6 +69,15 @@ export async function retrieveCart(cartId?: string, fields?: string) {
     .catch((e) => {
       return null
     })
+}
+
+/**
+ * The cart with what the cart page and the checkout need to know which
+ * deliveries it requires: a pallet product and a carton product are delivered
+ * (and paid) separately.
+ */
+export async function retrieveCartForCheckout(cartId?: string) {
+  return retrieveCart(cartId, `${DEFAULT_CART_FIELDS}, ${DELIVERY_CART_FIELDS}`)
 }
 
 /**

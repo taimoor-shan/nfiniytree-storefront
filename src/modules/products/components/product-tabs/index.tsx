@@ -81,15 +81,6 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
 
   const sections: { label: string; component: React.ReactNode }[] = []
 
-  // With a short description under the title, the full description gets its
-  // own section here (see `product-copy.ts`).
-  if (product.description && getShortDescription(product, locale)) {
-    sections.push({
-      label: t("product.description"),
-      component: <DescriptionTab text={product.description} />,
-    })
-  }
-
   sections.push({
     label: t("product.specifications"),
     component: (
@@ -101,6 +92,15 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
       />
     ),
   })
+
+  // With a short description under the title, the full description gets its
+  // own section after the specifications (see `product-copy.ts`).
+  if (product.description && getShortDescription(product, locale)) {
+    sections.push({
+      label: t("product.description"),
+      component: <DescriptionTab text={product.description} />,
+    })
+  }
 
   if (parsedKeyFeatures.length > 0) {
     sections.push({
@@ -132,13 +132,7 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
   )
 }
 
-const DescriptionTab = ({ text }: { text: string }) => {
-  return (
-    <div className="py-4">
-      <p className="text-base leading-loose whitespace-pre-line">{text}</p>
-    </div>
-  )
-}
+
 
 const KeyFeaturesTab = ({ features }: { features: string[] }) => {
   return (
@@ -150,6 +144,13 @@ const KeyFeaturesTab = ({ features }: { features: string[] }) => {
           </li>
         ))}
       </ul>
+    </div>
+  )
+}
+const DescriptionTab = ({ text }: { text: string }) => {
+  return (
+    <div className="py-4">
+      <p className="text-base leading-loose whitespace-pre-line">{text}</p>
     </div>
   )
 }
