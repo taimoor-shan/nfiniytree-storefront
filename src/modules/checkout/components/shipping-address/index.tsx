@@ -21,10 +21,11 @@ import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 
+// The value is what is saved with the address; the label is what is shown.
 const SALUTATIONS = [
-  { value: "MS", label: "Ms" },
-  { value: "MR", label: "Mr" },
-  { value: "MX", label: "Mx" },
+  { value: "MS", labelKey: "checkout.salutation.ms" },
+  { value: "MR", labelKey: "checkout.salutation.mr" },
+  { value: "MX", labelKey: "checkout.salutation.mx" },
 ] as const
 
 const ShippingAddress = ({
@@ -512,7 +513,7 @@ return (
               className="flex items-center gap-x-2 text-base-regular cursor-pointer rounded-sm radio-option-focus"
             >
               <MedusaRadio checked={formData.salutation === option.value} />
-              <span>{option.label}</span>
+              <span>{t(option.labelKey)}</span>
             </Radio>
           ))}
         </RadioGroup>

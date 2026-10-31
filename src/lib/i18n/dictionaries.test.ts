@@ -19,6 +19,7 @@ const WRITTEN_FOR_EVERY_LANGUAGE = (key: string) =>
   key === "common.variant" ||
   key === "common.notAvailable" ||
   key.startsWith("order.payment.") ||
+  key.startsWith("checkout.salutation.") ||
   key === "checkout.withdrawalAcknowledgement"
 
 const load = (locale: string): Record<string, string> =>
@@ -74,6 +75,42 @@ for (const locale of LOCALES) {
     `${locale} "checkout.withdrawalAcknowledgement" names the decree`
   )
   assert.notEqual(dictionary["withdrawal.decree"].trim(), "", `${locale} has the decree`)
+}
+
+// The salutation options show a label and save a fixed value, so the English
+// labels are what the form always said
+assert.deepEqual(
+  ["ms", "mr", "mx"].map((k) => english[`checkout.salutation.${k}`]),
+  ["Ms", "Mr", "Mx"]
+)
+
+// The notice and the checkbox name the decree by putting `withdrawal.decree`
+// where `{decree}` stands, so the two must not both add the same word (the
+// Hungarian decree carries its own article: "a a 45/2014" was on the cart)
+for (const locale of LOCALES) {
+  const dictionary = load(locale)
+  assert.ok(
+    dictionary["withdrawal.legalText"].includes("{decree}"),
+    `${locale} "withdrawal.legalText" names the decree`
+  )
+
+  for (const key of [
+    "withdrawal.legalText",
+    "checkout.withdrawalAcknowledgement",
+  ]) {
+    const words = dictionary[key]
+      .replace("{decree}", dictionary["withdrawal.decree"])
+      .toLowerCase()
+      .split(/\s+/)
+
+    for (let i = 1; i < words.length; i++) {
+      assert.notEqual(
+        words[i],
+        words[i - 1],
+        `${locale} "${key}" says "${words[i]}" twice in a row`
+      )
+    }
+  }
 }
 
 console.log("dictionaries.test.ts: ok")

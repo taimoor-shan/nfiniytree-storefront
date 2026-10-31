@@ -7,6 +7,7 @@ import { Fragment, useMemo } from "react"
 
 import Radio from "@modules/common/components/radio"
 import compareAddresses from "@lib/util/compare-addresses"
+import { getAddressCountryName } from "@lib/util/country-name"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@/lib/i18n"
 
@@ -24,7 +25,7 @@ const AddressSelect = ({
   addressInput,
   onSelect,
 }: AddressSelectProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const handleSelect = (id: string) => {
     const savedAddress = addresses.find((a) => a.id === id)
     if (savedAddress) {
@@ -106,7 +107,7 @@ const AddressSelect = ({
                         </span>
                         <span>
                           {address.province && `${address.province}, `}
-                          {address.country_code?.toUpperCase()}
+                          {getAddressCountryName(address.country_code, locale)}
                         </span>
                       </div>
                     </div>

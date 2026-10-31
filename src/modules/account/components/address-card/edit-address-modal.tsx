@@ -6,6 +6,7 @@ import { PencilSquare as Edit, Trash } from "@medusajs/icons"
 import { Button, Heading, Text, clx } from "@medusajs/ui"
 
 import useToggleState from "@lib/hooks/use-toggle-state"
+import { getAddressCountryName } from "@lib/util/country-name"
 import CountrySelect from "@modules/checkout/components/country-select"
 import Input from "@modules/common/components/input"
 import Modal from "@modules/common/components/modal"
@@ -28,7 +29,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
   address,
   isActive = false,
 }) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const [removing, setRemoving] = useState(false)
   const [successState, setSuccessState] = useState(false)
   const { state, open, close: closeModal } = useToggleState(false)
@@ -108,7 +109,7 @@ const EditAddress: React.FC<EditAddressProps> = ({
             </span>
             <span data-testid="address-province-country">
               {address.province && `${address.province}, `}
-              {address.country_code?.toUpperCase()}
+              {getAddressCountryName(address.country_code, locale)}
             </span>
           </Text>
         </div>

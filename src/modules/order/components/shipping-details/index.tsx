@@ -2,6 +2,7 @@
 
 import { convertToLocale } from "@lib/util/money"
 import { getOrderCountryCode } from "@lib/util/country-locale"
+import { getAddressCountryName } from "@lib/util/country-name"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text } from "@medusajs/ui"
 
@@ -14,7 +15,7 @@ type ShippingDetailsProps = {
 }
 
 const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const cc = getOrderCountryCode(order)
   return (
     <div>
@@ -35,7 +36,10 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
                 {order.shipping_address?.city}
               </Text>
               <Text className="txt-medium text-body">
-                {order.shipping_address?.country_code?.toUpperCase()}
+                {getAddressCountryName(
+                  order.shipping_address?.country_code,
+                  locale
+                )}
               </Text>
             </>
           ) : (
@@ -53,7 +57,10 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
                 {order.shipping_address?.city}
               </Text>
               <Text className="txt-medium text-body">
-                {order.shipping_address?.country_code?.toUpperCase()}
+                {getAddressCountryName(
+                  order.shipping_address?.country_code,
+                  locale
+                )}
               </Text>
               {order.shipping_address?.company && (
                 <Text className="txt-medium text-body">

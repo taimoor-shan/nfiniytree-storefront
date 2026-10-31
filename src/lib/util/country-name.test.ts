@@ -7,7 +7,7 @@
  */
 import assert from "node:assert/strict"
 import type { HttpTypes } from "@medusajs/types"
-import { getCountryName } from "./country-name"
+import { getAddressCountryName, getCountryName } from "./country-name"
 import { getCountryOptions } from "./regions"
 
 // Each language names the countries its own way
@@ -29,6 +29,22 @@ assert.equal(getCountryName(null, "de-AT", "Nowhere"), "Nowhere")
 assert.equal(getCountryName("", "de-AT", "Nowhere"), "Nowhere")
 assert.equal(getCountryName("qq", "de-AT", "Qqland"), "Qqland")
 assert.equal(getCountryName("not-a-code", "de-AT", "Qqland"), "Qqland")
+
+// An address stores only the code: it is named in every language, English too
+assert.equal(getAddressCountryName("at", "de-AT"), "Österreich")
+assert.equal(getAddressCountryName("AT", "de-DE"), "Österreich")
+assert.equal(getAddressCountryName("hu", "de-DE"), "Ungarn")
+assert.equal(getAddressCountryName("at", "hu-HU"), "Ausztria")
+assert.equal(getAddressCountryName("hu", "en"), "Hungary")
+assert.equal(getAddressCountryName("at", null), "Austria")
+assert.equal(getAddressCountryName("de", ""), "Germany")
+
+// Nothing to name: no country at all, or a code nobody knows, shown as it is
+assert.equal(getAddressCountryName(null, "de-AT"), "")
+assert.equal(getAddressCountryName(undefined, "en"), "")
+assert.equal(getAddressCountryName("", "de-AT"), "")
+assert.equal(getAddressCountryName("qq", "de-AT"), "QQ")
+assert.equal(getAddressCountryName("not-a-code", "en"), "NOT-A-CODE")
 
 // The list: named and sorted in the visitor's language
 const regions = [

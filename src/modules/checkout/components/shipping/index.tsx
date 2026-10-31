@@ -11,6 +11,7 @@ import {
 } from "@lib/util/deliveries"
 import { convertToLocale } from "@lib/util/money"
 import { getCartCountryCode } from "@lib/util/country-locale"
+import { getAddressCountryName } from "@lib/util/country-name"
 import { CheckCircleSolid, Loader } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import { Button, clx, Heading, Text } from "@medusajs/ui"
@@ -37,7 +38,10 @@ type ShippingProps = {
   availableShippingMethods: ShippingOption[] | null
 }
 
-function formatAddress(address?: HttpTypes.StoreCartAddress | null) {
+function formatAddress(
+  address: HttpTypes.StoreCartAddress | null | undefined,
+  locale: string
+) {
   if (!address) {
     return ""
   }
@@ -57,7 +61,7 @@ function formatAddress(address?: HttpTypes.StoreCartAddress | null) {
   }
 
   if (address.country_code) {
-    ret += `, ${address.country_code.toUpperCase()}`
+    ret += `, ${getAddressCountryName(address.country_code, locale)}`
   }
 
   return ret
@@ -86,7 +90,7 @@ const Shipping: React.FC<ShippingProps> = ({
   // What was just picked, per group, until the cart comes back with it.
   const [choice, setChoice] = useState<Record<string, string>>({})
 
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -383,7 +387,8 @@ const Shipping: React.FC<ShippingProps> = ({
                                     <span className="text-base-regular text-muted">
                                       {formatAddress(
                                         option.service_zone?.fulfillment_set
-                                          ?.location?.address
+                                          ?.location?.address,
+                                        locale
                                       )}
                                     </span>
                                   )}

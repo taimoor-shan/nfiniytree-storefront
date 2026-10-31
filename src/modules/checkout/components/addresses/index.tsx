@@ -3,6 +3,7 @@
 import { useTranslation } from "@/lib/i18n"
 import { setAddresses } from "@lib/data/cart"
 import compareAddresses from "@lib/util/compare-addresses"
+import { getAddressCountryName } from "@lib/util/country-name"
 import { CheckCircleSolid } from "@medusajs/icons"
 import { HttpTypes } from "@medusajs/types"
 import { Heading, Text, useToggleState } from "@medusajs/ui"
@@ -24,7 +25,7 @@ const Addresses = ({
   customer: HttpTypes.StoreCustomer | null
   regions: HttpTypes.StoreRegion[]
 }) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
@@ -125,7 +126,10 @@ const Addresses = ({
                       {cart.shipping_address.city}
                     </Text>
                     <Text className="txt-medium text-body">
-                      {cart.shipping_address.country_code?.toUpperCase()}
+                      {getAddressCountryName(
+                        cart.shipping_address.country_code,
+                        locale
+                      )}
                     </Text>
                     {cart.shipping_address.company && (
                       <Text className="txt-medium text-body">
@@ -182,7 +186,10 @@ const Addresses = ({
                           {cart.billing_address?.city}
                         </Text>
                         <Text className="txt-medium text-body">
-                          {cart.billing_address?.country_code?.toUpperCase()}
+                          {getAddressCountryName(
+                            cart.billing_address?.country_code,
+                            locale
+                          )}
                         </Text>
                       </>
                     )}
