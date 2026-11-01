@@ -8,7 +8,9 @@ import {
   formatDimension,
   parseApproxDimensions,
 } from "@lib/util/approx-dimensions"
-import { getShortDescription } from "@lib/util/product-copy"
+import { getLongDescription, getShortDescription } from "@lib/util/product-copy"
+import { localizeBodyLinks, normalizeBodyHeadings } from "@lib/util/cms-html"
+import { useMarketPrefix } from "@lib/context/market-context"
 import { useTranslation } from "@lib/i18n/client"
 import {
   getLocalizedMetadata,
@@ -30,6 +32,7 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
   // The page's language comes from its URL (`/en-hu`), not the cookie: the
   // cookie only remembers the visitor's last choice.
   const { t, locale: pageLocale } = useTranslation()
+  const market = useMarketPrefix()
   const locale = localeProp || pageLocale
 
   // Resolve locale-aware metadata once with the definitive locale.
@@ -93,9 +96,25 @@ const ProductTabs = ({ product, locale: localeProp }: ProductTabsProps) => {
     ),
   })
 
-  // With a short description under the title, the full description gets its
-  // own section after the specifications (see `product-copy.ts`).
-  if (product.description && getShortDescription(product, locale)) {
+  // The formatted long description from the admin's Long description box has
+  // the section to itself: the product's own description is then the short
+  // text under the title. Without one, a product with a short description
+  // under the title (its metadata `short_description`) shows its full
+  // description here instead (see `product-copy.ts`).
+  const longDescription = getLongDescription(product, locale)
+
+  if (longDescription) {
+    sections.push({
+      label: t("product.description"),
+      component: (
+        <LongDescriptionTab
+          html={longDescription}
+          title={product.title}
+          market={market}
+        />
+      ),
+    })
+  } else if (product.description && getShortDescription(product, locale)) {
     sections.push({
       label: t("product.description"),
       component: <DescriptionTab text={product.description} />,
@@ -151,6 +170,35 @@ const DescriptionTab = ({ text }: { text: string }) => {
   return (
     <div className="py-4">
       <p className="text-base leading-loose whitespace-pre-line">{text}</p>
+    </div>
+  )
+}
+
+/**
+ * The long description from the rich-text editor. The page's h1 is the
+ * product's name, so a heading level 1 in the text is dropped or demoted, and
+ * the shop links the editor wrote (`/products/olive-tree`) keep the visitor in
+ * their market (`/de-at/products/olive-tree`). Its headings stay below the
+ * section's own.
+ */
+const LongDescriptionTab = ({
+  html,
+  title,
+  market,
+}: {
+  html: string
+  title: string
+  market: string
+}) => {
+  return (
+    <div className="py-4">
+      <div
+        className="prose max-w-none text-base text-body [&>:first-child]:mt-0 [&_a]:text-primary-text [&_h2]:font-display [&_h2]:text-xl [&_h3]:font-display [&_h3]:text-lg"
+        data-testid="product-long-description"
+        dangerouslySetInnerHTML={{
+          __html: localizeBodyLinks(normalizeBodyHeadings(html, title), market),
+        }}
+      />
     </div>
   )
 }

@@ -51,6 +51,9 @@ const STRUCTURED_METADATA_KEYS = new Set([
   // and `src/lib/util/approx-dimensions.ts`).
   "short_description",
   "approx_dimensions",
+  // The Description section's formatted text, written in the admin's Long
+  // description box: HTML, or one HTML text per language as JSON.
+  "long_description",
 ])
 
 // ---------------------------------------------------------------------------
