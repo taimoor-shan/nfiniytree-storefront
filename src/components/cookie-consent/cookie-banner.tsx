@@ -35,8 +35,8 @@ export function CookieBanner({
   const positionClasses = {
     bottom: "inset-x-0 bottom-0",
     top: "inset-x-0 top-0",
-    "bottom-left": "bottom-4 left-4 max-w-md",
-    "bottom-right": "bottom-4 right-4 max-w-md",
+    "bottom-left": "bottom-4 left-4 max-w-lg",
+    "bottom-right": "bottom-4 right-4 max-w-lg",
   }
 
   const position = config.position ?? "bottom-right"
@@ -90,7 +90,7 @@ export function CookieBanner({
           <button
             type="button"
             onClick={openSettings}
-            className="flex items-center gap-2 text-sm text-on-dark-soft transition-colors hover:text-on-dark"
+            className="flex items-center gap-2 text-xs md:text-sm text-on-dark-soft transition-colors hover:text-on-dark"
           >
             <Settings className="h-4 w-4" />
             {copy.customize}
@@ -98,12 +98,12 @@ export function CookieBanner({
           <button
             type="button"
             onClick={rejectAll}
-            className="rounded-md border border-on-dark-soft/40 px-4 py-2 text-sm text-on-dark-soft transition-colors hover:border-on-dark-soft hover:text-on-dark"
+            className="rounded-md border border-on-dark-soft/40 px-4 py-2 text-xs md:text-sm text-on-dark-soft transition-colors hover:border-on-dark-soft hover:text-on-dark"
           >
             {copy.rejectAll}
           </button>
           {/* Coral stays scarce: only the primary CTA gets the brand colour. */}
-          <button type="button" onClick={acceptAll} className="btn-primary">
+          <button type="button" onClick={acceptAll} className="btn-primary text-xs md:text-sm">
             {copy.acceptAll}
           </button>
         </div>
