@@ -19,15 +19,15 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
   const cc = getOrderCountryCode(order)
   return (
     <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
+      <Heading level="h2" className="flex flex-row text-2xl lg:text-3xl mt-6 mb-4">
         {t("checkout.delivery")}
       </Heading>
-      <div className="flex items-start gap-x-8">
+      <div className="flex flex-wrap items-start lg:gap-8 gap-6">
         <div
-          className="flex flex-col"
+          className="flex flex-col gap-1"
           data-testid="shipping-address-summary"
         >
-          <Text className="txt-medium-plus text-ink mb-1">
+          <Text className="text-lg text-primary mb-2">
             {t("order.shippingAddress")}
           </Text>
           {isGuest ? (
@@ -81,7 +81,7 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
           className="flex flex-col"
           data-testid="shipping-contact-summary"
         >
-          <Text className="txt-medium-plus text-ink mb-1">{t("order.contact")}</Text>
+          <Text className="text-lg text-primary mb-2">{t("order.contact")}</Text>
           {!isGuest && (
             <Text className="txt-medium text-body">
               {order.shipping_address?.phone}
@@ -94,7 +94,7 @@ const ShippingDetails = ({ order, isGuest }: ShippingDetailsProps) => {
           className="flex flex-col"
           data-testid="shipping-method-summary"
         >
-          <Text className="txt-medium-plus text-ink mb-1">{t("order.method")}</Text>
+          <Text className="text-lg text-primary mb-2">{t("order.method")}</Text>
           {/* One line for each delivery: a pallet and a carton product ship apart. */}
           {(order.shipping_methods ?? []).map((method) => (
             <Text key={method.id} className="txt-medium text-body">

@@ -35,13 +35,13 @@ export default async function OrderCompletedTemplate({
         >
           <Heading
             level="h1"
-            className="flex flex-col gap-y-3 text-ink text-3xl mb-4"
+            className="flex flex-col gap-y-3 text-ink text-2xl lg:text-3xl"
           >
-            <span>{await translate("order.thankYou", locale)}</span>
+            {/* <span>{await translate("order.thankYou", locale)}</span> */}
             <span>{await translate("order.placedSuccessfully", locale)}</span>
           </Heading>
           <OrderDetails order={order} />
-          <Heading level="h2" className="flex flex-row text-3xl-regular">
+          <Heading level="h2" className="flex flex-row text-2xl lg:text-3xl mt-2 mb-0">
             {await translate("order.summary", locale)}
           </Heading>
           <Items order={order} />

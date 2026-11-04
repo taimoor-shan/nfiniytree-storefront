@@ -43,7 +43,7 @@ const PaymentDetails = ({ order }: PaymentDetailsProps) => {
 
   return (
     <div>
-      <Heading level="h2" className="flex flex-row text-3xl-regular my-6">
+      <Heading level="h2" className="flex flex-row text-2xl lg:text-3xl mt-6 mb-4">
         {t("checkout.payment")}
       </Heading>
       <div>
