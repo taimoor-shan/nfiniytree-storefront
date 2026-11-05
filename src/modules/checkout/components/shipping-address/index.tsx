@@ -15,6 +15,10 @@ import { validateVatNumber } from "@lib/util/vat"
 import { validatePhoneNumber } from "@lib/util/phone"
 import { sdk } from "@lib/config"
 import { getCountryOptions } from "@lib/util/regions"
+import {
+  isDeliveryOnRequest,
+  onRequestCountryOptions,
+} from "@lib/util/delivery-on-request"
 import { mapKeys } from "lodash"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import AddressSelect from "../address-select"
@@ -34,14 +38,23 @@ const ShippingAddress = ({
   checked,
   onChange,
   regions,
+  deliveryOnRequest = false,
+  onDeliveryOnRequestChange,
 }: {
   customer: HttpTypes.StoreCustomer | null
   cart: HttpTypes.StoreCart | null
   checked: boolean
   onChange: () => void
   regions: HttpTypes.StoreRegion[]
+  /**
+   * True while a "Delivery on request" country is chosen: the form becomes a
+   * delivery quote request, so it asks for no billing address or account.
+   */
+  deliveryOnRequest?: boolean
+  /** Called with the country when one on request is chosen, else with null. */
+  onDeliveryOnRequestChange?: (countryCode: string | null) => void
 }) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const router = useRouter()
   const pathname = usePathname()
   const marketPrefix = useMarketPrefix()
@@ -131,6 +144,10 @@ const ShippingAddress = ({
 
   // Flat list of all countries across all regions, with their region ids
   const countryOptions = useMemo(() => getCountryOptions(regions), [regions])
+  const onRequestOptions = useMemo(
+    () => onRequestCountryOptions(regions, locale),
+    [regions, locale]
+  )
 
   // Async VIES verification state
   const [vatVerificationStatus, setVatVerificationStatus] = useState<
@@ -352,6 +369,14 @@ const ShippingAddress = ({
 
     const newCountry = e.target.value
     setFormData({ ...formData, [e.target.name]: newCountry })
+
+    // A country the shop has no delivery prices for: the cart stays as it is
+    // (no region has the country) and the form turns into a quote request.
+    if (isDeliveryOnRequest(newCountry, regions)) {
+      onDeliveryOnRequestChange?.(newCountry)
+      return
+    }
+    onDeliveryOnRequestChange?.(null)
 
     const option = countryOptions.find((o) => o.country === newCountry)
     const needsRegionSwitch = option && option.region !== cart?.region?.id
@@ -651,6 +676,7 @@ return (
         name="shipping_address.country_code"
         autoComplete="country"
         regions={regions}
+        onRequestOptions={onRequestOptions}
         disabled={isSwitchingRegion}
         value={formData["shipping_address.country_code"]}
         onChange={handleCountryChange}
@@ -684,7 +710,7 @@ return (
             autoComplete="off"
             value={formData.vat_number}
             onChange={handleChange}
-            required
+            required={!deliveryOnRequest}
             data-testid="shipping-vat-input"
             error={vatError}
           />
@@ -721,6 +747,7 @@ return (
         </div>
       )}
 
+      {!deliveryOnRequest && (
       <div className="mb-4 col-span-1 sm:col-span-2">
         <Checkbox
           label={t("checkout.sameAsBilling")}
@@ -730,9 +757,10 @@ return (
           data-testid="billing-address-checkbox"
         />
       </div>
+      )}
 
       {/* Account — dynamic sign-up: private customers opt in, business customers must create one */}
-      {!customer && (
+      {!customer && !deliveryOnRequest && (
         <section className="flex flex-col gap-y-4 border-t pt-8 col-span-1 sm:col-span-2">
           <Heading level="h3" className="text-2xl-semi">
             {t("checkout.account")}
