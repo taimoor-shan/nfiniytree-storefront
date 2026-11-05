@@ -15,8 +15,15 @@ const CountrySelect = forwardRef<
   NativeSelectProps & {
     region?: HttpTypes.StoreRegion
     regions?: HttpTypes.StoreRegion[]
+    /**
+     * Countries listed under "Delivery on request": European countries no
+     * region covers, for which the checkout takes a quote request instead of
+     * an order (`@lib/util/delivery-on-request`).
+     */
+    onRequestOptions?: { value: string; label: string }[]
   }
->(({ placeholder, region, regions, defaultValue, ...props }, ref) => {
+>(({ placeholder, region, regions, defaultValue, ...rest }, ref) => {
+  const { onRequestOptions, ...props } = rest
   const { t, locale } = useTranslation()
   const resolvedPlaceholder = placeholder ?? t("common.country")
   const innerRef = useRef<HTMLSelectElement>(null)
@@ -64,6 +71,15 @@ const CountrySelect = forwardRef<
           {label}
         </option>
       ))}
+      {!!onRequestOptions?.length && (
+        <optgroup label={t("checkout.deliveryOnRequest")}>
+          {onRequestOptions.map(({ value, label }) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </optgroup>
+      )}
     </NativeSelect>
   )
 })

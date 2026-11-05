@@ -274,6 +274,15 @@ const CountryPopup = ({
         {t("countryPopup.continue", "Continue")}
       </button>
 
+      {/* The list holds only the countries the checkout delivers to; every
+          other European country is taken on request at checkout. */}
+      <p
+        className="text-sm text-body text-start mt-4"
+        data-testid="country-popup-on-request"
+      >
+        {t("countryPopup.onRequest")}
+      </p>
+
       {/* Nav hint */}
       <p className="text-xs text-muted text-center mt-4">
         {t(
