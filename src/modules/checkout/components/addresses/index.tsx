@@ -17,6 +17,7 @@ import Spinner from "@modules/common/icons/spinner"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useActionState, useState } from "react"
 import BillingAddress from "../billing_address"
+import CheckoutSignIn from "../checkout-sign-in"
 import ErrorMessage from "../error-message"
 import ShippingAddress from "../shipping-address"
 import { SubmitButton } from "../submit-button"
@@ -25,10 +26,16 @@ const Addresses = ({
   cart,
   customer,
   regions,
+  startCountry = null,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
   regions: HttpTypes.StoreRegion[]
+  /**
+   * The country on request the visitor chose in the popup or the header
+   * (`checkoutStartCountry`): the step opens as a quote request for it.
+   */
+  startCountry?: string | null
 }) => {
   const { t, locale } = useTranslation()
   const searchParams = useSearchParams()
@@ -52,7 +59,15 @@ const Addresses = ({
   // A "Delivery on request" country (a European country no region covers):
   // the form sends a delivery quote request instead of going on to delivery
   // and payment. See `@lib/util/delivery-on-request`.
-  const [onRequestCountry, setOnRequestCountry] = useState<string | null>(null)
+  const [onRequestCountry, setOnRequestCountry] = useState<string | null>(
+    startCountry
+  )
+  // The sign-in box above the form, opened by its own button or by the
+  // "this email has an account" note under the email field
+  const [signIn, setSignIn] = useState<{ open: boolean; email: string }>({
+    open: false,
+    email: "",
+  })
   const [requestState, requestAction] = useActionState<
     DeliveryRequestState,
     FormData
@@ -62,9 +77,6 @@ const Addresses = ({
     useState<DeliveryRequestState | null>(null)
   const requestSent =
     requestState.status === "sent" && requestState !== dismissedRequest
-  const onRequestCountryName = onRequestCountry
-    ? getAddressCountryName(onRequestCountry, locale)
-    : ""
 
   return (
     <div className="bg-canvas">
@@ -101,12 +113,17 @@ const Addresses = ({
             {t("checkout.deliveryRequest.sentTitle")}
           </Heading>
           <Text className="txt-medium text-body">
-            {t("checkout.deliveryRequest.sent")
+            {/* By email when they gave one, else by phone */}
+            {(requestState.email
+              ? t("checkout.deliveryRequest.sent")
+              : t("checkout.deliveryRequest.sentPhone")
+            )
               .replace(
                 "{country}",
                 getAddressCountryName(requestState.country, locale)
               )
-              .replace("{email}", requestState.email)}
+              .replace("{email}", requestState.email)
+              .replace("{phone}", requestState.phone)}
           </Text>
           <Text>
             <button
@@ -119,6 +136,14 @@ const Addresses = ({
             </button>
           </Text>
         </div>
+      )}
+      {isOpen && !customer && !requestSent && (
+        // Apart from the address form and above it (a form can't hold another)
+        <CheckoutSignIn
+          open={signIn.open}
+          email={signIn.email}
+          onOpenChange={(open) => setSignIn((current) => ({ ...current, open }))}
+        />
       )}
       {isOpen ? (
         // Hidden, not unmounted, while the confirmation shows, so the address
@@ -136,27 +161,19 @@ const Addresses = ({
               regions={regions}
               deliveryOnRequest={!!onRequestCountry}
               onDeliveryOnRequestChange={setOnRequestCountry}
+              startCountry={startCountry}
+              onSignInRequest={(email) => {
+                setSignIn({ open: true, email })
+                window.scrollTo({ top: 0, behavior: "smooth" })
+              }}
             />
 
             {onRequestCountry ? (
+              // The "on request" note sits under the country, at the top
               <div
                 className="mt-6 flex flex-col gap-y-4"
                 data-testid="delivery-request"
               >
-                <div className="rounded-lg border border-hairline bg-surface-card p-5">
-                  <Text className="txt-medium-plus text-ink mb-1">
-                    {t("checkout.deliveryRequest.title").replace(
-                      "{country}",
-                      onRequestCountryName
-                    )}
-                  </Text>
-                  <Text className="txt-medium text-body">
-                    {t("checkout.deliveryRequest.intro").replace(
-                      "{country}",
-                      onRequestCountryName
-                    )}
-                  </Text>
-                </div>
                 <Textarea
                   label={t("checkout.deliveryRequest.message")}
                   name="delivery_request_message"

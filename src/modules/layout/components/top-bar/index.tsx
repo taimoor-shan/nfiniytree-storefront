@@ -4,9 +4,14 @@ import { useMemo, useTransition, useState } from "react"
 import { useParams, usePathname } from "next/navigation"
 import { goToMarket } from "@lib/context/market-context"
 import { stripMarketPrefix } from "@lib/i18n/market"
-import { updateRegion } from "@lib/data/cart"
+import { chooseOnRequestCountry, updateRegion } from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
 import { getLocalizedLanguageName } from "@lib/util/locale-name"
+import {
+  isDeliveryOnRequest,
+  onRequestCountryOptions,
+} from "@lib/util/delivery-on-request"
+import { getAddressCountryName } from "@lib/util/country-name"
 import SimpleDropdown from "./simple-dropdown"
 import { Phone, Mail } from "lucide-react"
 import { Locale } from "@lib/data/locales"
@@ -17,6 +22,8 @@ type TopBarProps = {
   locales: Locale[] | null
   currentLocale: string | null
   regions: HttpTypes.StoreRegion[] | null
+  /** A country on request the visitor chose (`delivery-country`), shown instead of the market */
+  deliveryCountry?: string | null
   className?: string
 }
 
@@ -111,12 +118,13 @@ export default function TopBar({
   locales,
   currentLocale,
   regions,
+  deliveryCountry = null,
   className = "",
 }: TopBarProps) {
   const pathname = usePathname()
   const { countryCode } = useParams()
   const [isPending, startTransition] = useTransition()
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
 
   /* -------------------------------------------------- */
   /* Language options                                    */
@@ -161,13 +169,30 @@ export default function TopBar({
       .sort((a, b) => a.label.localeCompare(b.label))
   }, [regions])
 
+  // Every other European country: delivered on request (a quote, no order)
+  const onRequestOptions = useMemo(
+    () => onRequestCountryOptions(regions, locale),
+    [regions, locale]
+  )
+  const onRequestCountry = isDeliveryOnRequest(deliveryCountry, regions)
+    ? deliveryCountry
+    : null
+
   const currentCountryLabel = useMemo(() => {
+    // A country on request chosen: it is where the visitor wants delivery,
+    // whatever euro market they browse meanwhile
+    if (onRequestCountry) {
+      return t("topbar.onRequestCountry").replace(
+        "{country}",
+        getAddressCountryName(onRequestCountry, locale)
+      )
+    }
     if (!countryCode) return ""
     const found = countryOptions.find(
       (o) => o.countryCode === countryCode
     )
     return found?.label ?? ""
-  }, [countryCode, countryOptions])
+  }, [countryCode, countryOptions, onRequestCountry, locale, t])
 
   /* -------------------------------------------------- */
   /* Handlers                                            */
@@ -181,8 +206,18 @@ export default function TopBar({
     })
   }
 
+  // Also clears a country on request chosen before (`switchRegion`)
   const handleCountryChange = (country: string) => {
     updateRegion(country, stripMarketPrefix(pathname))
+  }
+
+  // Remembered on the server, which moves the visitor to a euro market if
+  // needed; the page then opens there in the same language ("" is English)
+  const handleOnRequestChange = (country: string) => {
+    startTransition(async () => {
+      const market = await chooseOnRequestCountry(country, countryCode as string)
+      goToMarket(market, currentLocale ?? "")
+    })
   }
 
   return (
@@ -280,9 +315,33 @@ export default function TopBar({
                   <li key={opt.countryCode}>
                     <button
                       className={`w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated whitespace-nowrap ${
-                        countryCode === opt.countryCode ? "text-primary" : ""
+                        !onRequestCountry && countryCode === opt.countryCode
+                          ? "text-primary"
+                          : ""
                       }`}
                       onClick={() => handleCountryChange(opt.countryCode)}
+                    >
+                      {opt.label}
+                    </button>
+                  </li>
+                ))}
+                {onRequestOptions.length > 0 && (
+                  <li
+                    role="presentation"
+                    className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide opacity-70 border-t border-gray-600 mt-2"
+                  >
+                    {t("checkout.deliveryOnRequest")}
+                  </li>
+                )}
+                {onRequestOptions.map((opt) => (
+                  <li key={opt.value}>
+                    <button
+                      className={`w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated whitespace-nowrap ${
+                        onRequestCountry === opt.value ? "text-primary" : ""
+                      }`}
+                      onClick={() => handleOnRequestChange(opt.value)}
+                      disabled={isPending}
+                      data-testid="topbar-on-request-option"
                     >
                       {opt.label}
                     </button>

@@ -19,8 +19,16 @@ import { NextRequest } from "next/server"
  * helper falls back to the next signal.
  */
 export function getRequestCountry(request: NextRequest): string | null {
-  const headers = request.headers
+  return countryFromHeaders(request.headers)
+}
 
+/**
+ * The same, from any request's headers: the proxy's, or `headers()` in a
+ * server component (the country popup offers a visitor their own country).
+ */
+export function countryFromHeaders(headers: {
+  get(name: string): string | null
+}): string | null {
   const cf = headers.get("cf-ipcountry")
   if (cf && isValidIso2(cf)) {
     return cf.toLowerCase()

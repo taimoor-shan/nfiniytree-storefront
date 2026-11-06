@@ -30,6 +30,9 @@
  *  5. The sign-up page's error text says the same
  *  6. Delivery opens under the visitor's market prefix (`/de-at/…`), not a bare
  *     country the proxy has to repair
+ *  7. A signed-out visitor whose email has an account is recognised: no
+ *     password, no second account, and the cart goes on their account once it
+ *     carries the email. When the check can't be made, the password rule holds
  */
 
 import Module from "node:module"
@@ -74,6 +77,10 @@ type Recorded = {
   customerUpdates: any[]
   cartUpdates: any[]
   addressesSaved: any[]
+  accountChecks: string[]
+  cartsAttached: string[]
+  /** The cart writes and the attach, in the order they happened */
+  sequence: string[]
 }
 
 const recorded: Recorded = {
@@ -82,10 +89,17 @@ const recorded: Recorded = {
   customerUpdates: [],
   cartUpdates: [],
   addressesSaved: [],
+  accountChecks: [],
+  cartsAttached: [],
+  sequence: [],
 }
 
 // Who `retrieveCustomer()` finds: null is a visitor who is not signed in
 let signedIn: Record<string, unknown> | null = null
+
+// What the backend says about the typed email: true has an account, false has
+// none, null is a check that could not be made (refused, or Medusa down)
+let knownAccount: boolean | null = false
 
 // The language `getLocale()` reports, and how registration ends: null lets it
 // through, an error makes it fail the way the SDK's `auth.register` does
@@ -107,6 +121,16 @@ const stubbedFiles: Record<string, unknown> = {
       recorded.accountsCreated.push(input)
     },
   },
+  [path.join(dataDir, "checkout-account.ts")]: {
+    emailHasAccount: async (email: string) => {
+      recorded.accountChecks.push(email)
+      return knownAccount
+    },
+    attachCartToAccount: async (cartId: string) => {
+      recorded.cartsAttached.push(cartId)
+      recorded.sequence.push("attach")
+    },
+  },
   [path.join(dataDir, "cookies.ts")]: {
     getAuthHeaders: async () => ({}),
     getCartId: async () => "cart_test",
@@ -123,6 +147,7 @@ const stubbedFiles: Record<string, unknown> = {
         cart: {
           update: async (cartId: string, data: unknown) => {
             recorded.cartUpdates.push({ cartId, data })
+            recorded.sequence.push("cart-update")
             return { cart: { id: cartId } }
           },
         },
@@ -221,16 +246,24 @@ type Outcome = { error: string } | { redirectedTo: string }
 async function submit(
   fields: Record<string, string>,
   customer: Record<string, unknown> | null,
-  options: { locale?: string; registrationFails?: Error } = {}
+  options: {
+    locale?: string
+    registrationFails?: Error
+    knownAccount?: boolean | null
+  } = {}
 ): Promise<Outcome> {
   signedIn = customer
   currentLocale = options.locale ?? "en"
   registrationFailure = options.registrationFails ?? null
+  knownAccount = options.knownAccount === undefined ? false : options.knownAccount
   recorded.registrationAttempts = []
   recorded.accountsCreated = []
   recorded.customerUpdates = []
   recorded.cartUpdates = []
   recorded.addressesSaved = []
+  recorded.accountChecks = []
+  recorded.cartsAttached = []
+  recorded.sequence = []
 
   const formData = new FormData()
   for (const [name, value] of Object.entries(fields)) formData.set(name, value)
@@ -466,6 +499,66 @@ async function main() {
   assert(
     sameOutcome(outcome, { redirectedTo: "/de-at/checkout?step=delivery" }),
     "a signed-in customer on /de-at is sent to /de-at/checkout"
+  )
+
+  // =========================================================================
+  section("7. A signed-out visitor whose email has an account is recognised")
+  // =========================================================================
+
+  // The bug this fixes: they filled in the whole form, were refused at the end
+  // and had to sign in at the top and start over
+  outcome = await submit(business, null, { knownAccount: true })
+  assert(
+    sameOutcome(outcome, toDelivery),
+    `they reach delivery without a password (got ${JSON.stringify(outcome)})`
+  )
+  assert(
+    recorded.accountChecks.length === 1 &&
+      recorded.accountChecks[0] === "buyer@example.test",
+    "the email they typed is the one checked"
+  )
+  assert(recorded.registrationAttempts.length === 0, "no sign-up is tried")
+  assert(recorded.accountsCreated.length === 0, "no second account is created")
+  assert(
+    recorded.cartsAttached.length === 1 && recorded.cartsAttached[0] === "cart_test",
+    "the cart is put on their account"
+  )
+  assert(
+    JSON.stringify(recorded.sequence) === JSON.stringify(["cart-update", "attach"]),
+    "once it carries their email, not before"
+  )
+  assert(
+    recorded.customerUpdates.length === 0 && recorded.addressesSaved.length === 0,
+    "and nothing on their account is changed by a visitor who did not sign in"
+  )
+
+  // A password typed anyway (fields filled before the check answered) is ignored
+  outcome = await submit({ ...business, password: "abc", password_repeat: "x" }, null, {
+    knownAccount: true,
+  })
+  assert(sameOutcome(outcome, toDelivery), "a stray password typed anyway does not stop them")
+  assert(recorded.registrationAttempts.length === 0, "and is not used for a sign-up")
+
+  // The check could not be made: the form falls back to what it always did
+  outcome = await submit(business, null, { knownAccount: null })
+  assert(
+    sameOutcome(outcome, { error: passwordRule }),
+    "when the check fails, a business buyer is asked for a password as before"
+  )
+  assert(recorded.cartsAttached.length === 0, "and no cart is moved")
+
+  outcome = await submit(business, null, { knownAccount: false })
+  assert(
+    sameOutcome(outcome, { error: passwordRule }),
+    "an email with no account still needs a password"
+  )
+  assert(recorded.cartsAttached.length === 0, "and its cart stays where it is")
+
+  outcome = await submit(business, returningCustomer, { knownAccount: true })
+  assert(sameOutcome(outcome, toDelivery), "a signed-in customer reaches delivery")
+  assert(
+    recorded.accountChecks.length === 0 && recorded.cartsAttached.length === 0,
+    "without a lookup or a cart move: they are who they signed in as"
   )
 }
 

@@ -7,9 +7,12 @@
  *  1. The links built from a card (call, mail, WhatsApp, page, contact file)
  *  2. The vCard: exact content, CRLF endings, escaping, line length
  *  3. Which paths are card pages
+ *  4. Christoph Thomann's card: links, description and the exact contact file
+ *  5. Every card: own address, and the number shown is the number saved
  */
 
 import {
+  CHRISTOPH_THOMANN,
   MARTIN_WOLF,
   buildVCard,
   cardDescription,
@@ -156,6 +159,94 @@ assert(!isTeamCardPath("/hu/team/martin-wolf"), "a market's own /team stays a ma
 assert(!isTeamCardPath("/teams/martin-wolf"), "/teams is another path")
 assert(!isTeamCardPath("/store"), "the shop's own routes")
 assertEqual(TEAM_CARD_LOCALE, "de-AT", "the cards are German, Austria's dictionary")
+
+section("4. Christoph Thomann's card")
+assertEqual(fullName(CHRISTOPH_THOMANN), "Christoph Thomann", "full name")
+assertEqual(pagePath(CHRISTOPH_THOMANN), "/team/christoph-thomann", "page address")
+assertEqual(
+  vcardPath(CHRISTOPH_THOMANN),
+  "/team/christoph-thomann.vcf",
+  "contact file address"
+)
+assertEqual(
+  vcardFileName(CHRISTOPH_THOMANN),
+  "Christoph_Thomann_InfinYtree.vcf",
+  "the saved file's name"
+)
+assertEqual(telHref(CHRISTOPH_THOMANN), "tel:+436643079229", "call link")
+assertEqual(
+  mailtoHref(CHRISTOPH_THOMANN),
+  "mailto:christoph@infinytree.com",
+  "mail link"
+)
+assertEqual(
+  whatsappHref(CHRISTOPH_THOMANN),
+  "https://wa.me/436643079229",
+  "WhatsApp link is digits only, no +"
+)
+assertEqual(
+  cardTitle(CHRISTOPH_THOMANN),
+  "Österreich",
+  "no role and one place: the title saved to the phone is the country"
+)
+assertEqual(
+  cardDescription(CHRISTOPH_THOMANN),
+  "Digitale Visitenkarte von Christoph Thomann bei InfinYtree (Österreich): anrufen, eine E-Mail schreiben oder den Kontakt speichern.",
+  "the page description"
+)
+assertEqual(
+  buildVCard(CHRISTOPH_THOMANN, "https://infinytree.com"),
+  [
+    "BEGIN:VCARD",
+    "VERSION:3.0",
+    "N:Thomann;Christoph;;;",
+    "FN:Christoph Thomann",
+    "ORG:InfinYtree",
+    "TITLE:Österreich",
+    "TEL;TYPE=WORK,CELL:+436643079229",
+    "EMAIL;TYPE=WORK:christoph@infinytree.com",
+    "URL:https://infinytree.com/",
+    "END:VCARD",
+    "",
+  ].join("\r\n"),
+  "exact content of the contact file"
+)
+
+section("5. Every card")
+const cards = [MARTIN_WOLF, CHRISTOPH_THOMANN]
+assertEqual(
+  new Set(cards.map((card) => card.slug)).size,
+  cards.length,
+  "no two cards share an address"
+)
+for (const card of cards) {
+  const who = fullName(card)
+  assert(
+    isTeamCardPath(pagePath(card)),
+    `${who}: the proxy serves the address as a card page`
+  )
+  assert(
+    !isTeamCardPath(vcardPath(card)),
+    `${who}: the contact file is left to its own route`
+  )
+  assertEqual(
+    card.phone,
+    `+${card.phoneDisplay.replace(/\D/g, "")}`,
+    `${who}: the number shown is the number that is dialled and saved`
+  )
+  assert(
+    /^\+\d{8,15}$/.test(card.phone),
+    `${who}: the number is in international format`
+  )
+  assert(
+    /^[a-z0-9._-]+@infinytree\.com$/.test(card.email),
+    `${who}: a lowercase company address`
+  )
+  assert(
+    !buildVCard(card, "https://infinytree.com").includes("undefined"),
+    `${who}: nothing in the contact file reads 'undefined'`
+  )
+}
 
 // ===========================================================================
 console.log(`\n${"─".repeat(40)}`)

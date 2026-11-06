@@ -18,6 +18,8 @@ type SideMenuProps = {
   currentLocale: string | null
   storeName?: string
   triggerClassName?: string
+  /** A country on request the visitor chose, for the country selector */
+  deliveryCountry?: string | null
 }
 
 const SideMenu = ({
@@ -26,6 +28,7 @@ const SideMenu = ({
   currentLocale,
   storeName = "InfinYtree",
   triggerClassName,
+  deliveryCountry = null,
 }: SideMenuProps) => {
   const { t } = useTranslation()
   const countryToggleState = useToggleState()
@@ -179,6 +182,8 @@ const SideMenu = ({
                             <CountrySelect
                               toggleState={countryToggleState}
                               regions={regions}
+                              deliveryCountry={deliveryCountry}
+                              currentLocale={currentLocale}
                             />
                             <ArrowRightMini
                               aria-hidden="true"

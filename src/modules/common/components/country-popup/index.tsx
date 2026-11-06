@@ -13,13 +13,21 @@ import { useParams, usePathname } from "next/navigation"
 import { goToMarket } from "@lib/context/market-context"
 import { stripMarketPrefix } from "@lib/i18n/market"
 
-import { switchRegion, updateRegion } from "@lib/data/cart"
+import {
+  chooseOnRequestCountry,
+  switchRegion,
+  updateRegion,
+} from "@lib/data/cart"
 import { updateLocale } from "@lib/data/locale-actions"
 import { Locale } from "@lib/data/locales"
 import { getLocalizedLanguageName } from "@lib/util/locale-name"
 import useToggleState from "@lib/hooks/use-toggle-state"
 import { useTranslation } from "@lib/i18n"
 import { CountryOption, getCountryOptions } from "@lib/util/regions"
+import {
+  chooserStartCountry,
+  onRequestCountryOptions,
+} from "@lib/util/delivery-on-request"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import Modal from "@modules/common/components/modal"
 
@@ -31,26 +39,47 @@ type CountryPopupProps = {
   regions: HttpTypes.StoreRegion[]
   locales?: Locale[] | null
   currentLocale?: string | null
+  /** A country on request the visitor chose before (`delivery-country`) */
+  deliveryCountry?: string | null
+  /** Where Cloudflare says the visitor is: offered when it is on request */
+  visitorCountry?: string | null
 }
+
+/** A country of the list; `onRequest` for one the shop takes quote requests for */
+type PopupOption = CountryOption & { onRequest?: boolean }
 
 const CountryPopup = ({
   regions,
   locales,
   currentLocale,
+  deliveryCountry,
+  visitorCountry,
 }: CountryPopupProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
   const { countryCode } = useParams()
   const pathname = usePathname()
   const currentPath = stripMarketPrefix(pathname)
 
   const toggleState = useToggleState(false)
-  const [selected, setSelected] = useState<CountryOption | undefined>(undefined)
+  const [selected, setSelected] = useState<PopupOption | undefined>(undefined)
   const [selectedLocale, setSelectedLocale] = useState<string>(
     currentLocale ?? ""
   )
   const [, startLocaleTransition] = useTransition()
 
   const options = useMemo(() => getCountryOptions(regions), [regions])
+  // Every other European country, listed apart: choosing one keeps the visitor
+  // on a euro market and turns the checkout into a delivery quote request
+  const onRequestOptions = useMemo<PopupOption[]>(
+    () =>
+      onRequestCountryOptions(regions, locale).map((o) => ({
+        country: o.value,
+        region: "",
+        label: o.label,
+        onRequest: true,
+      })),
+    [regions, locale]
+  )
 
   const localeOptions = useMemo(() => {
     if (!locales) return []
@@ -100,8 +129,18 @@ const CountryPopup = ({
     )
       return
 
+    // A country on request chosen before, else the visitor's own when it is
+    // on request, else the market they are in
+    const start = chooserStartCountry({
+      market: countryCode as string,
+      chosen: deliveryCountry,
+      geo: visitorCountry,
+      regions,
+    })
     const initial =
-      options.find((o) => o.country === countryCode) ?? options[0]
+      [...options, ...onRequestOptions].find((o) => o.country === start) ??
+      options.find((o) => o.country === countryCode) ??
+      options[0]
     if (initial) setSelected(initial)
 
     toggleState.open()
@@ -121,6 +160,23 @@ const CountryPopup = ({
     const localeChanged =
       (selectedLocale ?? "") !== (currentLocale ?? "")
 
+    // A country on request: remembered on the server, which moves the visitor
+    // to a euro market if needed; then the page opens there, in the language
+    // chosen ("" is English)
+    if (selected?.onRequest) {
+      document.cookie = `${COUNTRY_POPUP_COOKIE}=true;path=/;max-age=${ONE_YEAR};SameSite=Lax`
+      toggleState.close()
+      startLocaleTransition(async () => {
+        if (localeChanged) await updateLocale(selectedLocale ?? "")
+        const market = await chooseOnRequestCountry(
+          selected.country,
+          countryCode as string
+        )
+        goToMarket(market, selectedLocale ?? "")
+      })
+      return
+    }
+
     // Persist both cookies before any redirect
     document.cookie = `${COUNTRY_POPUP_COOKIE}=true;path=/;max-age=${ONE_YEAR};SameSite=Lax`
     if (chosen) {
@@ -129,7 +185,10 @@ const CountryPopup = ({
 
     toggleState.close()
 
-    const countryChanged = !!chosen && chosen !== countryCode
+    // A country on request chosen before is replaced by this one, even when
+    // it is the market the visitor is already in (switching clears it)
+    const countryChanged =
+      (!!chosen && chosen !== countryCode) || !!deliveryCountry
 
     // A new language means a new URL prefix: save it, switch the country too
     // if that changed, then load the page under the new prefix.
@@ -220,6 +279,31 @@ const CountryPopup = ({
                 {option.label}
               </ListboxOption>
             ))}
+            {onRequestOptions.length > 0 && (
+              <div
+                role="presentation"
+                className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide text-muted border-t border-hairline"
+              >
+                {t("checkout.deliveryOnRequest")}
+              </div>
+            )}
+            {onRequestOptions.map((option) => (
+              <ListboxOption
+                key={option.country}
+                value={option}
+                className="cursor-pointer select-none px-4 py-2.5 hover:bg-surface-card data-[focus]:bg-surface-card flex items-center gap-x-2 text-sm"
+                data-testid="country-popup-on-request-option"
+              >
+                <ReactCountryFlag
+                  svg
+                  countryCode={option.country}
+                  style={{ width: "16px", height: "16px" }}
+                  alt=""
+                  aria-hidden="true"
+                />
+                {option.label}
+              </ListboxOption>
+            ))}
           </ListboxOptions>
         </Listbox>
 
@@ -274,13 +358,18 @@ const CountryPopup = ({
         {t("countryPopup.continue", "Continue")}
       </button>
 
-      {/* The list holds only the countries the checkout delivers to; every
-          other European country is taken on request at checkout. */}
+      {/* The countries the checkout delivers to come first; every other
+          European country is listed under "Delivery on request". Choosing
+          one says what that means before the visitor goes on. */}
       <p
         className="text-sm text-body text-start mt-4"
+        role="status"
+        aria-live="polite"
         data-testid="country-popup-on-request"
       >
-        {t("countryPopup.onRequest")}
+        {selected?.onRequest
+          ? t("countryPopup.onRequestChosen").replace("{country}", selected.label)
+          : t("countryPopup.onRequest")}
       </p>
 
       {/* Nav hint */}

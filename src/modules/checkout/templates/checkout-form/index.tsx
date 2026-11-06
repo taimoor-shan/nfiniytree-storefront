@@ -10,10 +10,13 @@ export default async function CheckoutForm({
   cart,
   customer,
   regions,
+  startCountry = null,
 }: {
   cart: HttpTypes.StoreCart | null
   customer: HttpTypes.StoreCustomer | null
   regions: HttpTypes.StoreRegion[]
+  /** A country on request to open the address step with, as a quote request */
+  startCountry?: string | null
 }) {
   if (!cart) {
     return null
@@ -28,7 +31,12 @@ export default async function CheckoutForm({
 
   return (
     <div className="w-full grid grid-cols-1 gap-y-8">
-      <Addresses cart={cart} customer={customer} regions={regions} />
+      <Addresses
+        cart={cart}
+        customer={customer}
+        regions={regions}
+        startCountry={startCountry}
+      />
 
       <Shipping cart={cart} availableShippingMethods={shippingMethods} />
 

@@ -38,6 +38,17 @@ export const MARTIN_WOLF: BusinessCard = {
   email: "martin@infinytree.com",
 }
 
+export const CHRISTOPH_THOMANN: BusinessCard = {
+  slug: "christoph-thomann",
+  firstName: "Christoph",
+  lastName: "Thomann",
+  organisation: "InfinYtree",
+  place: ["Österreich"],
+  phone: "+436643079229",
+  phoneDisplay: "+43 664 3079229",
+  email: "christoph@infinytree.com",
+}
+
 export const fullName = (card: BusinessCard) =>
   `${card.firstName} ${card.lastName}`
 

@@ -91,3 +91,83 @@ export const isDeliveryOnRequest = (
     !deliverableCountries(regions).has(code)
   )
 }
+
+/**
+ * Remembers a country on request the visitor chose in the country popup or
+ * the header, so the header names it and the checkout opens as a quote
+ * request for it. A country on request has no region, so no market URL of its
+ * own: the visitor browses a euro market (`onRequestMarket`) meanwhile.
+ */
+export const DELIVERY_COUNTRY_COOKIE = "delivery-country"
+
+// The euro markets shown to a visitor from a country on request, in order
+const ON_REQUEST_MARKETS = ["at", "de"]
+
+/**
+ * The market to show a visitor whose delivery country is on request: the one
+ * they are in when it sells in euro, else Austria, then Germany, then any
+ * euro country. Their own market when the shop sells in no euro region.
+ */
+export const onRequestMarket = (
+  regions: HttpTypes.StoreRegion[] | null | undefined,
+  current?: string | null
+): string | null => {
+  const euro = (regions ?? [])
+    .filter((r) => r.currency_code?.toLowerCase() === "eur")
+    .flatMap((r) => (r.countries ?? []).map((c) => c.iso_2?.toLowerCase()))
+    .filter((c): c is string => !!c)
+  const here = current?.toLowerCase() || null
+
+  if (here && euro.includes(here)) {
+    return here
+  }
+  return ON_REQUEST_MARKETS.find((c) => euro.includes(c)) ?? euro[0] ?? here
+}
+
+/**
+ * The country a country chooser (the first-visit popup, the header) starts
+ * on: a country on request the visitor chose, else the one they are in when it
+ * is on request (Cloudflare's guess, which they confirm), else their market.
+ */
+export const chooserStartCountry = ({
+  market,
+  chosen,
+  geo,
+  regions,
+}: {
+  market: string | null | undefined
+  chosen: string | null | undefined
+  geo: string | null | undefined
+  regions: HttpTypes.StoreRegion[] | null | undefined
+}): string | null =>
+  [chosen, geo]
+    .map((code) => code?.toLowerCase())
+    .find((code) => isDeliveryOnRequest(code, regions)) ??
+  market ??
+  null
+
+/**
+ * The country on request the checkout opens with, as a quote request: the one
+ * the visitor chose, until the cart holds an address they typed (then the
+ * form shows that address, and its country, as it always did).
+ */
+export const checkoutStartCountry = ({
+  chosen,
+  cartAddress,
+  regions,
+}: {
+  chosen: string | null | undefined
+  cartAddress:
+    | {
+        first_name?: string | null
+        address_1?: string | null
+        country_code?: string | null
+      }
+    | null
+    | undefined
+  regions: HttpTypes.StoreRegion[] | null | undefined
+}): string | null => {
+  const typed = !!(cartAddress?.first_name || cartAddress?.address_1)
+  const code = chosen?.toLowerCase() ?? null
+  return !typed && isDeliveryOnRequest(code, regions) ? code : null
+}

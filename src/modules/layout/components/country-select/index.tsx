@@ -7,16 +7,21 @@ import {
   ListboxOptions,
   Transition,
 } from "@headlessui/react"
-import { Fragment, useEffect, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState, useTransition } from "react"
 import ReactCountryFlag from "react-country-flag"
 
 import { StateType } from "@lib/hooks/use-toggle-state"
 import { useParams, usePathname } from "next/navigation"
-import { updateRegion } from "@lib/data/cart"
+import { chooseOnRequestCountry, updateRegion } from "@lib/data/cart"
+import { goToMarket } from "@lib/context/market-context"
 import { stripMarketPrefix } from "@lib/i18n/market"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@lib/i18n"
 import { CountryOption, getCountryOptions } from "@lib/util/regions"
+import {
+  isDeliveryOnRequest,
+  onRequestCountryOptions,
+} from "@lib/util/delivery-on-request"
 
 type CountrySelectProps = {
   toggleState: StateType
@@ -31,7 +36,14 @@ type CountrySelectProps = {
    */
   buttonClassName?: string
   dropdownWrapperClassName?: string
+  /** A country on request the visitor chose (`delivery-country`) */
+  deliveryCountry?: string | null
+  /** The language the page is in ("" or null is English), kept on a switch */
+  currentLocale?: string | null
 }
+
+/** A country of the list; `onRequest` for one the shop takes quote requests for */
+type Option = CountryOption & { onRequest?: boolean }
 
 const CountrySelect = ({
   toggleState,
@@ -39,13 +51,13 @@ const CountrySelect = ({
   label = "Shipping to:",
   buttonClassName,
   dropdownWrapperClassName,
+  deliveryCountry = null,
+  currentLocale = null,
 }: CountrySelectProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
+  const [, startTransition] = useTransition()
 
-  const [current, setCurrent] = useState<
-    | { country: string | undefined; region: string; label: string | undefined }
-    | undefined
-  >(undefined)
+  const [current, setCurrent] = useState<Option | undefined>(undefined)
 
   const { countryCode } = useParams()
   const currentPath = stripMarketPrefix(usePathname())
@@ -53,17 +65,53 @@ const CountrySelect = ({
   const { state, close, toggle } = toggleState
 
   const options = useMemo(() => getCountryOptions(regions), [regions])
+  // Every other European country: delivered on request (a quote, no order)
+  const onRequestOptions = useMemo<Option[]>(
+    () =>
+      onRequestCountryOptions(regions, locale).map((o) => ({
+        country: o.value,
+        region: "",
+        label: o.label,
+        onRequest: true,
+      })),
+    [regions, locale]
+  )
+  const onRequestCountry = isDeliveryOnRequest(deliveryCountry, regions)
+    ? deliveryCountry
+    : null
 
   useEffect(() => {
-    if (countryCode) {
-      const option = options?.find((o) => o?.country === countryCode)
-      setCurrent(option)
+    // A country on request chosen is where the visitor wants delivery,
+    // whatever euro market they browse meanwhile
+    const chosen = onRequestCountry
+      ? onRequestOptions.find((o) => o.country === onRequestCountry)
+      : undefined
+    if (chosen) {
+      setCurrent({
+        ...chosen,
+        label: t("topbar.onRequestCountry").replace("{country}", chosen.label),
+      })
+    } else if (countryCode) {
+      setCurrent(options?.find((o) => o?.country === countryCode))
     }
-  }, [options, countryCode])
+  }, [options, onRequestOptions, onRequestCountry, countryCode, t])
 
-  const handleChange = (option: CountryOption) => {
-    updateRegion(option.country, currentPath)
+  const handleChange = (option: Option) => {
     close()
+    if (option.onRequest) {
+      // Remembered on the server, which moves the visitor to a euro market if
+      // needed; the page then opens there in the same language
+      startTransition(async () => {
+        const market = await chooseOnRequestCountry(
+          option.country,
+          countryCode as string
+        )
+        goToMarket(market, currentLocale ?? "")
+      })
+      return
+    }
+    // Also clears a country on request chosen before (`switchRegion`)
+    updateRegion(option.country, currentPath)
   }
 
   return (
@@ -161,6 +209,33 @@ const CountrySelect = ({
                   </ListboxOption>
                 )
               })}
+              {onRequestOptions.length > 0 && (
+                <div
+                  role="presentation"
+                  className="px-3 pt-3 pb-1 text-xs tracking-wide text-muted border-t border-hairline"
+                >
+                  {t("checkout.deliveryOnRequest")}
+                </div>
+              )}
+              {onRequestOptions.map((o) => (
+                <ListboxOption
+                  key={o.country}
+                  value={o}
+                  className="py-2 hover:bg-surface-card px-3 cursor-pointer flex items-center gap-x-2"
+                >
+                  <ReactCountryFlag
+                    svg
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                    }}
+                    countryCode={o.country}
+                    alt=""
+                    aria-hidden="true"
+                  />{" "}
+                  {o.label}
+                </ListboxOption>
+              ))}
             </ListboxOptions>
           </Transition>
         </div>

@@ -14,6 +14,10 @@ import {
 } from "./lib/i18n/market"
 import { TEAM_CARD_LOCALE, isTeamCardPath } from "./lib/team/card-path"
 import {
+  isDeliveryOnRequest,
+  onRequestMarket,
+} from "./lib/util/delivery-on-request"
+import {
   REFERRAL_COOKIE,
   REFERRAL_PARAM,
   normalizeReferralCode,
@@ -107,12 +111,23 @@ async function getCountryCode(
       .get("selected-country")
       ?.value?.toLowerCase()
 
+    // A visitor from a European country the shop delivers to on request sees
+    // euro prices (Austria, else Germany), not the default market's, which may
+    // be forints. The country popup then offers their own country to confirm.
+    const regions = Array.from(new Set(regionMap.values()))
+    const euroMarket =
+      geoCountry && isDeliveryOnRequest(geoCountry, regions)
+        ? onRequestMarket(regions, null)
+        : null
+
     if (urlCountryCode && regionMap.has(urlCountryCode)) {
       countryCode = urlCountryCode
     } else if (selectedCountryCookie && regionMap.has(selectedCountryCookie)) {
       countryCode = selectedCountryCookie
     } else if (geoCountry && regionMap.has(geoCountry)) {
       countryCode = geoCountry
+    } else if (euroMarket && regionMap.has(euroMarket)) {
+      countryCode = euroMarket
     } else if (regionMap.has(DEFAULT_REGION)) {
       countryCode = DEFAULT_REGION
     } else if (regionMap.keys().next().value) {

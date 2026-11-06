@@ -6,14 +6,20 @@ import { HttpTypes } from "@medusajs/types"
 import { refresh, revalidateTag } from "next/cache"
 import { redirect } from "next/navigation"
 import {
+  clearDeliveryCountry,
   getAuthHeaders,
   getCartId,
   removeCartId,
   setCartId,
+  setDeliveryCountry,
   setSelectedCountry,
 } from "./cookies"
 import { CACHE_TAGS } from "./cache"
-import { getRegion } from "./regions"
+import { getRegion, listRegions } from "./regions"
+import {
+  isDeliveryOnRequest,
+  onRequestMarket,
+} from "@lib/util/delivery-on-request"
 import { getLocale } from "@lib/data/locale-actions"
 import { marketPrefix } from "@lib/i18n/market"
 import { getRequestMarketPrefix } from "./market"
@@ -28,6 +34,7 @@ import {
   updateCustomer,
 } from "./customer"
 import { knownErrorKey } from "./localize-error"
+import { attachCartToAccount, emailHasAccount } from "./checkout-account"
 
 const DEFAULT_CART_FIELDS =
   "*items, *items.tax_lines, *region, *items.product, *items.variant, *items.variant.options, *items.variant.images, *items.thumbnail, *items.metadata, +items.total, *promotions, *shipping_methods, *shipping_methods.tax_lines, *shipping_address"
@@ -410,7 +417,7 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     if (!formData) {
       throw new Error("No form data found when setting addresses")
     }
-    const cartId = getCartId()
+    const cartId = await getCartId()
     if (!cartId) {
       throw new Error("No existing cart found when setting addresses")
     }
@@ -473,10 +480,21 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
     // password field, so none is asked for and no second account is made.
     const customer = await retrieveCustomer()
 
+    // A signed-out visitor whose email already has an account is a returning
+    // customer: no password, no second account, and the cart is put on their
+    // account once it carries the email (below). The form leaves out the
+    // password fields for them already; this is the check that counts. When it
+    // can't be made (null) the password rule holds as before, and Medusa's
+    // refusal of a registered email still tells them to sign in.
+    const email = String(formData.get("email") ?? "").trim()
+    const returningEmail =
+      !customer && !!email && (await emailHasAccount(email)) === true
+
     // Dynamic account creation: business customers must create an account,
     // private customers can opt in via "Create customer account".
     const createAccount = formData.get("create_customer_account") === "on"
-    const wantsAccount = !customer && (isBusiness || createAccount)
+    const wantsAccount =
+      !customer && !returningEmail && (isBusiness || createAccount)
     const password = String(formData.get("password") ?? "")
     const passwordRepeat = String(formData.get("password_repeat") ?? "")
 
@@ -584,6 +602,13 @@ export async function setAddresses(currentState: unknown, formData: FormData) {
         phone: formData.get("billing_address.phone"),
       }
     await updateCart(data)
+
+    // The order is to land in the returning customer's account and credit
+    // their sales rep. Medusa ties a fresh cart to the account by itself, but
+    // not one that already had another email; this puts it right either way.
+    if (returningEmail) {
+      await attachCartToAccount(cartId)
+    }
 
     // Create the account after the cart addresses are set — the guest cart
     // is transferred to the new customer inside createCustomerAccount.
@@ -790,6 +815,40 @@ export async function switchRegion(countryCode: string) {
 
   revalidateTag(CACHE_TAGS.regions, "max")
   revalidateTag(CACHE_TAGS.products, "max")
+
+  // A country the shop delivers to replaces a country on request chosen before
+  await clearDeliveryCountry()
+}
+
+/**
+ * A country on request chosen in the country popup or the header: a European
+ * country the shop has no region for, so no market of its own. The visitor is
+ * moved to a euro market if they are not in one (`onRequestMarket`: never
+ * forint prices), and the choice is remembered so the header names the
+ * country and the checkout opens as a delivery quote request for it.
+ *
+ * Returns the market to open, which the caller loads with `goToMarket()` (a
+ * full load, so the header reads the new choice).
+ */
+export async function chooseOnRequestCountry(
+  countryCode: string,
+  currentCountry: string
+): Promise<string> {
+  const regions = await listRegions()
+  const code = countryCode.toLowerCase()
+
+  if (!isDeliveryOnRequest(code, regions)) {
+    throw new Error(`Not a country on request: ${countryCode}`)
+  }
+
+  const market = onRequestMarket(regions, currentCountry) ?? currentCountry
+  if (market !== currentCountry) {
+    // Clears an earlier choice, so the new one is set after it
+    await switchRegion(market)
+  }
+  await setDeliveryCountry(code)
+
+  return market
 }
 
 /**

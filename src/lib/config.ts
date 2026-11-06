@@ -45,9 +45,12 @@ sdk.client.fetch = async <T>(
 }
 
 /**
- * For the sales commission plugin's own routes (/sales-portal/*,
- * /sales-invites/*), which the public address doesn't send to Medusa. Server
- * code only: see `serverBackendUrl`.
+ * Medusa at the address this server reaches it directly. For the sales
+ * commission plugin's own routes (/sales-portal/*, /sales-invites/*), which the
+ * public address doesn't send to Medusa, and for the checkout's account check,
+ * which is limited per visitor and must not pass Cloudflare (it would stamp
+ * every call with this server's address). Server code only: see
+ * `serverBackendUrl`.
  */
 export const portalSdk = new Medusa({
   baseUrl: serverBackendUrl(),

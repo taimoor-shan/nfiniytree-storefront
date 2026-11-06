@@ -1,5 +1,6 @@
 import "server-only"
 import { cookies as nextCookies } from "next/headers"
+import { DELIVERY_COUNTRY_COOKIE } from "@lib/util/delivery-on-request"
 
 export const getAuthHeaders = async (): Promise<
   { authorization: string } | Record<string, never>
@@ -65,6 +66,37 @@ export const setSelectedCountry = async (countryCode: string) => {
     sameSite: "strict",
     secure: process.env.NODE_ENV === "production",
   })
+}
+
+/**
+ * The country on request the visitor chose in the popup or the header (a
+ * European country the shop has no region for). The header names it and the
+ * checkout opens as a quote request for it; see `DELIVERY_COUNTRY_COOKIE`.
+ */
+export const getDeliveryCountry = async (): Promise<string | null> => {
+  try {
+    const cookies = await nextCookies()
+    const value = cookies.get(DELIVERY_COUNTRY_COOKIE)?.value?.toLowerCase()
+    return value && /^[a-z]{2}$/.test(value) ? value : null
+  } catch {
+    return null
+  }
+}
+
+export const setDeliveryCountry = async (countryCode: string) => {
+  const cookies = await nextCookies()
+  cookies.set(DELIVERY_COUNTRY_COOKIE, countryCode.toLowerCase(), {
+    maxAge: 60 * 60 * 24 * 365,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+  })
+}
+
+export const clearDeliveryCountry = async () => {
+  const cookies = await nextCookies()
+  cookies.set(DELIVERY_COUNTRY_COOKIE, "", { maxAge: -1, path: "/" })
 }
 
 // The sales portal has its own cookie: a sales rep and a shop customer are

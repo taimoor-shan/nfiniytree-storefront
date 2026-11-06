@@ -4,11 +4,13 @@ import { sdk } from "@lib/config"
 import { translate } from "@/lib/i18n"
 import { getCartId } from "./cookies"
 import { getLocale } from "./locale-actions"
+import { getReferralCode } from "./referral"
 import { validatePhoneNumber } from "@lib/util/phone"
 
 export type DeliveryRequestState =
   | { status: "idle" }
-  | { status: "sent"; email: string; country: string }
+  // `email` is "" for a request with only a phone: the shop calls instead
+  | { status: "sent"; email: string; phone: string; country: string }
   | { status: "error"; message: string }
 
 const field = (formData: FormData, name: string) =>
@@ -20,6 +22,10 @@ const field = (formData: FormData, name: string) =>
  * The backend reads the products from the cart and saves them with the address
  * and contact details for a representative, who answers with a price. Nothing
  * is ordered and the cart is left as it is.
+ *
+ * No account is asked for, and the email is optional: the shop can answer by
+ * phone, so one of the two is enough. The sales rep link the visitor followed
+ * goes along, for the owner to credit the rep when the quote becomes an order.
  */
 export async function requestDeliveryQuote(
   _state: DeliveryRequestState,
@@ -44,7 +50,6 @@ export async function requestDeliveryQuote(
   const phone = field(formData, "shipping_address.phone")
 
   const required = [
-    email,
     field(formData, "shipping_address.first_name"),
     field(formData, "shipping_address.last_name"),
     field(formData, "shipping_address.address_1"),
@@ -54,6 +59,11 @@ export async function requestDeliveryQuote(
   ]
   if (required.some((v) => !v)) {
     return fail("checkout.deliveryRequest.missingFields")
+  }
+
+  // The shop must be able to answer: by email, or by phone
+  if (!email && !phone) {
+    return fail("checkout.deliveryRequest.contactNeeded")
   }
 
   const phoneResult = validatePhoneNumber(country, phone)
@@ -71,13 +81,14 @@ export async function requestDeliveryQuote(
 
   const isBusiness = field(formData, "customer_type") === "b2b"
   const optional = (name: string) => field(formData, name) || undefined
+  const salesRepRef = (await getReferralCode()) ?? undefined
 
   try {
     await sdk.client.fetch("/store/delivery-requests", {
       method: "POST",
       body: {
         cart_id: cartId,
-        email,
+        email: email || undefined,
         first_name: field(formData, "shipping_address.first_name"),
         last_name: field(formData, "shipping_address.last_name"),
         company: optional("shipping_address.company"),
@@ -93,6 +104,7 @@ export async function requestDeliveryQuote(
           field(formData, "delivery_request_message").slice(0, 2000) ||
           undefined,
         locale: locale ?? undefined,
+        sales_rep_ref: salesRepRef,
       },
     })
   } catch (err) {
@@ -106,5 +118,5 @@ export async function requestDeliveryQuote(
     return fail("checkout.deliveryRequest.error")
   }
 
-  return { status: "sent", email, country }
+  return { status: "sent", email, phone, country }
 }

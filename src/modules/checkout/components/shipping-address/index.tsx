@@ -1,19 +1,18 @@
 "use client"
 
 import { HttpTypes } from "@medusajs/types"
-import { useMarketPrefix } from "@lib/context/market-context"
-import { stripMarketPrefix } from "@lib/i18n/market"
 import { Container, Heading, Text } from "@medusajs/ui"
 import { Radio, RadioGroup } from "@headlessui/react"
 import Checkbox from "@modules/common/components/checkbox"
 import Input from "@modules/common/components/input"
 import MedusaRadio from "@modules/common/components/radio"
-import LocalizedClientLink from "@modules/common/components/localized-client-link"
 import ReferrerNotice from "../referrer-notice"
 import { useTranslation } from "@/lib/i18n"
 import { validateVatNumber } from "@lib/util/vat"
 import { validatePhoneNumber } from "@lib/util/phone"
 import { sdk } from "@lib/config"
+import { checkEmailHasAccount } from "@lib/data/checkout-account-actions"
+import { getAddressCountryName } from "@lib/util/country-name"
 import { getCountryOptions } from "@lib/util/regions"
 import {
   isDeliveryOnRequest,
@@ -23,7 +22,9 @@ import { mapKeys } from "lodash"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import AddressSelect from "../address-select"
 import CountrySelect from "../country-select"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+
+const EMAIL_SHAPE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 // The value is what is saved with the address; the label is what is shown.
 const SALUTATIONS = [
@@ -40,6 +41,8 @@ const ShippingAddress = ({
   regions,
   deliveryOnRequest = false,
   onDeliveryOnRequestChange,
+  startCountry,
+  onSignInRequest,
 }: {
   customer: HttpTypes.StoreCustomer | null
   cart: HttpTypes.StoreCart | null
@@ -53,12 +56,16 @@ const ShippingAddress = ({
   deliveryOnRequest?: boolean
   /** Called with the country when one on request is chosen, else with null. */
   onDeliveryOnRequestChange?: (countryCode: string | null) => void
+  /**
+   * A country on request to open the form with (chosen in the country popup
+   * or the header), instead of the cart's country.
+   */
+  startCountry?: string | null
+  /** Opens the sign-in box above the form, with the email typed here. */
+  onSignInRequest?: (email: string) => void
 }) => {
   const { t, locale } = useTranslation()
   const router = useRouter()
-  const pathname = usePathname()
-  const marketPrefix = useMarketPrefix()
-  const searchParams = useSearchParams()
 
   const customerMetadata = (customer?.metadata || {}) as Record<string, any>
   const cartAddressMetadata = (cart?.shipping_address?.metadata ||
@@ -102,6 +109,7 @@ const ShippingAddress = ({
     "shipping_address.city":
       cart?.shipping_address?.city || defaultShippingAddress?.city || "",
     "shipping_address.country_code":
+      startCountry ||
       cart?.shipping_address?.country_code ||
       defaultShippingAddress?.country_code ||
       "",
@@ -135,6 +143,38 @@ const ShippingAddress = ({
   const [password, setPassword] = useState("")
   const [passwordRepeat, setPasswordRepeat] = useState("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  // Whether the typed email has an account, asked when the field is left. A
+  // returning customer is greeted and asked for no password; `setAddresses`
+  // checks again and puts the cart on their account. The answer is kept with
+  // the email it was for, so one typed since is never taken for it.
+  const [accountCheck, setAccountCheck] = useState<{
+    email: string
+    hasAccount: boolean | null
+  } | null>(null)
+  const typedEmail = String(formData.email ?? "").trim().toLowerCase()
+  const recognised =
+    !customer &&
+    !deliveryOnRequest &&
+    accountCheck?.email === typedEmail &&
+    accountCheck.hasAccount === true
+
+  const checkEmail = useCallback(
+    async (value: string) => {
+      const email = value.trim().toLowerCase()
+      if (customer || !EMAIL_SHAPE.test(email)) return
+      const hasAccount = await checkEmailHasAccount(email)
+      setAccountCheck({ email, hasAccount })
+    },
+    [customer]
+  )
+
+  // A form that opens with an email in it ("Edit", or a page reload) is
+  // checked once, as leaving the field would
+  useEffect(() => {
+    if (formData.email && !deliveryOnRequest) void checkEmail(formData.email)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const isBusiness = formData.customer_type === "b2b"
 
@@ -458,11 +498,9 @@ const ShippingAddress = ({
     setPasswordError(null)
   }
 
-  // Rebuilt from the market prefix so the visitor comes back in the same
-  // language (`/en-hu/checkout`), however the router reports the path.
-  const loginReturnUrl = `/${marketPrefix}${stripMarketPrefix(pathname)}${
-    searchParams.toString() ? `?${searchParams.toString()}` : ""
-  }`
+  const onRequestCountryName = deliveryOnRequest
+    ? getAddressCountryName(formData["shipping_address.country_code"], locale)
+    : ""
 
 return (
   <>
@@ -487,8 +525,49 @@ return (
     )}
 
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
-      {/* E-Mail — first field, with an inline login link (Vitra order) */}
-      <div className="col-span-1 flex flex-col gap-y-2 mb-6">
+      {/* The delivery country comes first: it decides what the rest of the
+          form is (an order, or a quote request asking for no billing address
+          or account), so nobody fills in half the form before finding out */}
+      <fieldset className="flex flex-col gap-y-2 col-span-1 sm:col-span-2">
+        <legend className="txt-compact-medium-plus text-ink mb-2">
+          {t("checkout.deliveryCountry")}
+        </legend>
+        <CountrySelect
+          name="shipping_address.country_code"
+          autoComplete="country"
+          label={t("checkout.deliveryCountry")}
+          regions={regions}
+          onRequestOptions={onRequestOptions}
+          disabled={isSwitchingRegion}
+          value={formData["shipping_address.country_code"]}
+          onChange={handleCountryChange}
+          required
+          data-testid="shipping-country-select"
+        />
+      </fieldset>
+
+      {deliveryOnRequest && (
+        <div
+          className="col-span-1 sm:col-span-2 rounded-lg border border-hairline bg-surface-card p-5"
+          data-testid="delivery-request-intro"
+        >
+          <Text className="txt-medium-plus text-ink mb-1">
+            {t("checkout.deliveryRequest.title").replace(
+              "{country}",
+              onRequestCountryName
+            )}
+          </Text>
+          <Text className="txt-medium text-body">
+            {t("checkout.deliveryRequest.intro").replace(
+              "{country}",
+              onRequestCountryName
+            )}
+          </Text>
+        </div>
+      )}
+
+      {/* The email keeps its half width; the note under it spans the form */}
+      <div className="col-span-1 sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-x-4 sm:gap-x-6 gap-y-2 mb-6">
         <Input
           label={t("account.email")}
           name="email"
@@ -497,25 +576,45 @@ return (
           autoComplete="email"
           value={formData.email}
           onChange={handleChange}
-          required
+          onBlur={(e) => {
+            if (!deliveryOnRequest) void checkEmail(e.target.value)
+          }}
+          // A quote can be answered by phone instead (the request asks for one
+          // of the two); an order needs the email for its confirmation
+          required={!deliveryOnRequest}
+          helperText={
+            deliveryOnRequest ? t("checkout.deliveryRequest.contactHint") : undefined
+          }
           data-testid="shipping-email-input"
         />
-        {!customer && (
-          <div>
-            <span className="txt-compact-medium text-ink/70">
-              {t("cart.alreadyHaveAccount")}{" "}
-            </span>
-            <LocalizedClientLink
-              href={`/account?returnUrl=${encodeURIComponent(
-                loginReturnUrl
-              )}`}
-              className="text-link hover:underline"
-              data-testid="checkout-login-link"
+        {/* Always mounted, so the greeting is announced when it appears; out
+            of the layout (sr-only) while there is nothing to say */}
+        <div
+          role="status"
+          aria-live="polite"
+          className={recognised ? "sm:col-span-2" : "sr-only"}
+        >
+          {recognised && (
+            <div
+              className="rounded-md bg-surface-card p-3 flex flex-col gap-y-1"
+              data-testid="known-account-notice"
             >
-              {t("checkout.logIn")}
-            </LocalizedClientLink>
-          </div>
-        )}
+              <Text className="txt-compact-medium text-ink">
+                {t("checkout.knownAccount")}
+              </Text>
+              {onSignInRequest && (
+                <button
+                  type="button"
+                  className="self-start text-link hover:underline txt-compact-medium"
+                  onClick={() => onSignInRequest(formData.email)}
+                  data-testid="known-account-sign-in"
+                >
+                  {t("checkout.knownAccountSignIn")}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Salutation */}
@@ -621,7 +720,8 @@ return (
         value={formData["shipping_address.company"]}
         onChange={handleChange}
         autoComplete="organization"
-        required={isBusiness}
+        // A quote request asks for as little as it can: no company needed
+        required={isBusiness && !deliveryOnRequest}
         data-testid="shipping-company-input"
      
       />
@@ -672,18 +772,6 @@ return (
         onChange={handleChange}
         data-testid="shipping-province-input"
       />
-      <CountrySelect
-        name="shipping_address.country_code"
-        autoComplete="country"
-        regions={regions}
-        onRequestOptions={onRequestOptions}
-        disabled={isSwitchingRegion}
-        value={formData["shipping_address.country_code"]}
-        onChange={handleCountryChange}
-        required
-        data-testid="shipping-country-select"
-      />
-
       {/* Phone — full width so the helper text and error line don't get
           cramped into a half column */}
       <div className="flex flex-col gap-y-1 col-span-1">
@@ -759,8 +847,9 @@ return (
       </div>
       )}
 
-      {/* Account — dynamic sign-up: private customers opt in, business customers must create one */}
-      {!customer && !deliveryOnRequest && (
+      {/* Account — dynamic sign-up: private customers opt in, business
+          customers must create one. A recognised email already has one. */}
+      {!customer && !deliveryOnRequest && !recognised && (
         <section className="flex flex-col gap-y-4 border-t pt-8 col-span-1 sm:col-span-2">
           <Heading level="h3" className="text-2xl-semi">
             {t("checkout.account")}

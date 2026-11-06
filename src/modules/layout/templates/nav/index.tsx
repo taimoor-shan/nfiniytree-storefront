@@ -4,6 +4,7 @@ import Image from "next/image"
 import { listRegions } from "@lib/data/regions"
 import { listLocales } from "@lib/data/locales"
 import { getLocale } from "@lib/data/locale-actions"
+import { getDeliveryCountry } from "@lib/data/cookies"
 import { retrieveStore } from "@lib/data/store"
 import { getDictionary } from "@lib/i18n/dictionaries"
 import { ShoppingCart, User } from "lucide-react"
@@ -16,12 +17,15 @@ import HeaderWrapper from "@modules/layout/components/header-wrapper"
 import TopBar from "@modules/layout/components/top-bar"
 
 export default async function Nav() {
-  const [regions, locales, currentLocale, store] = await Promise.all([
-    listRegions().then((regions: StoreRegion[]) => regions),
-    listLocales(),
-    getLocale(),
-    retrieveStore(),
-  ])
+  const [regions, locales, currentLocale, store, deliveryCountry] =
+    await Promise.all([
+      listRegions().then((regions: StoreRegion[]) => regions),
+      listLocales(),
+      getLocale(),
+      retrieveStore(),
+      // A country on request the visitor chose: the header names it
+      getDeliveryCountry(),
+    ])
   const storeName = store?.name || "InfinYtree"
   const dict = await getDictionary(currentLocale)
   // The selectors list English as "" (the products' own text); a `/en-hu`
@@ -35,6 +39,7 @@ export default async function Nav() {
           locales={locales}
           currentLocale={selectedLocale}
           regions={regions as any}
+          deliveryCountry={deliveryCountry}
         />
       }
     >
@@ -59,6 +64,7 @@ export default async function Nav() {
               locales={locales}
               currentLocale={selectedLocale}
               storeName={storeName}
+              deliveryCountry={deliveryCountry}
             />
           </div>
 
