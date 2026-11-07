@@ -2,7 +2,7 @@
 
 import { clx } from "@medusajs/ui"
 
-import { getProductPrice } from "@lib/util/get-product-price"
+import { getProductPrice, hasPriceRange } from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { useTranslation } from "@/lib/i18n"
 
@@ -24,6 +24,10 @@ export default function ProductPrice({
   })
 
   const selectedPrice = variant ? variantPrice : cheapestPrice
+
+  // Variants priced differently: until one is picked the page says "From
+  // <lowest price>"; picking a variant drops the prefix and shows its own price.
+  const showFrom = !variant && hasPriceRange(product)
 
   // No price is set yet (a piece whose price is still to be agreed): say so,
   // never a skeleton that never resolves and never a zero.
@@ -47,11 +51,15 @@ export default function ProductPrice({
     <div className="flex gap-2 items-center mt-4 mb-2">
       <div className="flex items-center gap-x-2 text-ink">
         <span
-          className={clx("text-lg font-bold text-primary-text", {
+          className={clx("text-lg font-bold text-primary-text whitespace-nowrap", {
             "text-primary-text": isDiscounted,
           })}
         >
-          {!variant && t("product.from") + " "}
+          {showFrom && (
+            <span data-testid="product-price-from">
+              {t("product.from")}{" "}
+            </span>
+          )}
           <span
             data-testid="product-price"
             data-value={selectedPrice.calculated_price_number}

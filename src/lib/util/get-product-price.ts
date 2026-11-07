@@ -113,3 +113,26 @@ export function getProductPrice({
 export function isPriceOnRequest(product: HttpTypes.StoreProduct): boolean {
   return !getProductPrice({ product }).cheapestPrice
 }
+
+/**
+ * True when the price depends on which variant is chosen: two or more variants
+ * have a price and the prices are not all the same. Only then does the product
+ * page open on "From <lowest price>" and wait for the visitor to pick a
+ * variant. A product whose variants all cost the same, or that has a single
+ * variant, has one price to show and nothing to choose first.
+ *
+ * Variants without a price (none, or zero) are left out, as in the cheapest
+ * price above, so one of them never turns a single price into a range.
+ */
+export function hasPriceRange(product: HttpTypes.StoreProduct): boolean {
+  const amounts = new Set<number>()
+
+  for (const variant of product?.variants ?? []) {
+    const amount = variant.calculated_price?.calculated_amount
+    if (amount) {
+      amounts.add(amount)
+    }
+  }
+
+  return amounts.size > 1
+}

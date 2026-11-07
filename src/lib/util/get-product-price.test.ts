@@ -3,7 +3,11 @@
  */
 import assert from "node:assert/strict"
 
-import { getProductPrice, isPriceOnRequest } from "./get-product-price"
+import {
+  getProductPrice,
+  hasPriceRange,
+  isPriceOnRequest,
+} from "./get-product-price"
 
 const priced = (id: string, amount: number) => ({
   id,
@@ -46,5 +50,48 @@ const one = getProductPrice({
   variantId: "a",
 })
 assert.equal(one.variantPrice, null, "a variant without a price has none")
+
+// A price range: the page says "From <lowest>" until a variant is picked
+assert.equal(
+  hasPriceRange(product([priced("a", 300), priced("b", 120), priced("c", 200)])),
+  true,
+  "three variants, three prices"
+)
+assert.equal(
+  hasPriceRange(product([priced("a", 120), priced("b", 120), priced("c", 300)])),
+  true,
+  "two share the lowest price, one costs more"
+)
+assert.equal(
+  hasPriceRange(product([priced("a", 120), priced("b", 120), priced("c", 120)])),
+  false,
+  "variants that cost the same have one price, nothing to be 'from'"
+)
+assert.equal(
+  hasPriceRange(product([priced("a", 120)])),
+  false,
+  "a single variant"
+)
+
+// A variant with no price (or a zero) is not part of the range
+assert.equal(
+  hasPriceRange(product([{ id: "a" }, priced("b", 120)])),
+  false,
+  "one priced variant next to an unpriced one"
+)
+assert.equal(
+  hasPriceRange(product([priced("zero", 0), priced("b", 120)])),
+  false,
+  "a zero does not make a range"
+)
+assert.equal(
+  hasPriceRange(product([priced("zero", 0), priced("b", 120), priced("c", 300)])),
+  true,
+  "a zero does not hide a real range"
+)
+
+// Nothing to compare
+assert.equal(hasPriceRange(product([])), false, "no variants")
+assert.equal(hasPriceRange(product(undefined)), false, "no variants at all")
 
 console.log("get-product-price.test.ts: ok")

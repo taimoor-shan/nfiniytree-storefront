@@ -8,7 +8,7 @@ import useToggleState from "@lib/hooks/use-toggle-state"
 import ChevronDown from "@modules/common/icons/chevron-down"
 import X from "@modules/common/icons/x"
 
-import { getProductPrice } from "@lib/util/get-product-price"
+import { getProductPrice, hasPriceRange } from "@lib/util/get-product-price"
 import OptionSelect from "./option-select"
 import NotifyMeForm from "@modules/products/components/notify-me-form"
 import { HttpTypes } from "@medusajs/types"
@@ -73,6 +73,10 @@ const MobileActions: React.FC<MobileActionsProps> = ({
     return variantPrice || cheapestPrice || null
   }, [price])
 
+  // Same rule as the price in the buy box: "From <lowest price>" until a
+  // variant is picked, when the variants are priced differently.
+  const showFrom = !variant && hasPriceRange(product)
+
   const isSimple = isSimpleProduct(product)
   // With every option greyed out there is nothing to pick in the dialog.
   const showOptionsButton = !isSimple && !notifyForProduct
@@ -118,6 +122,11 @@ const MobileActions: React.FC<MobileActionsProps> = ({
                           selectedPrice.price_type === "sale",
                       })}
                     >
+                      {showFrom && (
+                        <span data-testid="mobile-price-from">
+                          {t("product.from")}{" "}
+                        </span>
+                      )}
                       {selectedPrice.calculated_price}
                     </span>
                   </div>

@@ -3,7 +3,11 @@
 import { productParams, trackEvent } from "@lib/analytics/ga4"
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
-import { getProductPrice, isPriceOnRequest } from "@lib/util/get-product-price"
+import {
+  getProductPrice,
+  hasPriceRange,
+  isPriceOnRequest,
+} from "@lib/util/get-product-price"
 import { HttpTypes } from "@medusajs/types"
 import { Button } from "@medusajs/ui"
 import Divider from "@modules/common/components/divider"
@@ -72,15 +76,24 @@ export default function ProductActions({
     [product]
   )
 
+  // The variants are priced differently: the page opens on "From <lowest
+  // price>" and the visitor picks the variant that sets the price. Nothing is
+  // preselected then, or the first variant's price would replace the "From"
+  // the moment the page loads.
+  const priceDependsOnVariant = useMemo(() => hasPriceRange(product), [product])
+
   // Ref to ensure preselection only runs once on mount, not on every
   // server re-fetch (which would override the user's manual selection).
   const preselectedRef = useRef(false)
 
-  // Preselect the first available variant on mount (or first variant if none available)
+  // Preselect the first available variant on mount (or first variant if none
+  // available), unless the choice sets the price.
   useEffect(() => {
     if (preselectedRef.current) return
     // Preselecting would show one of the greyed-out options as chosen.
     if (notifyForProduct) return
+    // Preselecting would settle the price before the visitor has chosen.
+    if (priceDependsOnVariant) return
     if (!product.variants || product.variants.length === 0) return
 
     const firstAvailable =
@@ -88,7 +101,7 @@ export default function ProductActions({
     const variantOptions = optionsAsKeymap(firstAvailable.options)
     setOptions(variantOptions ?? {})
     preselectedRef.current = true
-  }, [product.variants, notifyForProduct])
+  }, [product.variants, notifyForProduct, priceDependsOnVariant])
 
   // Compute which option values lead only to unavailable (out-of-stock) variants
   const unavailableOptionValueIds = useMemo(() => {
@@ -390,7 +403,7 @@ export default function ProductActions({
               isLoading={isAdding}
               data-testid="add-product-button"
             >
-              {!selectedVariant && !options
+              {!selectedVariant && priceDependsOnVariant
                 ? t("product.selectVariant")
                 : quantityExceedsStock
                 ? t("product.notEnoughStock")
