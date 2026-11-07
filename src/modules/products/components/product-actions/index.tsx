@@ -1,8 +1,10 @@
 "use client"
 
 import { productParams, trackEvent } from "@lib/analytics/ga4"
+import { useProductSelection } from "@lib/context/product-selection-context"
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
+import { isVariantAvailable, optionsAsKeymap } from "@lib/util/default-variant"
 import {
   getProductPrice,
   hasPriceRange,
@@ -27,25 +29,6 @@ type ProductActionsProps = {
   customerEmail?: string
 }
 
-const optionsAsKeymap = (
-  variantOptions: HttpTypes.StoreProductVariant["options"]
-) => {
-  return variantOptions?.reduce((acc: Record<string, string>, varopt: any) => {
-    acc[varopt.option_id] = varopt.value
-    return acc
-  }, {})
-}
-
-// Helper: check if a variant is available for purchase
-const isVariantAvailable = (
-  variant: HttpTypes.StoreProductVariant
-) => {
-  if (!variant.manage_inventory) return true
-  if (variant.allow_backorder) return true
-  if ((variant.inventory_quantity || 0) > 0) return true
-  return false
-}
-
 export default function ProductActions({
   product,
   disabled,
@@ -55,7 +38,10 @@ export default function ProductActions({
   const searchParams = useSearchParams()
   const { t } = useTranslation()
 
-  const [options, setOptions] = useState<Record<string, string | undefined>>({})
+  // The chosen options live above this component (`ProductSelectionProvider`):
+  // the gallery in the other column shows the pictures of the choice, and the
+  // page opens on the variant preselected below, worked out on the server.
+  const { options, setOptions } = useProductSelection()
   const [isAdding, setIsAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
   // Announced to assistive tech after a successful add. Sighted users see the
@@ -99,9 +85,14 @@ export default function ProductActions({
     const firstAvailable =
       product.variants.find(isVariantAvailable) || product.variants[0]
     const variantOptions = optionsAsKeymap(firstAvailable.options)
-    setOptions(variantOptions ?? {})
+    // The page already opens on this choice (`getDefaultChoice()` made it on the
+    // server, for the gallery too). This is for a buy box without that, and it
+    // never replaces a choice that has been made.
+    setOptions((current) =>
+      Object.values(current).some(Boolean) ? current : (variantOptions ?? {})
+    )
     preselectedRef.current = true
-  }, [product.variants, notifyForProduct, priceDependsOnVariant])
+  }, [product.variants, notifyForProduct, priceDependsOnVariant, setOptions])
 
   // Compute which option values lead only to unavailable (out-of-stock) variants
   const unavailableOptionValueIds = useMemo(() => {
@@ -174,8 +165,8 @@ export default function ProductActions({
     // `router.replace` used to be called here, which triggers a full RSC
     // roundtrip — on mount (the preselect effect always sets a variant) and
     // again on every option change, each one re-rendering the whole route on
-    // the server. Nothing on the server consumes `v_id`:
-    // `getImagesForVariant` takes it and ignores it. `replaceState` keeps the
+    // the server. Nothing on the server consumes `v_id`: the gallery follows
+    // the choice in the browser (`VariantGallery`). `replaceState` keeps the
     // URL shareable and the back/forward history identical without the
     // roundtrip.
     window.history.replaceState(null, "", pathname + "?" + params.toString())

@@ -62,8 +62,14 @@ export const listProducts = async ({
           limit,
           offset,
           region_id: region?.id,
+          // `+images.variants.id` hands over, with each picture, the variants it
+          // is tied to in the admin (none = shared by all): that is all the
+          // product gallery needs to follow the shopper's choice
+          // (`src/lib/util/variant-gallery.ts`). `*variants.images` is gone with
+          // it: Medusa lists a variant's shared pictures first and repeats every
+          // picture once per variant, which this page never read.
           fields:
-            "*variants.calculated_price,*variants.prices,+variants.inventory_quantity,*variants.images,+metadata,+tags,*categories,",
+            "*variants.calculated_price,*variants.prices,+variants.inventory_quantity,+images.variants.id,+metadata,+tags,*categories,",
           ...queryParams,
         },
         headers,

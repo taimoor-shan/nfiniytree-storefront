@@ -1,16 +1,21 @@
 "use client"
 
-import { HttpTypes } from "@medusajs/types"
 import { Container } from "@medusajs/ui"
 import Image from "next/image"
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { ChevronLeft, ChevronRight, Play } from "lucide-react"
 import { useTranslation } from "@/lib/i18n"
 import { normalizeImageUrl } from "@lib/util/image-url"
-import { buildGallerySlides, type ProductVideo } from "@lib/util/product-video"
+import {
+  buildGallerySlides,
+  type GalleryImage,
+  type ProductVideo,
+} from "@lib/util/product-video"
+import { HERO_IMAGE_QUALITY, HERO_IMAGE_SIZES } from "./hero-image"
 
 type ImageGalleryProps = {
-  images: HttpTypes.StoreProductImage[]
+  /** The pictures to show, the one to open on first. */
+  images: GalleryImage[]
   /**
    * Product name, used to build meaningful alt text. Without it the gallery can
    * only say "product image".
@@ -22,15 +27,29 @@ type ImageGalleryProps = {
    * itself in place of the big image.
    */
   video?: ProductVideo
+  /**
+   * Keeps the thumbnail column's place when there is a single item to show, so
+   * the big picture is as wide as it is for the product's other choices. A
+   * product whose plants have a different number of pictures would otherwise
+   * widen the big picture under the shopper's eyes on the way from three
+   * pictures to one.
+   */
+  reserveThumbnails?: boolean
 }
 
-const ImageGallery = ({ images, productTitle, video }: ImageGalleryProps) => {
+const ImageGallery = ({
+  images,
+  productTitle,
+  video,
+  reserveThumbnails = false,
+}: ImageGalleryProps) => {
   const { t } = useTranslation()
   const [activeIndex, setActiveIndex] = useState(0)
   const [playing, setPlaying] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
   const touchStartX = useRef(0)
   const touchEndX = useRef(0)
+  const thumbnailStrip = useRef<HTMLDivElement>(null)
 
   const slides = useMemo(
     () => buildGallerySlides(images ?? [], video),
@@ -41,8 +60,22 @@ const ImageGallery = ({ images, productTitle, video }: ImageGalleryProps) => {
   // video) they were looking at.
   const contents = slides.map((slide) => slide.id).join("|")
 
-  useEffect(() => {
+  // Other pictures to show (the shopper chose another plant): start again at
+  // the first. Done while rendering rather than in an effect, which would let
+  // one frame show the new pictures at the old position (the third of three,
+  // say) before jumping back. React redoes this render at once, before
+  // anything is painted.
+  const [shownContents, setShownContents] = useState(contents)
+  if (shownContents !== contents) {
+    setShownContents(contents)
     setActiveIndex(0)
+    setPlaying(false)
+    setVideoFailed(false)
+  }
+
+  // The thumbnails of a long set can be scrolled; a new set shows its first.
+  useEffect(() => {
+    if (thumbnailStrip.current) thumbnailStrip.current.scrollTop = 0
   }, [contents])
 
   // The player only exists while the video plays, so moving to another item
@@ -129,10 +162,17 @@ const ImageGallery = ({ images, productTitle, video }: ImageGalleryProps) => {
 
   return (
     <div className="flex gap-x-4 relative w-full justify-end">
-      {/* Thumbnails — desktop only, scrollable if more than 6 */}
-      {slides.length > 1 && (
-        <div className="hidden lg:flex flex-col gap-y-4 overflow-y-auto max-h-[680px] pr-1">
-          {slides.map((slide, index) => {
+      {/* Thumbnails — desktop only, scrollable if more than 6. With a single
+          item the column stays, empty, when the product's other choices have
+          thumbnails (`reserveThumbnails`), so the big picture keeps its size. */}
+      {(slides.length > 1 || reserveThumbnails) && (
+        <div
+          ref={thumbnailStrip}
+          className="hidden lg:flex flex-col gap-y-4 overflow-y-auto max-h-[680px] pr-1"
+          aria-hidden={slides.length > 1 ? undefined : true}
+        >
+          {slides.length <= 1 && <span className="block w-[100px] shrink-0" />}
+          {slides.length > 1 && slides.map((slide, index) => {
             const thumbnailUrl = slide.kind === "image" ? slide.url : slide.poster
 
             return (
@@ -199,14 +239,16 @@ const ImageGallery = ({ images, productTitle, video }: ImageGalleryProps) => {
             preload
             // Higher than the 75 used for grid thumbnails — this is the PDP hero
             // image shoppers look at most closely. Both values are declared in
-            // next.config.js `images.qualities`.
-            quality={85}
+            // next.config.js `images.qualities`. Quality and `sizes` come from
+            // `hero-image.ts`, which fetches the next choices' pictures ahead
+            // and has to ask for exactly the same file.
+            quality={HERO_IMAGE_QUALITY}
             className="absolute inset-0 rounded-md"
             alt={describeSlide(activeIndex)}
             fill
             // Container is `w-full max-w-[600px]`, and the left column only
             // becomes a 55% flex child at the `small` (1024px) breakpoint.
-            sizes="(max-width: 1023px) 100vw, 600px"
+            sizes={HERO_IMAGE_SIZES}
             style={{ objectFit: "cover" }}
           />
         )}

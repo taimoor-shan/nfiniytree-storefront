@@ -2,7 +2,7 @@ import { getMarketPrefix } from "@lib/data/market"
 import React, { Suspense } from "react"
 import Features from "@modules/home/components/features"
 
-import ImageGallery from "@modules/products/components/image-gallery"
+import VariantGallery from "@modules/products/components/image-gallery/variant-gallery"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
 import ProductInfoBlocks from "@modules/products/components/product-info-blocks"
 import ProductJsonLd from "@modules/products/components/product-jsonld"
@@ -13,7 +13,9 @@ import SkeletonRelatedProducts from "@modules/skeletons/templates/skeleton-relat
 import SkeletonProductActions from "@modules/skeletons/components/skeleton-product-actions"
 import { notFound } from "next/navigation"
 import { HttpTypes } from "@medusajs/types"
+import { ProductSelectionProvider } from "@lib/context/product-selection-context"
 import { getLocale } from "@lib/data/locale-actions"
+import { getDefaultChoice } from "@lib/util/default-variant"
 import { getProductVideo } from "@lib/util/product-video"
 
 import ProductActionsWrapper from "./product-actions-wrapper"
@@ -22,14 +24,12 @@ type ProductTemplateProps = {
   product: HttpTypes.StoreProduct
   region: HttpTypes.StoreRegion
   countryCode: string
-  images: HttpTypes.StoreProductImage[]
 }
 
 const ProductTemplate: React.FC<ProductTemplateProps> = async ({
   product,
   region,
   countryCode,
-  images,
 }) => {
   if (!product || !product.id) {
     return notFound()
@@ -51,32 +51,38 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
         market={await getMarketPrefix(countryCode)}
       />
 
-      <div
-        className="content-container flex flex-col small:flex-row small:items-start sm:pt-12 pt-8 gap-y-8 small:gap-x-10 relative"
-        data-testid="product-container"
-      >
-        {/* Left Column - Image Gallery */}
-        <div className="block w-full small:w-[55%] small:sticky small:top-28">
-          <ImageGallery
-            images={images}
-            productTitle={product.title}
-            video={getProductVideo(product)}
-          />
+      {/* The gallery on the left shows the pictures of the plant chosen in the
+          buy box on the right, so both sit under the one choice. The page opens
+          on the variant the buy box preselects, worked out here on the server
+          with the same rule, so the first paint already shows its pictures. */}
+      <ProductSelectionProvider initialOptions={getDefaultChoice(product)}>
+        <div
+          className="content-container flex flex-col small:flex-row small:items-start sm:pt-12 pt-8 gap-y-8 small:gap-x-10 relative"
+          data-testid="product-container"
+        >
+          {/* Left Column - Image Gallery */}
+          <div className="block w-full small:w-[55%] small:sticky small:top-28">
+            <VariantGallery
+              product={product}
+              productTitle={product.title}
+              video={getProductVideo(product)}
+            />
+          </div>
+
+          {/* Right Column - Product Details sticky wrapper */}
+          <div className="flex flex-col w-full small:w-[45%] gap-y-10">
+            <ProductInfo product={product} />
+
+            <Suspense fallback={<SkeletonProductActions />}>
+              <ProductActionsWrapper product={product} region={region} />
+            </Suspense>
+
+            <ProductTabs product={product} locale={locale} />
+
+            <ProductOnboardingCta />
+          </div>
         </div>
-
-        {/* Right Column - Product Details sticky wrapper */}
-        <div className="flex flex-col w-full small:w-[45%] gap-y-10">
-          <ProductInfo product={product} />
-
-          <Suspense fallback={<SkeletonProductActions />}>
-            <ProductActionsWrapper product={product} region={region} />
-          </Suspense>
-
-          <ProductTabs product={product} locale={locale} />
-
-          <ProductOnboardingCta />
-        </div>
-      </div>
+      </ProductSelectionProvider>
       {/* <div className="content-container my-16 small:my-32">
         <ProductInfoBlocks product={product} locale={locale} />
       </div> */}

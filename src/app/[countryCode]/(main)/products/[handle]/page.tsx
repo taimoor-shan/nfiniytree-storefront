@@ -6,7 +6,6 @@ import { getRegion, listRegions } from "@lib/data/regions"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
 import ProductTemplate from "@modules/products/templates"
-import { HttpTypes } from "@medusajs/types"
 import { normalizeImageUrl } from "@lib/util/image-url"
 import { getSeoAlternates } from "@lib/util/page-metadata"
 import { getProductSeo } from "@lib/util/product-copy"
@@ -57,15 +56,6 @@ export async function generateStaticParams() {
     )
     return []
   }
-}
-
-function getImagesForVariant(
-  product: HttpTypes.StoreProduct,
-  _selectedVariantId?: string
-): HttpTypes.StoreProductImage[] {
-  // TODO: Re-enable variant-scoped images once per-variant image
-  // assignments are fixed in the Medusa admin.
-  return product.images ?? []
 }
 
 /**
@@ -154,10 +144,10 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 export default async function ProductPage(props: Props) {
   const params = await props.params
 
-  // `searchParams.v_id` used to be read here and handed to
-  // `getImagesForVariant`, which ignores it (see the TODO in that function).
-  // Reading searchParams opts the route out of static rendering, so this was a
-  // dead read with a cost. `v_id` is now written client-side only, via
+  // `searchParams` is deliberately not read: reading it opts the route out of
+  // static rendering. The gallery follows the shopper's choice in the browser
+  // (`VariantGallery`, from the pictures and the variants they are tied to that
+  // the page already holds), and `v_id` is written client-side only, via
   // `history.replaceState`.
   const [region, pricedProduct] = await Promise.all([
     getRegion(params.countryCode),
@@ -175,14 +165,11 @@ export default async function ProductPage(props: Props) {
     notFound()
   }
 
-  const images = getImagesForVariant(pricedProduct)
-
   return (
     <ProductTemplate
       product={pricedProduct}
       region={region}
       countryCode={params.countryCode}
-      images={images}
     />
   )
 }
