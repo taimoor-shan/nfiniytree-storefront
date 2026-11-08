@@ -1,16 +1,16 @@
 "use client"
 
-import { Badge, Heading, Input, Label, Text } from "@medusajs/ui"
+import { Badge, Button, Heading, Input, Label, Text } from "@medusajs/ui"
 import React from "react"
 
 import { applyPromotions } from "@lib/data/cart"
 import { convertToLocale } from "@lib/util/money"
 import { getCartCountryCode } from "@lib/util/country-locale"
 import { HttpTypes } from "@medusajs/types"
+import { guardRepaint } from "@modules/common/components/repaint-guard"
 import Trash from "@modules/common/icons/trash"
 import { useTranslation } from "@/lib/i18n"
 import ErrorMessage from "../error-message"
-import { SubmitButton } from "../submit-button"
 
 type DiscountCodeProps = {
   cart: HttpTypes.StoreCart & {
@@ -21,42 +21,75 @@ type DiscountCodeProps = {
 const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   const { t } = useTranslation()
   const [isOpen, setIsOpen] = React.useState(false)
+  const [isApplying, setIsApplying] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState("")
   // Promotion keeps its own currency_code; the formatting locale follows
   // the cart's commercial country.
   const cc = getCartCountryCode(cart)
 
   const { promotions = [] } = cart
+
+  // Applying and removing both call the Server Action from an event handler,
+  // with a pending flag of their own, the way the cart's delete button does.
+  // The Apply button shows that flag, and a refused code stays in the field so
+  // a typo can be mended.
+  const apply = async (codes: string[]): Promise<boolean> => {
+    setIsApplying(true)
+    try {
+      const result = await applyPromotions(codes)
+      if (!result.ok) {
+        setErrorMessage(result.error)
+      }
+      return result.ok
+    } catch {
+      // The action ANSWERS a code the shop turns down, in the visitor's
+      // language, instead of throwing it (a production build hides what a
+      // thrown error says). What lands here failed outright: a dropped
+      // connection, a page from before a deploy.
+      setErrorMessage(t("account.errorOccurred"))
+      return false
+    } finally {
+      setIsApplying(false)
+      // The totals and the list of applied codes come back with the action
+      guardRepaint()
+    }
+  }
+
   const removePromotionCode = async (code: string) => {
+    setErrorMessage("")
+
     const validPromotions = promotions.filter(
       (promotion) => promotion.code !== code
     )
 
-    await applyPromotions(
+    await apply(
       validPromotions.filter((p) => p.code !== undefined).map((p) => p.code!)
     )
   }
 
-  const addPromotionCode = async (formData: FormData) => {
+  const addPromotionCode = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (isApplying) {
+      return
+    }
     setErrorMessage("")
 
-    const code = formData.get("code")
+    const input = event.currentTarget.elements.namedItem(
+      "code"
+    ) as HTMLInputElement | null
+    // A code pasted from an email often carries a space or a line break at its
+    // end, and Medusa matches the code exactly.
+    const code = input?.value.trim()
     if (!code) {
       return
     }
-    const input = document.getElementById("promotion-input") as HTMLInputElement
     const codes = promotions
       .filter((p) => p.code !== undefined)
       .map((p) => p.code!)
-    codes.push(code.toString())
+    codes.push(code)
 
-    try {
-      await applyPromotions(codes)
-    } catch (e: any) {
-      setErrorMessage(e.message)
-    }
-
-    if (input) {
+    // A refused code stays in the field, so a typo can be mended
+    if ((await apply(codes)) && input) {
       input.value = ""
     }
   }
@@ -64,7 +97,7 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
   return (
     <div className="w-full bg-canvas flex flex-col">
       <div className="txt-medium">
-        <form action={(a) => addPromotionCode(a)} className="w-full mb-5">
+        <form onSubmit={addPromotionCode} className="w-full mb-5">
           {/* This used to be a <Label> wrapping the toggle button, which is
               invalid and left the code field with no accessible name at all.
               The toggle is now a plain disclosure button and the field carries
@@ -100,12 +133,15 @@ const DiscountCode: React.FC<DiscountCodeProps> = ({ cart }) => {
                   }
                   data-testid="discount-input"
                 />
-                <SubmitButton
+                <Button
+                  size="large"
+                  type="submit"
                   variant="secondary"
+                  isLoading={isApplying}
                   data-testid="discount-apply-button"
                 >
                   {t("checkout.apply")}
-                </SubmitButton>
+                </Button>
               </div>
 
               <ErrorMessage

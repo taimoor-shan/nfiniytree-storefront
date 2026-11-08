@@ -211,6 +211,8 @@
   "checkout.addPromotion": "Aktionscode(s) hinzufügen",
   "checkout.promotionsApplied": "Angewendete Aktionen:",
   "checkout.removeDiscount": "Rabattcode aus Bestellung entfernen",
+  "checkout.promoCodeInvalid": "Dieser Aktionscode ist ungültig. Bitte prüfen Sie ihn und versuchen Sie es erneut.",
+  "checkout.promoCodeNotApplicable": "Dieser Aktionscode kann für die Artikel in Ihrem Warenkorb nicht verwendet werden.",
   "checkout.orPayWithCard": "Oder mit Karte bezahlen",
   "checkout.paymentFailed": "Zahlung fehlgeschlagen",
   "checkout.backToCart": "Zurück zum Warenkorb",

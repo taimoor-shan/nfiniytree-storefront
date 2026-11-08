@@ -4,6 +4,7 @@ import { productParams, trackEvent } from "@lib/analytics/ga4"
 import { useProductSelection } from "@lib/context/product-selection-context"
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
+import { guardRepaint } from "@modules/common/components/repaint-guard"
 import { isVariantAvailable, optionsAsKeymap } from "@lib/util/default-variant"
 import {
   getProductPrice,
@@ -287,6 +288,8 @@ export default function ProductActions({
       setAddError(t("product.addToCartError"))
     } finally {
       setIsAdding(false)
+      // The header's cart count comes back with the action (see `RepaintGuard`)
+      guardRepaint()
     }
   }
 

@@ -11,6 +11,7 @@ import { getLocale } from "@lib/data/locale-actions"
 import { LocaleProvider } from "@lib/i18n/client"
 import { CookieConsentBoundary } from "@/components/cookie-consent/cookie-consent-boundary"
 import GoogleAnalytics from "@modules/common/components/google-analytics"
+import RepaintGuard from "@modules/common/components/repaint-guard"
 
 const badoni = Bodoni_Moda({
   subsets: ["latin"],
@@ -52,6 +53,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     // hydration error here is a false positive.
     <html lang={lang} data-mode="light" suppressHydrationWarning>
       <body className={`${badoni.variable} ${dmSans.variable}`}>
+        {/* Outside the consent boundary: it is not a tracker and has to work
+            for every visitor. */}
+        <RepaintGuard />
         <LocaleProvider initialLocale={locale} initialDict={dict}>
           {/* Deliberately not <main>: the route-group layouts render the header
               and footer inside this wrapper, so a <main> here would swallow the

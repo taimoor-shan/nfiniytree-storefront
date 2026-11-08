@@ -1,6 +1,7 @@
 import { deleteLineItem } from "@lib/data/cart"
 import { Spinner, Trash } from "@medusajs/icons"
 import { clx } from "@medusajs/ui"
+import { guardRepaint } from "@modules/common/components/repaint-guard"
 import { useState } from "react"
 import { useTranslation } from "@lib/i18n/client"
 
@@ -24,9 +25,11 @@ const DeleteButton = ({
     // `router.refresh()` used to follow this await. `deleteLineItem` calls
     // `refresh()` server-side, so the action response already carries the
     // re-rendered tree — the extra client refresh was a second full RSC
-    // roundtrip for the same result.
+    // roundtrip for the same result. `guardRepaint()` makes sure the page
+    // shows that tree (see `RepaintGuard`).
     await deleteLineItem(id).finally(() => {
       setIsDeleting(false)
+      guardRepaint()
     })
   }
 

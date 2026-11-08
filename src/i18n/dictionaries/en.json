@@ -211,6 +211,8 @@
   "checkout.addPromotion": "Add Promotion Code(s)",
   "checkout.promotionsApplied": "Promotion(s) applied:",
   "checkout.removeDiscount": "Remove discount code from order",
+  "checkout.promoCodeInvalid": "This promotion code isn't valid. Please check it and try again.",
+  "checkout.promoCodeNotApplicable": "This promotion code can't be used for the items in your cart.",
   "checkout.orPayWithCard": "Or pay with card",
   "checkout.paymentFailed": "Payment failed",
   "checkout.backToCart": "Back to shopping cart",

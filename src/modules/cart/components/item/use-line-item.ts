@@ -2,6 +2,7 @@
 
 import { updateLineItem } from "@lib/data/cart"
 import { HttpTypes } from "@medusajs/types"
+import { guardRepaint } from "@modules/common/components/repaint-guard"
 import { useState } from "react"
 
 /**
@@ -26,6 +27,8 @@ const useLineItem = (item: HttpTypes.StoreCartLineItem) => {
       })
       .finally(() => {
         setUpdating(false)
+        // The page must show the new quantity and totals the action sent back
+        guardRepaint()
       })
   }
 

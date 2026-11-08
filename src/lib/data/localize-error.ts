@@ -13,6 +13,10 @@ const KNOWN_ERROR_KEYS: Record<string, string> = {
   // it does for every registration failure, and the SDK's error carries no
   // type or code, so this sentence is all that tells it from the others.
   "identity with email already exists": "account.emailAlreadyRegistered",
+  // A promotion code that does not exist.  Medusa answers 400 "The promotion
+  // code X is invalid", with the code the visitor typed in the middle, so the
+  // fixed words before it are what identifies the sentence.
+  "promotion code": "checkout.promoCodeInvalid",
 }
 
 /**

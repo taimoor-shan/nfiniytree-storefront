@@ -198,6 +198,10 @@ export async function updateCart(data: HttpTypes.StoreUpdateCart) {
       // `cache: "no-store"`, so those totals are re-fetched from Medusa and
       // stay server-authoritative — while leaving cached data and the prefetch
       // cache alone.
+      //
+      // In a production build the browser does not always paint that payload;
+      // `guardRepaint()` (modules/common/components/repaint-guard) is what makes
+      // it. Every client call site of these cart actions runs it afterwards.
       refresh()
       return cart
     })
@@ -337,29 +341,94 @@ export async function initiatePaymentSession(
     .catch(medusaError)
 }
 
-export async function applyPromotions(codes: string[]) {
+/**
+ * What applying or removing promotion codes came to, for the promo box.
+ *
+ * A refusal is a RESULT, not an exception. In a production build Next replaces
+ * the message of any error a Server Action throws with "An error occurred in
+ * the Server Components render. The specific message is omitted in production
+ * builds…", so a mistyped code used to show the visitor that and nothing else
+ * (`next dev` shows the real message, which is why it was never seen while
+ * developing). A returned value reaches the browser unchanged.
+ */
+export type PromotionResult = { ok: true } | { ok: false; error: string }
+
+/**
+ * Applies the promotion codes to the visitor's cart. Medusa replaces the cart's
+ * codes with the list, so removing a code is applying the list without it.
+ *
+ * Never throws for what a visitor can cause: a code the shop does not know, or
+ * knows but cannot use on this cart, comes back as `{ ok: false, error }` with
+ * a sentence in their language. Anything unexpected says so generically, and
+ * the details go to the server log.
+ */
+export async function applyPromotions(
+  codes: string[]
+): Promise<PromotionResult> {
+  const locale = await getLocale()
   const cartId = await getCartId()
 
   if (!cartId) {
-    throw new Error("No existing cart found")
+    console.error("[promotions] no cart cookie to apply the codes to")
+    return {
+      ok: false,
+      error: await translate("account.errorOccurred", locale),
+    }
   }
 
   const headers = {
     ...(await getAuthHeaders()),
   }
 
-  return sdk.store.cart
-    .update(cartId, { promo_codes: codes }, {}, headers)
-    .then(async () => {
-      // `revalidateTag(products, "max")` used to stand here. It marks cached
-      // product data stale-while-revalidate and, by design, does not make the
-      // action return a fresh render of the page, so a code Medusa had applied
-      // showed on the cart page only after a manual reload. A promotion does not
-      // touch product data; what the page needs is the cart re-read. See
-      // `updateCart` above for why that is `refresh()`.
-      refresh()
-    })
-    .catch(medusaError)
+  let promotionsOnCart: HttpTypes.StoreCartPromotion[] | undefined
+  try {
+    const { cart } = await sdk.store.cart.update(
+      cartId,
+      { promo_codes: codes },
+      {},
+      headers
+    )
+    promotionsOnCart = cart?.promotions
+  } catch (error: any) {
+    const key = knownErrorKey(error)
+    // A mistyped code is an everyday event; anything else is worth a log line
+    if (!key) {
+      console.error(
+        "[promotions] Medusa did not take the codes:",
+        error?.message ?? error
+      )
+    }
+    return {
+      ok: false,
+      error: await translate(key ?? "account.errorOccurred", locale),
+    }
+  }
+
+  // `revalidateTag(products, "max")` used to stand here. It marks cached
+  // product data stale-while-revalidate and, by design, does not make the
+  // action return a fresh render of the page, so a code Medusa had applied
+  // showed on the cart page only after a manual reload. A promotion does not
+  // touch product data; what the page needs is the cart re-read. See
+  // `updateCart` above for why that is `refresh()`.
+  refresh()
+
+  // Medusa takes a code it knows without a word even when it cannot use it:
+  // none of the cart's items is discountable, or a rule of the promotion (a
+  // minimum spend, a region…) is not met. The code is then simply missing from
+  // the cart it sends back, and the visitor, seeing nothing happen, took the
+  // code for broken. An answer with no list of promotions proves nothing, so
+  // only a list that lacks a code counts.
+  if (Array.isArray(promotionsOnCart)) {
+    const applied = new Set(promotionsOnCart.map((promotion) => promotion.code))
+    if (codes.some((code) => !applied.has(code))) {
+      return {
+        ok: false,
+        error: await translate("checkout.promoCodeNotApplicable", locale),
+      }
+    }
+  }
+
+  return { ok: true }
 }
 
 export async function applyGiftCard(code: string) {
@@ -410,11 +479,8 @@ export async function submitPromotionForm(
   formData: FormData
 ) {
   const code = formData.get("code") as string
-  try {
-    await applyPromotions([code])
-  } catch (e: any) {
-    return e.message
-  }
+  const result = await applyPromotions([code])
+  return result.ok ? undefined : result.error
 }
 
 // TODO: Pass a POJO instead of a form entity here
