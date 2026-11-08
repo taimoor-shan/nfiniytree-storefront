@@ -351,7 +351,13 @@ export async function applyPromotions(codes: string[]) {
   return sdk.store.cart
     .update(cartId, { promo_codes: codes }, {}, headers)
     .then(async () => {
-      revalidateTag(CACHE_TAGS.products, "max")
+      // `revalidateTag(products, "max")` used to stand here. It marks cached
+      // product data stale-while-revalidate and, by design, does not make the
+      // action return a fresh render of the page, so a code Medusa had applied
+      // showed on the cart page only after a manual reload. A promotion does not
+      // touch product data; what the page needs is the cart re-read. See
+      // `updateCart` above for why that is `refresh()`.
+      refresh()
     })
     .catch(medusaError)
 }

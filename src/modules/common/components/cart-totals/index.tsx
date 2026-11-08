@@ -2,6 +2,7 @@
 
 import { convertToLocale } from "@lib/util/money"
 import { getCartCountryCode } from "@lib/util/country-locale"
+import { discountLabel } from "@lib/util/discount"
 import { useTranslation } from "@/lib/i18n"
 import React from "react"
 
@@ -18,12 +19,19 @@ type CartTotalsProps = {
   }
   taxRate?: number | null
   countryCode?: string
+  /**
+   * The promotion codes behind the discount, named in its label. The order
+   * pages pass them; the cart and checkout leave them out, since their promo
+   * code box already lists the codes.
+   */
+  discountCodes?: string[]
 }
 
 const CartTotals: React.FC<CartTotalsProps> = ({
   totals,
   taxRate,
   countryCode,
+  discountCodes,
 }) => {
   const {
     currency_code,
@@ -69,10 +77,13 @@ const CartTotals: React.FC<CartTotalsProps> = ({
           </span>
         </div>
         {!!discount_subtotal && (
-          <div className="flex items-center justify-between">
-            <span>{t("cart.discount")}</span>
+          <div className="flex items-center justify-between gap-x-4">
+            {/* A long code wraps inside the label; the amount keeps its line */}
+            <span className="min-w-0 break-words">
+              {discountLabel(t("cart.discount"), discountCodes)}
+            </span>
             <span
-              className="text-primary-text"
+              className="text-primary-text shrink-0 whitespace-nowrap"
               data-testid="cart-discount"
               data-value={discount_subtotal || 0}
             >
