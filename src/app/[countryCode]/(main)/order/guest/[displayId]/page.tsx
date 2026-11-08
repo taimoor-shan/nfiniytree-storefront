@@ -33,11 +33,21 @@ async function fetchGuestOrder(displayId: string, token: string) {
   const backendUrl =
     process.env.MEDUSA_BACKEND_URL || "http://localhost:9000"
 
+  const publishableKey =
+    process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY || ""
+
+  // Every /store route wants the publishable key, and this route answers with a
+  // fixed set of relations (items, shipping address and methods, fulfillments),
+  // refusing any other query parameter: without the key, or with a `fields`,
+  // it answers 400 and every guest saw a 404 page.
   const res = await fetch(
     `${backendUrl}/store/orders/guest/${displayId}?token=${encodeURIComponent(
       token
-    )}&fields=*shipping_address,*shipping_methods`,
-    { cache: "no-store" }
+    )}`,
+    {
+      headers: { "x-publishable-api-key": publishableKey },
+      cache: "no-store",
+    }
   )
 
   if (!res.ok) return null
