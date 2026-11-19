@@ -6,6 +6,7 @@ import { isSimpleProduct } from "@lib/util/product"
 import {
   ApproxDimensions,
   formatDimension,
+  localizeDecimals,
   parseApproxDimensions,
 } from "@lib/util/approx-dimensions"
 import { getLongDescription, getShortDescription } from "@lib/util/product-copy"
@@ -226,7 +227,7 @@ const SpecificationsTab = ({
   isConfigured,
   approxDimensions,
 }: SpecificationsTabProps) => {
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
 
   // Dimension icons keyed by label (labels are managed by the backend)
   const dimensionIcons: Record<string, React.ReactNode> = {
@@ -296,7 +297,7 @@ const SpecificationsTab = ({
                     {resolvePotLabel(t, key)}
                   </span>
 
-                  <p className="text-body">{value}</p>
+                  <p className="text-body">{localizeDecimals(value, locale)}</p>
                 </div>
               </div>
             ))}
@@ -322,7 +323,9 @@ const SpecificationsTab = ({
             {potSpecs.map((spec, i) => (
               <div key={i} className="flex flex-col gap-y-1">
                 <span className="font-semibold text-ink">{spec.label}</span>
-                <p className="text-body text-base">{spec.value}</p>
+                <p className="text-body text-base">
+                  {localizeDecimals(spec.value, locale)}
+                </p>
               </div>
             ))}
           </div>

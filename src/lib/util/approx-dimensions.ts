@@ -59,3 +59,15 @@ export function formatDimension({
   if (range) return { text: `${approxLabel} ${range} ${unit}`, approximate: true }
   return null
 }
+
+/**
+ * Writes the decimal numbers in a spec value the way the visitor's language
+ * does: "82.5 cm" stays as it is in English and reads "82,5 cm" in German and
+ * Hungarian. Values come from the admin as typed (with a point), so this is
+ * applied at render. Only a point between two digits is touched.
+ */
+export function localizeDecimals(text: string, locale: string | null | undefined): string {
+  const language = (locale || "en").toLowerCase().split("-")[0]
+  if (language !== "de" && language !== "hu") return text
+  return text.replace(/(\d)\.(\d)/g, "$1,$2")
+}

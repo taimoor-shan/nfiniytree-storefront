@@ -10,10 +10,14 @@ export default async function AllProducts({
   sortBy,
   page,
   countryCode,
+  excludeCollectionIds,
 }: {
   sortBy?: SortOptions
   page?: string
   countryCode: string
+  /** The collections shown in their own rails above this grid. Their products
+   *  are left out here so no product appears twice on the homepage. */
+  excludeCollectionIds?: string[]
 }) {
   const pageNumber = page ? parseInt(page) : 1
   const sort = sortBy || "price_desc"
@@ -23,7 +27,10 @@ export default async function AllProducts({
     <div className="content-container pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-4 gap-4">
         <h2 className="text-2xl sm:text-3xl font-display text-ink">
-          {await translate("store.allProducts", locale)}
+          {await translate(
+            excludeCollectionIds?.length ? "home.moreProducts" : "store.allProducts",
+            locale
+          )}
         </h2>
         <RefinementList sortBy={sort} />
       </div>
@@ -34,6 +41,7 @@ export default async function AllProducts({
             sortBy={sort}
             page={pageNumber}
             countryCode={countryCode}
+            excludeCollectionIds={excludeCollectionIds}
           />
         </Suspense>
       </div>
