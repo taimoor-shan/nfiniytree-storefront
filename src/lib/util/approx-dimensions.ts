@@ -71,3 +71,11 @@ export function localizeDecimals(text: string, locale: string | null | undefined
   if (language !== "de" && language !== "hu") return text
   return text.replace(/(\d)\.(\d)/g, "$1,$2")
 }
+
+/**
+ * localizeDecimals for a value that is a measurement ("82.5 cm", "1.2 kg"):
+ * free text such as a material ("Stainless steel 1.4301") is left as written.
+ */
+export function localizeMeasurement(text: string, locale: string | null | undefined): string {
+  return /\d\s*(mm|cm|m|kg|g|l)\b/i.test(text) ? localizeDecimals(text, locale) : text
+}

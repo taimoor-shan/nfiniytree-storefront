@@ -837,5 +837,7 @@
   "product.shippingFromRange": "from {price}",
   "product.shippingExactAtCheckout": "plus VAT, exact price by postcode at checkout",
   "product.shippingPolicyLink": "Shipping terms",
-  "topbar.otherCountry": "Other country? Request a quote"
+  "topbar.otherCountry": "Other country? Request a quote",
+  "newsletter.unsubscribeLinkInvalid": "This unsubscribe link is no longer valid. It may have been used already. If you still receive our emails, write to info@infinytree.com and we will remove your address.",
+  "newsletter.statusError": "That did not work. Please try again."
 }

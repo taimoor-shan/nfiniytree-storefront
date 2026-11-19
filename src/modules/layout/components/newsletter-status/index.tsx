@@ -17,7 +17,7 @@ export default function NewsletterStatus({
   token: string
 }) {
   const { t } = useTranslation()
-  const [state, setState] = useState<"idle" | "loading" | "done" | "invalid">(
+  const [state, setState] = useState<"idle" | "loading" | "done" | "invalid" | "error">(
     token ? "idle" : "invalid"
   )
 
@@ -29,8 +29,11 @@ export default function NewsletterStatus({
         { method: "POST", body: { action, token } }
       )
       setState(found ? "done" : "invalid")
-    } catch {
-      setState("invalid")
+    } catch (e) {
+      // The backend refusing the token (4xx) means a bad link; a network or
+      // server failure does not, so the visitor can try again.
+      const status = (e as { status?: number })?.status
+      setState(status && status < 500 ? "invalid" : "error")
     }
   }
 
@@ -42,13 +45,22 @@ export default function NewsletterStatus({
     )
   }
   if (state === "invalid") {
-    return <p role="alert" className="text-body">{t("newsletter.linkInvalid")}</p>
+    return (
+      <p role="alert" className="text-body">
+        {t(action === "confirm" ? "newsletter.linkInvalid" : "newsletter.unsubscribeLinkInvalid")}
+      </p>
+    )
   }
   return (
+    <div className="flex flex-col items-start gap-3">
+      {state === "error" && (
+        <p role="alert" className="text-body">{t("newsletter.statusError")}</p>
+      )}
     <button type="button" className="btn-primary" onClick={submit} disabled={state === "loading"}>
       {state === "loading"
         ? "…"
         : t(action === "confirm" ? "newsletter.confirmButton" : "newsletter.unsubscribeButton")}
     </button>
+    </div>
   )
 }

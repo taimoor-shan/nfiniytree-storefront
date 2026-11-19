@@ -837,5 +837,7 @@
   "product.shippingFromRange": "{price}-tól",
   "product.shippingExactAtCheckout": "+ÁFA, a pontos díj irányítószám szerint a pénztárban",
   "product.shippingPolicyLink": "Szállítási feltételek",
-  "topbar.otherCountry": "Más ország? Kérjen ajánlatot"
+  "topbar.otherCountry": "Más ország? Kérjen ajánlatot",
+  "newsletter.unsubscribeLinkInvalid": "Ez a leiratkozási link már nem érvényes. Lehet, hogy már felhasználta. Ha továbbra is kap tőlünk e-maileket, írjon az info@infinytree.com címre, és töröljük a címét.",
+  "newsletter.statusError": "Ez nem sikerült. Kérjük, próbálja újra."
 }

@@ -837,5 +837,7 @@
   "product.shippingFromRange": "ab {price}",
   "product.shippingExactAtCheckout": "zzgl. MwSt., genauer Preis nach Postleitzahl im Checkout",
   "product.shippingPolicyLink": "Versandbedingungen",
-  "topbar.otherCountry": "Anderes Land? Angebot anfragen"
+  "topbar.otherCountry": "Anderes Land? Angebot anfragen",
+  "newsletter.unsubscribeLinkInvalid": "Dieser Abmeldelink ist nicht mehr gültig. Vielleicht wurde er schon verwendet. Wenn Sie weiterhin E-Mails von uns erhalten, schreiben Sie an info@infinytree.com und wir entfernen Ihre Adresse.",
+  "newsletter.statusError": "Das hat nicht geklappt. Bitte versuchen Sie es erneut."
 }

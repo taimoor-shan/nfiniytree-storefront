@@ -5,6 +5,7 @@ import { useMemo } from "react"
 
 import { useProductSelection } from "@lib/context/product-selection-context"
 import { useTranslation } from "@lib/i18n/client"
+import { getLocalizedMetadata } from "@lib/i18n/metadata"
 import {
   localizeDecimals,
   parseApproxDimensions,
@@ -71,8 +72,9 @@ const VariantGallery = ({
   // is described rather than only numbered.
   const { t, locale } = useTranslation()
   const details = useMemo(() => {
+    // Resolved the way the specifications read it, so JSON text is decoded.
     const approx = parseApproxDimensions(
-      (product.metadata as Record<string, unknown> | null)?.approx_dimensions
+      getLocalizedMetadata(product.metadata, locale || "en")?.approx_dimensions
     )
     const height = product.height
       ? `${product.height} cm`
@@ -85,10 +87,12 @@ const VariantGallery = ({
           "{height}",
           localizeDecimals(height, locale)
         ),
-      ...Object.values(choice ?? {}),
+      // Only name the chosen options when the pictures are the chosen
+      // plant's: a gallery that fell back to the whole product shows others.
+      ...(shown !== images ? Object.values(choice ?? {}) : []),
     ].filter((part): part is string => !!part && !!part.trim())
     return parts.length ? `, ${parts.join(", ")}` : ""
-  }, [product, choice, t, locale])
+  }, [product, choice, shown, images, t, locale])
 
   return (
     <ImageGallery

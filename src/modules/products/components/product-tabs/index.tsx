@@ -6,7 +6,7 @@ import { isSimpleProduct } from "@lib/util/product"
 import {
   ApproxDimensions,
   formatDimension,
-  localizeDecimals,
+  localizeMeasurement,
   parseApproxDimensions,
 } from "@lib/util/approx-dimensions"
 import { getLongDescription, getShortDescription } from "@lib/util/product-copy"
@@ -297,7 +297,7 @@ const SpecificationsTab = ({
                     {resolvePotLabel(t, key)}
                   </span>
 
-                  <p className="text-body">{localizeDecimals(value, locale)}</p>
+                  <p className="text-body">{localizeMeasurement(value, locale)}</p>
                 </div>
               </div>
             ))}
@@ -324,7 +324,7 @@ const SpecificationsTab = ({
               <div key={i} className="flex flex-col gap-y-1">
                 <span className="font-semibold text-ink">{spec.label}</span>
                 <p className="text-body text-base">
-                  {localizeDecimals(spec.value, locale)}
+                  {localizeMeasurement(spec.value, locale)}
                 </p>
               </div>
             ))}

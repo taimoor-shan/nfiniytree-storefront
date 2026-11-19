@@ -213,16 +213,6 @@ const CountrySelect = ({
                   </ListboxOption>
                 )
               })}
-              {onRequestOptions.length > 0 && !othersShown && (
-                <button
-                  type="button"
-                  className="w-full text-left py-2 px-3 hover:bg-surface-card normal-case underline underline-offset-2 border-t border-hairline"
-                  onClick={() => setShowOthers(true)}
-                  data-testid="country-select-other-country"
-                >
-                  {t("topbar.otherCountry")}
-                </button>
-              )}
               {othersShown && (
                 <>
               {onRequestOptions.length > 0 && (
@@ -257,6 +247,18 @@ const CountrySelect = ({
             </ListboxOptions>
           </Transition>
         </div>
+        {/* Outside the listbox so the keyboard reaches it: a plain button
+            inside ListboxOptions is skipped by the arrow keys. */}
+        {onRequestOptions.length > 0 && !othersShown && (
+          <button
+            type="button"
+            className="block mt-2 text-sm text-left underline underline-offset-2"
+            onClick={() => setShowOthers(true)}
+            data-testid="country-select-other-country"
+          >
+            {t("topbar.otherCountry")}
+          </button>
+        )}
       </Listbox>
     </div>
   )

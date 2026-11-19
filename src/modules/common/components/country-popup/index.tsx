@@ -284,16 +284,6 @@ const CountryPopup = ({
                 {option.label}
               </ListboxOption>
             ))}
-            {onRequestOptions.length > 0 && !othersShown && (
-              <button
-                type="button"
-                className="w-full text-left px-4 py-2.5 text-sm underline underline-offset-2 border-t border-hairline hover:bg-surface-card"
-                onClick={() => setShowOthers(true)}
-                data-testid="country-popup-other-country"
-              >
-                {t("topbar.otherCountry")}
-              </button>
-            )}
             {othersShown && (
               <>
             {onRequestOptions.length > 0 && (
@@ -324,6 +314,18 @@ const CountryPopup = ({
               </>
             )}
           </ListboxOptions>
+        {/* Outside the listbox so the keyboard reaches it: a plain button
+            inside ListboxOptions is skipped by the arrow keys. */}
+        {onRequestOptions.length > 0 && !othersShown && (
+          <button
+            type="button"
+            className="block mt-2 text-sm text-left underline underline-offset-2"
+            onClick={() => setShowOthers(true)}
+            data-testid="country-popup-other-country"
+          >
+            {t("topbar.otherCountry")}
+          </button>
+        )}
         </Listbox>
 
         {locales && locales.length > 0 && (

@@ -12,7 +12,8 @@ type Props = {
 
 const ACTIONS = { confirm: "newsletter.confirmTitle", unsubscribe: "newsletter.unsubscribeTitle" } as const
 
-const isAction = (value: string): value is keyof typeof ACTIONS => value in ACTIONS
+const isAction = (value: string): value is keyof typeof ACTIONS =>
+  value === "confirm" || value === "unsubscribe"
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const { action } = await props.params

@@ -338,7 +338,11 @@ export default function TopBar({
                     <button
                       type="button"
                       className="w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated whitespace-nowrap underline underline-offset-2"
-                      onClick={() => setShowOthers(true)}
+                      onClick={(e) => {
+                        // Keep the dropdown open: its panel closes on any click.
+                        e.stopPropagation()
+                        setShowOthers(true)
+                      }}
                       data-testid="topbar-other-country"
                     >
                       {t("topbar.otherCountry")}

@@ -7,7 +7,7 @@ import WithdrawalForm from "@modules/withdrawal/components/withdrawal-form"
 
 type Props = {
   params: Promise<{ countryCode: string }>
-  searchParams: Promise<{ order?: string }>
+  searchParams: Promise<{ order?: string | string[] }>
 }
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
@@ -25,7 +25,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
  * pages (which fill in the order number).
  */
 export default async function WithdrawalPage(props: Props) {
-  const { order } = await props.searchParams
+  const { order: orderParam } = await props.searchParams
+  // A repeated ?order= arrives as an array: take the first.
+  const order = Array.isArray(orderParam) ? orderParam[0] : orderParam
   const locale = (await getLocale()) || "en"
   const [title, intro, termsLink] = await Promise.all([
     translate("withdrawal.title", locale),
