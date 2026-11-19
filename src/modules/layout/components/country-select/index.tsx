@@ -79,6 +79,10 @@ const CountrySelect = ({
   const onRequestCountry = isDeliveryOnRequest(deliveryCountry, regions)
     ? deliveryCountry
     : null
+  // The countries on request stay behind one "Other country? Request a
+  // quote" entry until asked for (or one of them is already chosen).
+  const [showOthers, setShowOthers] = useState(false)
+  const othersShown = showOthers || !!onRequestCountry
 
   useEffect(() => {
     // A country on request chosen is where the visitor wants delivery,
@@ -209,36 +213,52 @@ const CountrySelect = ({
                   </ListboxOption>
                 )
               })}
+              {othersShown && (
+                <>
               {onRequestOptions.length > 0 && (
-                <div
-                  role="presentation"
-                  className="px-3 pt-3 pb-1 text-xs tracking-wide text-muted border-t border-hairline"
-                >
-                  {t("checkout.deliveryOnRequest")}
-                </div>
+                  <div
+                    role="presentation"
+                    className="px-3 pt-3 pb-1 text-xs tracking-wide text-muted border-t border-hairline"
+                  >
+                    {t("checkout.deliveryOnRequest")}
+                  </div>
+                )}
+                {onRequestOptions.map((o) => (
+                  <ListboxOption
+                    key={o.country}
+                    value={o}
+                    className="py-2 hover:bg-surface-card px-3 cursor-pointer flex items-center gap-x-2"
+                  >
+                    <ReactCountryFlag
+                      svg
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                      }}
+                      countryCode={o.country}
+                      alt=""
+                      aria-hidden="true"
+                    />{" "}
+                    {o.label}
+                  </ListboxOption>
+                ))}
+                </>
               )}
-              {onRequestOptions.map((o) => (
-                <ListboxOption
-                  key={o.country}
-                  value={o}
-                  className="py-2 hover:bg-surface-card px-3 cursor-pointer flex items-center gap-x-2"
-                >
-                  <ReactCountryFlag
-                    svg
-                    style={{
-                      width: "16px",
-                      height: "16px",
-                    }}
-                    countryCode={o.country}
-                    alt=""
-                    aria-hidden="true"
-                  />{" "}
-                  {o.label}
-                </ListboxOption>
-              ))}
             </ListboxOptions>
           </Transition>
         </div>
+        {/* Outside the listbox so the keyboard reaches it: a plain button
+            inside ListboxOptions is skipped by the arrow keys. */}
+        {onRequestOptions.length > 0 && !othersShown && (
+          <button
+            type="button"
+            className="block mt-2 text-sm text-left underline underline-offset-2"
+            onClick={() => setShowOthers(true)}
+            data-testid="country-select-other-country"
+          >
+            {t("topbar.otherCountry")}
+          </button>
+        )}
       </Listbox>
     </div>
   )
