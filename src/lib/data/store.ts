@@ -7,6 +7,8 @@ type StoreResponse = {
   store: {
     id: string
     name?: string | null
+    /** Settings the admin keeps on the store, e.g. the home video banner (`getHomeBanner()`). */
+    metadata?: Record<string, unknown> | null
   }
 }
 

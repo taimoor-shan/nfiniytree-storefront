@@ -233,7 +233,7 @@ const Addresses = ({
               <div className="flex items-start gap-x-8">
                 <div className="flex items-start flex-wrap gap-2 w-full">
                   <div
-                    className="flex flex-col"
+                    className="flex flex-col w-[calc(50%-8px)]"
                     data-testid="shipping-address-summary"
                   >
                     <Text className="txt-medium-plus text-primary mb-1">
@@ -271,7 +271,7 @@ const Addresses = ({
                   </div>
 
                   <div
-                    className="flex flex-col"
+                    className="flex flex-col w-[calc(50%-8px)]"
                     data-testid="shipping-contact-summary"
                   >
                     <Text className="txt-medium-plus text-primary mb-1">
@@ -284,7 +284,7 @@ const Addresses = ({
                   </div>
 
                   <div
-                    className="flex flex-col"
+                    className="flex flex-col w-full"
                     data-testid="billing-address-summary"
                   >
                     <Text className="txt-medium-plus text-primary mb-1">

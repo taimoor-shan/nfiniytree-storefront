@@ -485,3 +485,15 @@
   background: red;
   transform: rotate(-12deg);
 }
+
+/* The home page's banner video is decoration, so it carries no player of any
+   kind. `controls` is never set, but iOS Safari still draws a play button over
+   an inline video it will not autoplay (Low Power Mode); these hide it and the
+   rest of the native overlay. */
+.banner-video::-webkit-media-controls,
+.banner-video::-webkit-media-controls-panel,
+.banner-video::-webkit-media-controls-overlay-play-button,
+.banner-video::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}

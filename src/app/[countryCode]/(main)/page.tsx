@@ -8,12 +8,14 @@ import SkeletonProductGrid from "@modules/skeletons/templates/skeleton-product-g
 import Hero from "@modules/home/components/hero"
 import About from "@modules/home/components/about"
 import Features from "@modules/home/components/features"
+import HomeVideoBanner from "@modules/home/components/home-video-banner"
 import { listCollections } from "@lib/data/collections"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getRegion } from "@lib/data/regions"
 import { retrieveStore } from "@lib/data/store"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
+import { getHomeBanner } from "@lib/util/home-banner"
 import { getSeoAlternates } from "@lib/util/page-metadata"
 import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
 import OrganizationJsonLd from "@modules/common/components/organization-jsonld"
@@ -62,20 +64,25 @@ export default async function Home(props: {
 
   // These ran one after another, so the homepage produced no HTML until all of
   // them had resolved. `getLocale()` is only a cookie read, so it costs nothing
-  // to await first; the two network calls then go out together.
-  // `retrieveStore()` used to be awaited here too, but its `storeName` result
-  // was never referenced in the markup — `generateMetadata` fetches the store
-  // separately — so it was a roundtrip the page paid for and discarded.
+  // to await first; the network calls then go out together.
+  // `retrieveStore()` is awaited here again, now that the markup uses it: the
+  // video banner's settings live in the store's metadata. It is the same cached
+  // fetch (tag `store`) that `generateMetadata` makes, so it is no extra roundtrip.
   const locale = (await getLocale()) || "en"
 
-  const [region, collectionsResult, homePage, description] = await Promise.all([
-    getRegion(countryCode),
-    listCollections({ fields: "id, handle, title" }),
-    retrievePageBySlug("home", locale),
-    translate("metadata.homeDescription", locale),
-  ])
+  const [region, collectionsResult, homePage, description, store] =
+    await Promise.all([
+      getRegion(countryCode),
+      listCollections({ fields: "id, handle, title" }),
+      retrievePageBySlug("home", locale),
+      translate("metadata.homeDescription", locale),
+      retrieveStore(),
+    ])
 
   const { collections } = collectionsResult
+  // Null until the admin sets a video (Settings → Store), so the page is
+  // unchanged for a shop without one.
+  const banner = getHomeBanner(store?.metadata)
 
   if (!collections || !region) {
     return null
@@ -101,6 +108,11 @@ export default async function Home(props: {
               countryCode={countryCode}
             />
           </Suspense>
+
+      {/* Directly under the Best Sellers rail, above the full catalogue. It is a
+          full-bleed band (outside any content-container), and its own bottom
+          margin replaces the gap the rail used to leave above "All products". */}
+      {banner && <HomeVideoBanner banner={banner} />}
 
       <div className="">
           <AllProducts sortBy={sortBy} page={page} countryCode={countryCode} />
