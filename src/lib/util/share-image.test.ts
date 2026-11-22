@@ -98,6 +98,22 @@ test("anything else is refused", () => {
   assert.equal(parseShareImagePath("cover", version, encode("..")), null)
   assert.equal(parseShareImagePath("cover", version, encode("a\\b")), null)
   assert.equal(parseShareImagePath("cover", version, ".jpg"), null)
+  for (const dots of [
+    "%2e%2e",
+    ".%2e",
+    "%2e.",
+    "%2E%2E",
+    "%2e",
+    "a%2fb",
+    "a%5cb",
+  ]) {
+    assert.equal(
+      parseShareImagePath("cover", version, encode(dots)),
+      null,
+      dots
+    )
+    assert.equal(staticFileName(`/static/${dots}`), null, dots)
+  }
 })
 
 test("only a file directly under /static/ is an upload", () => {

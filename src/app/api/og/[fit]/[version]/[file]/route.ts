@@ -27,6 +27,30 @@ const FETCH_TIMEOUT_MS = 10_000
 
 export const runtime = "nodejs"
 
+/** The body, refused as soon as it is larger than `limit` bytes. */
+async function readAtMost(response: Response, limit: number): Promise<Buffer> {
+  const declared = Number(response.headers.get("content-length"))
+  if (declared > limit) {
+    await response.body?.cancel()
+    throw new Error("source too large")
+  }
+  const reader = response.body?.getReader()
+  if (!reader) throw new Error("source has no body")
+  const chunks: Uint8Array[] = []
+  let total = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    total += value.byteLength
+    if (total > limit) {
+      await reader.cancel()
+      throw new Error("source too large")
+    }
+    chunks.push(value)
+  }
+  return Buffer.concat(chunks)
+}
+
 export async function GET(
   _request: NextRequest,
   {
@@ -47,8 +71,7 @@ export async function GET(
     if (!source.ok) throw new Error(`source answered ${source.status}`)
     const type = source.headers.get("content-type") || ""
     if (!type.startsWith("image/")) throw new Error(`source is ${type}`)
-    const bytes = Buffer.from(await source.arrayBuffer())
-    if (bytes.length > MAX_SOURCE_BYTES) throw new Error("source too large")
+    const bytes = await readAtMost(source, MAX_SOURCE_BYTES)
 
     const jpeg = await sharp(bytes, { failOn: "none" })
       .rotate()

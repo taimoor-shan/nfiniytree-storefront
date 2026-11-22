@@ -49,7 +49,19 @@ const FITS: readonly ShareImageFit[] = ["cover", "contain"]
 const BASE64URL = /^[A-Za-z0-9_-]+$/
 
 /** One path segment of an uploaded file, as it appears after `/static/`. */
-const isSafeFileName = (name: string) =>
+const isSafeFileName = (name: string) => {
+  // The name is put into the backend URL as it is, so judge it as the URL
+  // parser will: `%2e%2e` is `..` there and would leave `/static/`.
+  let decoded: string
+  try {
+    decoded = decodeURIComponent(name)
+  } catch {
+    return false
+  }
+  return isSafePlainName(name) && isSafePlainName(decoded)
+}
+
+const isSafePlainName = (name: string) =>
   name.length > 0 &&
   name.length <= 300 &&
   !name.includes("/") &&
