@@ -16,8 +16,8 @@ import { retrieveStore } from "@lib/data/store"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
 import { getHomeBanner } from "@lib/util/home-banner"
-import { getSeoAlternates } from "@lib/util/page-metadata"
-import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
+import { getDefaultShareImage, getSeoAlternates } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 import OrganizationJsonLd from "@modules/common/components/organization-jsonld"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
@@ -45,7 +45,7 @@ export async function generateMetadata(props: {
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}`,
-      images: [DEFAULT_OG_IMAGE],
+      images: [await getDefaultShareImage(locale)],
     },
   }
 }

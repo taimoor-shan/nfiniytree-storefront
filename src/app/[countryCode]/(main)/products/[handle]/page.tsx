@@ -7,9 +7,10 @@ import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
 import ProductTemplate from "@modules/products/templates"
 import { normalizeImageUrl } from "@lib/util/image-url"
-import { getSeoAlternates } from "@lib/util/page-metadata"
+import { getDefaultShareImage, getSeoAlternates } from "@lib/util/page-metadata"
 import { getProductSeo } from "@lib/util/product-copy"
-import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
+import { SITE_NAME } from "@lib/util/seo"
+import { shareImageFor } from "@lib/util/share-image"
 
 type Props = {
   params: Promise<{ countryCode: string; handle: string }>
@@ -115,7 +116,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   // Products often have images but no `thumbnail`; without the first image as
   // a fallback those product pages had no share image at all.
   const imageUrl = product.thumbnail || product.images?.[0]?.url
-  const image = imageUrl ? normalizeImageUrl(imageUrl) : null
+  // Product photos are portrait: shown whole on the cream canvas at 1200 × 630
+  // (`/api/og`), where Facebook would otherwise crop away the top and bottom.
+  const image =
+    shareImageFor(imageUrl ? normalizeImageUrl(imageUrl) : null, {
+      fit: "contain",
+      alt: product.title,
+    }) || (await getDefaultShareImage(locale))
 
   return {
     title,
@@ -127,16 +134,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}/products/${handle}`,
-      // Relative `/static/...`, resolved against `metadataBase` in the root
-      // layout. Keeps social crawlers on the public storefront origin instead
-      // of whatever origin Medusa's file provider happens to emit.
-      images: image ? [{ url: image, alt: product.title }] : [DEFAULT_OG_IMAGE],
+      // Relative, resolved against `metadataBase` in the root layout, so social
+      // crawlers stay on the public storefront origin.
+      images: [image],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [image || DEFAULT_OG_IMAGE.url],
+      images: [image],
     },
   }
 }

@@ -5647,6 +5647,7 @@ __metadata:
     react-country-flag: "npm:^3.1.0"
     react-dom: "npm:19.2.8"
     server-only: "npm:^0.0.1"
+    sharp: "npm:^0.34.5"
     tailwindcss: "npm:^3.0.23"
     tailwindcss-radix: "npm:^2.8.0"
     typescript: "npm:^5.3.2"

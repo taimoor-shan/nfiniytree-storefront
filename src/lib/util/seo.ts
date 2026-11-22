@@ -19,14 +19,21 @@ import { marketPrefix, marketVariants } from "@lib/i18n/market"
 export const SITE_NAME = "InfinYtree"
 
 /**
- * The share image for pages without one of their own: the homepage hero cut
- * to 1200 × 630, the size social networks expect. A page that sets `openGraph`
- * replaces the root's file-based `opengraph-image`, so each one names it.
+ * The share image for pages without one of their own, when the homepage's hero
+ * cannot be read (`getDefaultShareImage()` in `page-metadata.ts` prefers the
+ * hero the editors set in the CMS). It is that hero cut to 1200 × 630.
+ *
+ * Social networks cache a preview by the image URL, so this file never gets
+ * replaced in place: a new picture goes in under a new name (the month it was
+ * made), and the old file is deleted. The root's file-based
+ * `opengraph-image.jpg` / `twitter-image.jpg` were removed for the same reason:
+ * they kept the old homepage on every page that had no image of its own.
  */
 export const DEFAULT_OG_IMAGE = {
-  url: "/og-default.jpg",
+  url: "/og-default-2026-11.jpg",
   width: 1200,
   height: 630,
+  type: "image/jpeg",
   alt: "InfinYtree handmade artificial trees and flower arrangements in a bright living room",
 }
 

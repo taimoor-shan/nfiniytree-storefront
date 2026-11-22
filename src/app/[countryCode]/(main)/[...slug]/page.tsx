@@ -5,8 +5,12 @@ import { getLocale } from "@lib/data/locale-actions"
 import { getMarketPrefix } from "@lib/data/market"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { cmsSlugFromSegments } from "@lib/util/cms-path"
-import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
-import { DEFAULT_OG_IMAGE, NOINDEX_METADATA, SITE_NAME } from "@lib/util/seo"
+import {
+  getPageShareImage,
+  getSeoAlternates,
+  resolveDescription,
+} from "@lib/util/page-metadata"
+import { NOINDEX_METADATA, SITE_NAME } from "@lib/util/seo"
 import PageTemplate from "@modules/cms/page-templates"
 
 /**
@@ -60,7 +64,9 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       title,
       ...(description ? { description } : {}),
       url: `/${await getMarketPrefix(countryCode)}${path}`,
-      images: page.featured_image ? [{ url: page.featured_image }] : [DEFAULT_OG_IMAGE],
+      images: [
+        await getPageShareImage(page.featured_image, page.title, locale),
+      ],
     },
   }
 }
