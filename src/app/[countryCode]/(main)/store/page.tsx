@@ -5,8 +5,8 @@ import { SortOptions } from "@modules/store/components/refinement-list/sort-prod
 import StoreTemplate from "@modules/store/templates"
 import { translate } from "@lib/i18n"
 import { getLocale } from "@lib/data/locale-actions"
-import { getSeoAlternates } from "@lib/util/page-metadata"
-import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
+import { getDefaultShareImage, getSeoAlternates } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 
 export async function generateMetadata(props: {
   params: Promise<{ countryCode: string }>
@@ -30,7 +30,7 @@ export async function generateMetadata(props: {
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}/store`,
-      images: [DEFAULT_OG_IMAGE],
+      images: [await getDefaultShareImage(locale)],
     },
   }
 }

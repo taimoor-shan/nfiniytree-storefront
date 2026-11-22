@@ -13,6 +13,7 @@ import {
   getAlternates,
   SITE_NAME,
 } from "./seo"
+import { shareImageFor, type ShareImage } from "./share-image"
 
 /**
  * `alternates` for a page's `generateMetadata`, resolved against the live
@@ -41,6 +42,43 @@ export async function getSeoAlternates(countryCode: string, path: string = "") {
     path,
     countryCodes,
   })
+}
+
+/**
+ * The share image of a page that has no picture of its own (the homepage, the
+ * shop, categories, the blog index): the homepage hero as the editors set it in
+ * the CMS, so a new hero shows in link previews without a code change, cut to
+ * 1200 × 630 by `/api/og`. The same cached request the homepage makes.
+ * Without a hero (or with the backend down) the bundled `DEFAULT_OG_IMAGE`.
+ */
+export async function getDefaultShareImage(
+  locale?: string | null
+): Promise<ShareImage> {
+  try {
+    const home = await retrievePageBySlug("home", locale || "en")
+    return (
+      shareImageFor(home?.featured_image, {
+        fit: "cover",
+        alt: DEFAULT_OG_IMAGE.alt,
+      }) || DEFAULT_OG_IMAGE
+    )
+  } catch {
+    return DEFAULT_OG_IMAGE
+  }
+}
+
+/**
+ * The share image of a CMS page: its own featured picture, else the default.
+ */
+export async function getPageShareImage(
+  featuredImage: string | null | undefined,
+  alt: string | null | undefined,
+  locale?: string | null
+): Promise<ShareImage> {
+  return (
+    shareImageFor(featuredImage, { fit: "cover", alt }) ||
+    (await getDefaultShareImage(locale))
+  )
 }
 
 /**
@@ -133,7 +171,9 @@ export async function getCmsPageMetadata({
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}${path}`,
-      images: page?.featured_image ? [{ url: page.featured_image }] : [DEFAULT_OG_IMAGE],
+      images: [
+        await getPageShareImage(page?.featured_image, page?.title, locale),
+      ],
     },
   }
 }

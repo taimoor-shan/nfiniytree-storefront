@@ -1,5 +1,4 @@
 import { getMarketPrefix } from "@lib/data/market"
-import { normalizeImageUrl } from "@lib/util/image-url"
 import { Metadata } from "next"
 import { Suspense } from "react"
 
@@ -17,8 +16,8 @@ import { retrieveStore } from "@lib/data/store"
 import { getLocale } from "@lib/data/locale-actions"
 import { translate } from "@lib/i18n"
 import { getHomeBanner } from "@lib/util/home-banner"
-import { getSeoAlternates } from "@lib/util/page-metadata"
-import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
+import { getDefaultShareImage, getSeoAlternates } from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 import OrganizationJsonLd from "@modules/common/components/organization-jsonld"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
 
@@ -32,10 +31,6 @@ export async function generateMetadata(props: {
   // The store name alone ("InfinYtree") told searchers nothing about the shop.
   const title = await translate("metadata.homeTitle", locale)
   const description = await translate("metadata.homeDescription", locale)
-  // The hero picture from the CMS home page, so a shared link shows the shop's
-  // own image; the default one only when the page has none.
-  const homePage = await retrievePageBySlug("home", locale || "en")
-  const heroImage = normalizeImageUrl(homePage?.featured_image)
 
   return {
     title,
@@ -50,9 +45,14 @@ export async function generateMetadata(props: {
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}`,
-      images: heroImage
-        ? [{ url: heroImage, alt: await translate("hero.imageAlt", locale) }]
-        : [DEFAULT_OG_IMAGE],
+      // The CMS hero as a 1200 × 630 JPEG whose URL changes with the picture
+      // (`getDefaultShareImage`), described in the visitor's language.
+      images: [
+        {
+          ...(await getDefaultShareImage(locale)),
+          alt: await translate("hero.imageAlt", locale),
+        },
+      ],
     },
   }
 }

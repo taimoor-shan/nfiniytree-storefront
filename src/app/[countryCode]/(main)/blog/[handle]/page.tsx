@@ -6,7 +6,12 @@ import { getLocale } from "@lib/data/locale-actions"
 import { getMarketPrefix } from "@lib/data/market"
 import { getDictionary } from "@lib/i18n"
 import { normalizeImageUrl } from "@lib/util/image-url"
-import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
+import {
+  getDefaultShareImage,
+  getSeoAlternates,
+  resolveDescription,
+} from "@lib/util/page-metadata"
+import { shareImageFor } from "@lib/util/share-image"
 import { NOINDEX_METADATA, SITE_NAME } from "@lib/util/seo"
 import PostJsonLd from "@modules/blog/components/post-jsonld"
 import PostTemplate from "@modules/blog/templates/post"
@@ -35,10 +40,12 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
     [post.seo_description, post.excerpt],
     post.content
   )
-  const image = post.featured_image
-    ? normalizeImageUrl(post.featured_image)
-    : null
   const alt = post.featured_image_alt || post.title
+  const image =
+    shareImageFor(normalizeImageUrl(post.featured_image), {
+      fit: "cover",
+      alt,
+    }) || (await getDefaultShareImage(locale))
 
   return {
     title,
@@ -53,15 +60,15 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
       ...(post.published_at ? { publishedTime: post.published_at } : {}),
       ...(post.updated_at ? { modifiedTime: post.updated_at } : {}),
       ...(post.author_name ? { authors: [post.author_name] } : {}),
-      // Relative `/static/...`, resolved against `metadataBase` in the root
-      // layout, so social crawlers stay on the public storefront origin.
-      images: image ? [{ url: image, alt }] : [],
+      // Relative, resolved against `metadataBase` in the root layout, so social
+      // crawlers stay on the public storefront origin.
+      images: [image],
     },
     twitter: {
-      card: image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       ...(description ? { description } : {}),
-      images: image ? [image] : [],
+      images: [image],
     },
   }
 }

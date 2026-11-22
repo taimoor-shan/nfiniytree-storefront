@@ -1,4 +1,5 @@
 import { getBaseURL } from "@lib/util/env"
+import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
 import { Metadata } from "next"
 import "styles/globals.css"
 // Only the two fonts actually instantiated below are imported. `Gelasio`,
@@ -27,6 +28,14 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(getBaseURL()),
+  // What a link to a page without metadata of its own shows when shared. Pages
+  // that set `openGraph` replace this and name their own image.
+  openGraph: {
+    siteName: SITE_NAME,
+    type: "website",
+    images: [DEFAULT_OG_IMAGE],
+  },
+  twitter: { card: "summary_large_image" },
   // Declared rather than left to the `/favicon.ico` convention: Google shows the
   // icon next to every search result and wants a square multiple of 48 px.
   icons: {

@@ -3,8 +3,12 @@ import { Metadata } from "next"
 import { retrievePageBySlug } from "@lib/data/pages"
 import { getLocale } from "@lib/data/locale-actions"
 import { getDictionary, translate } from "@lib/i18n/dictionaries"
-import { getSeoAlternates, resolveDescription } from "@lib/util/page-metadata"
-import { DEFAULT_OG_IMAGE, SITE_NAME } from "@lib/util/seo"
+import {
+  getPageShareImage,
+  getSeoAlternates,
+  resolveDescription,
+} from "@lib/util/page-metadata"
+import { SITE_NAME } from "@lib/util/seo"
 import Hero from "@modules/home/components/hero"
 import ContactForm from "@modules/contact/components/contact-form"
 
@@ -42,7 +46,9 @@ export async function generateMetadata(
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}/contact`,
-      images: page?.featured_image ? [{ url: page.featured_image }] : [DEFAULT_OG_IMAGE],
+      images: [
+        await getPageShareImage(page?.featured_image, page?.title, locale),
+      ],
     },
   }
 }
