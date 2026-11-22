@@ -5,7 +5,8 @@ import LocalizedClientLink from "@modules/common/components/localized-client-lin
 import { useTranslation } from "@/lib/i18n"
 import React from "react"
 
-const Help = () => {
+/** `displayId` fills in the order number on the withdrawal form. */
+const Help = ({ displayId }: { displayId?: number | string }) => {
   const { t } = useTranslation()
 
   return (
@@ -19,6 +20,15 @@ const Help = () => {
           <li>
             <LocalizedClientLink className="hover:underline text-primary-text" href="/policies/returns">
               {t("order.returnsExchanges")}
+            </LocalizedClientLink>
+          </li>
+          <li>
+            <LocalizedClientLink
+              className="hover:underline text-primary-text"
+              href={displayId ? `/withdrawal?order=${displayId}` : "/withdrawal"}
+              data-testid="order-withdrawal-link"
+            >
+              {t("withdrawal.orderLink")}
             </LocalizedClientLink>
           </li>
         </ul>

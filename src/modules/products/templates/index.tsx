@@ -4,6 +4,7 @@ import Features from "@modules/home/components/features"
 
 import VariantGallery from "@modules/products/components/image-gallery/variant-gallery"
 import ProductOnboardingCta from "@modules/products/components/product-onboarding-cta"
+import ProductDeliveryInfo from "@modules/products/components/product-delivery-info"
 import ProductInfoBlocks from "@modules/products/components/product-info-blocks"
 import ProductJsonLd from "@modules/products/components/product-jsonld"
 import ProductTabs from "@modules/products/components/product-tabs"
@@ -75,6 +76,17 @@ const ProductTemplate: React.FC<ProductTemplateProps> = async ({
 
             <Suspense fallback={<SkeletonProductActions />}>
               <ProductActionsWrapper product={product} region={region} />
+            </Suspense>
+
+            {/* Made to order, delivery time and cost for the market's country,
+                and a consultation button: what a buyer of a large piece asks
+                before adding it to the cart. */}
+            <Suspense fallback={null}>
+              <ProductDeliveryInfo
+                product={product}
+                region={region}
+                countryCode={countryCode}
+              />
             </Suspense>
 
             <ProductTabs product={product} locale={locale} />

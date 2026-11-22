@@ -1,4 +1,5 @@
 import { getMarketPrefix } from "@lib/data/market"
+import { normalizeImageUrl } from "@lib/util/image-url"
 import { Metadata } from "next"
 import { Suspense } from "react"
 
@@ -31,6 +32,10 @@ export async function generateMetadata(props: {
   // The store name alone ("InfinYtree") told searchers nothing about the shop.
   const title = await translate("metadata.homeTitle", locale)
   const description = await translate("metadata.homeDescription", locale)
+  // The hero picture from the CMS home page, so a shared link shows the shop's
+  // own image; the default one only when the page has none.
+  const homePage = await retrievePageBySlug("home", locale || "en")
+  const heroImage = normalizeImageUrl(homePage?.featured_image)
 
   return {
     title,
@@ -45,7 +50,9 @@ export async function generateMetadata(props: {
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}`,
-      images: [DEFAULT_OG_IMAGE],
+      images: heroImage
+        ? [{ url: heroImage, alt: await translate("hero.imageAlt", locale) }]
+        : [DEFAULT_OG_IMAGE],
     },
   }
 }
@@ -115,7 +122,12 @@ export default async function Home(props: {
       {banner && <HomeVideoBanner banner={banner} />}
 
       <div className="">
-          <AllProducts sortBy={sortBy} page={page} countryCode={countryCode} />
+          <AllProducts
+            sortBy={sortBy}
+            page={page}
+            countryCode={countryCode}
+            excludeCollectionIds={collections.map((c) => c.id)}
+          />
      
       </div>
     </>

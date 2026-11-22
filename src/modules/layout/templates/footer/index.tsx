@@ -238,6 +238,15 @@ export default async function Footer() {
               >
                 {dict["footer.privacyPolicy"]}
               </LocalizedClientLink>
+              {/* The online withdrawal function must be easy to find
+                  during the whole withdrawal period: on every page. */}
+              <LocalizedClientLink
+                href="/withdrawal"
+                className="hover:text-ink transition-colors"
+                data-testid="footer-withdrawal-link"
+              >
+                {dict["footer.withdrawal"]}
+              </LocalizedClientLink>
               <CookieTriggerLocalized />
             </div>
             </div>

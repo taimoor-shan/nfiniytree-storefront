@@ -3,7 +3,12 @@
  */
 import assert from "node:assert/strict"
 
-import { formatDimension, parseApproxDimensions } from "./approx-dimensions"
+import {
+  formatDimension,
+  localizeDecimals,
+  localizeMeasurement,
+  parseApproxDimensions,
+} from "./approx-dimensions"
 
 // The shape the admin stores for Blue Cascade, once parsed
 assert.deepEqual(
@@ -50,5 +55,14 @@ assert.deepEqual(
 )
 assert.equal(formatDimension({ unit: "cm", approxLabel: "approx." }), null)
 assert.equal(formatDimension({ exact: 0, unit: "cm", approxLabel: "approx." }), null)
+
+// German and Hungarian write a decimal comma; English keeps the point
+assert.equal(localizeDecimals("82.5 cm", "de-AT"), "82,5 cm")
+assert.equal(localizeDecimals("82.5 cm", "hu-HU"), "82,5 cm")
+assert.equal(localizeDecimals("82.5 cm", "en"), "82.5 cm")
+// Only measurements: a material code stays as written
+assert.equal(localizeMeasurement("160.5–180 cm", "de-DE"), "160,5–180 cm")
+assert.equal(localizeMeasurement("1.2 kg", "de-DE"), "1,2 kg")
+assert.equal(localizeMeasurement("Stainless steel 1.4301", "de-DE"), "Stainless steel 1.4301")
 
 console.log("approx-dimensions.test.ts: ok")

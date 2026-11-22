@@ -22,6 +22,11 @@ type ImageGalleryProps = {
    */
   productTitle?: string
   /**
+   * Added after the name in the alt text: height and chosen options, starting
+   * with ", " (", 220 cm tall, Gold"). Empty when there is nothing to add.
+   */
+  productDetails?: string
+  /**
    * The product's video. It is one more item of the gallery, after the second
    * image: a still image with a play button until it is played, then the video
    * itself in place of the big image.
@@ -40,6 +45,7 @@ type ImageGalleryProps = {
 const ImageGallery = ({
   images,
   productTitle,
+  productDetails,
   video,
   reserveThumbnails = false,
 }: ImageGalleryProps) => {
@@ -157,6 +163,7 @@ const ImageGallery = ({
         : "a11y.productImageOf"
     )
       .replace("{product}", name)
+      .replace("{details}", productDetails ?? "")
       .replace("{index}", String(index + 1))
       .replace("{total}", String(slides.length))
 
