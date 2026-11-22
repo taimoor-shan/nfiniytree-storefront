@@ -81,6 +81,11 @@ const CountryPopup = ({
     [regions, locale]
   )
 
+  // The countries on request stay behind one "Other country? Request a
+  // quote" entry until asked for (or one of them is already chosen).
+  const [showOthers, setShowOthers] = useState(false)
+  const othersShown = showOthers || !!selected?.onRequest
+
   const localeOptions = useMemo(() => {
     if (!locales) return []
     const seen = new Set<string>()
@@ -279,32 +284,48 @@ const CountryPopup = ({
                 {option.label}
               </ListboxOption>
             ))}
+            {othersShown && (
+              <>
             {onRequestOptions.length > 0 && (
-              <div
-                role="presentation"
-                className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide text-muted border-t border-hairline"
-              >
-                {t("checkout.deliveryOnRequest")}
-              </div>
+                <div
+                  role="presentation"
+                  className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide text-muted border-t border-hairline"
+                >
+                  {t("checkout.deliveryOnRequest")}
+                </div>
+              )}
+              {onRequestOptions.map((option) => (
+                <ListboxOption
+                  key={option.country}
+                  value={option}
+                  className="cursor-pointer select-none px-4 py-2.5 hover:bg-surface-card data-[focus]:bg-surface-card flex items-center gap-x-2 text-sm"
+                  data-testid="country-popup-on-request-option"
+                >
+                  <ReactCountryFlag
+                    svg
+                    countryCode={option.country}
+                    style={{ width: "16px", height: "16px" }}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  {option.label}
+                </ListboxOption>
+              ))}
+              </>
             )}
-            {onRequestOptions.map((option) => (
-              <ListboxOption
-                key={option.country}
-                value={option}
-                className="cursor-pointer select-none px-4 py-2.5 hover:bg-surface-card data-[focus]:bg-surface-card flex items-center gap-x-2 text-sm"
-                data-testid="country-popup-on-request-option"
-              >
-                <ReactCountryFlag
-                  svg
-                  countryCode={option.country}
-                  style={{ width: "16px", height: "16px" }}
-                  alt=""
-                  aria-hidden="true"
-                />
-                {option.label}
-              </ListboxOption>
-            ))}
           </ListboxOptions>
+        {/* Outside the listbox so the keyboard reaches it: a plain button
+            inside ListboxOptions is skipped by the arrow keys. */}
+        {onRequestOptions.length > 0 && !othersShown && (
+          <button
+            type="button"
+            className="block mt-2 text-sm text-left underline underline-offset-2"
+            onClick={() => setShowOthers(true)}
+            data-testid="country-popup-other-country"
+          >
+            {t("topbar.otherCountry")}
+          </button>
+        )}
         </Listbox>
 
         {locales && locales.length > 0 && (

@@ -81,10 +81,11 @@ const Hero = ({ page }: HeroProps) => {
             sizes={desktopImage.sizes}
           />
         )}
+        {/* Was `alt=""`: the picture shows the shop's pieces in a room, so
+            it is named (the og:image's description, in the page language). */}
         <img
           {...mobileImage}
-          alt=""
-          aria-hidden
+          alt={t("hero.imageAlt")}
           className={clx(
             "object-cover object-center",
             desktopImage ? "md:object-bottom" : "md:hidden"

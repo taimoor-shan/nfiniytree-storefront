@@ -48,7 +48,7 @@ const OrderDetailsTemplate: React.FC<OrderDetailsTemplateProps> = ({
         <Items order={order} />
         <ShippingDetails order={order} isGuest={isGuest} />
         <OrderSummary order={order} />
-        <Help />
+        <Help displayId={order.display_id} />
       </div>
     </div>
   )

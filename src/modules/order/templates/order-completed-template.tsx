@@ -53,7 +53,7 @@ export default async function OrderCompletedTemplate({
           />
           <ShippingDetails order={order} />
           <PaymentDetails order={order} />
-          <Help />
+          <Help displayId={order.display_id} />
         </div>
       </div>
     </div>

@@ -163,11 +163,15 @@ export default function TopBar({
       .flatMap((r) =>
         (r.countries ?? []).map((c) => ({
           countryCode: c.iso_2 ?? "",
-          label: c.display_name ?? "",
+          // In the page's language ("Österreich" on a German page), like the
+          // countries on request below; Medusa's own name was English only.
+          label: c.iso_2
+            ? getAddressCountryName(c.iso_2, locale)
+            : c.display_name ?? "",
         }))
       )
       .sort((a, b) => a.label.localeCompare(b.label))
-  }, [regions])
+  }, [regions, locale])
 
   // Every other European country: delivered on request (a quote, no order)
   const onRequestOptions = useMemo(
@@ -177,6 +181,10 @@ export default function TopBar({
   const onRequestCountry = isDeliveryOnRequest(deliveryCountry, regions)
     ? deliveryCountry
     : null
+  // The shop delivers to the countries above; the others sit behind one
+  // "Other country? Request a quote" entry instead of a list of thirty
+  // that read as if the shop delivered there.
+  const [showOthers, setShowOthers] = useState(false)
 
   const currentCountryLabel = useMemo(() => {
     // A country on request chosen: it is where the visitor wants delivery,
@@ -325,7 +333,23 @@ export default function TopBar({
                     </button>
                   </li>
                 ))}
-                {onRequestOptions.length > 0 && (
+                {onRequestOptions.length > 0 && !showOthers && !onRequestCountry && (
+                  <li className="border-t border-gray-600 mt-2 pt-1">
+                    <button
+                      type="button"
+                      className="w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated whitespace-nowrap underline underline-offset-2"
+                      onClick={(e) => {
+                        // Keep the dropdown open: its panel closes on any click.
+                        e.stopPropagation()
+                        setShowOthers(true)
+                      }}
+                      data-testid="topbar-other-country"
+                    >
+                      {t("topbar.otherCountry")}
+                    </button>
+                  </li>
+                )}
+                {(showOthers || onRequestCountry) && onRequestOptions.length > 0 && (
                   <li
                     role="presentation"
                     className="px-4 pt-3 pb-1 text-xs uppercase tracking-wide opacity-70 border-t border-gray-600 mt-2"
@@ -333,20 +357,21 @@ export default function TopBar({
                     {t("checkout.deliveryOnRequest")}
                   </li>
                 )}
-                {onRequestOptions.map((opt) => (
-                  <li key={opt.value}>
-                    <button
-                      className={`w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated whitespace-nowrap ${
-                        onRequestCountry === opt.value ? "text-primary" : ""
-                      }`}
-                      onClick={() => handleOnRequestChange(opt.value)}
-                      disabled={isPending}
-                      data-testid="topbar-on-request-option"
-                    >
-                      {opt.label}
-                    </button>
-                  </li>
-                ))}
+                {(showOthers || onRequestCountry) &&
+                  onRequestOptions.map((opt) => (
+                    <li key={opt.value}>
+                      <button
+                        className={`w-full text-left px-4 py-1.5 text-sm hover:bg-surface-dark-elevated whitespace-nowrap ${
+                          onRequestCountry === opt.value ? "text-primary" : ""
+                        }`}
+                        onClick={() => handleOnRequestChange(opt.value)}
+                        disabled={isPending}
+                        data-testid="topbar-on-request-option"
+                      >
+                        {opt.label}
+                      </button>
+                    </li>
+                  ))}
               </ul>
             </SimpleDropdown>
           )}

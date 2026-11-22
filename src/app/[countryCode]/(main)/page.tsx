@@ -45,7 +45,14 @@ export async function generateMetadata(props: {
       title,
       description,
       url: `/${await getMarketPrefix(countryCode)}`,
-      images: [await getDefaultShareImage(locale)],
+      // The CMS hero as a 1200 × 630 JPEG whose URL changes with the picture
+      // (`getDefaultShareImage`), described in the visitor's language.
+      images: [
+        {
+          ...(await getDefaultShareImage(locale)),
+          alt: await translate("hero.imageAlt", locale),
+        },
+      ],
     },
   }
 }
@@ -115,7 +122,12 @@ export default async function Home(props: {
       {banner && <HomeVideoBanner banner={banner} />}
 
       <div className="">
-          <AllProducts sortBy={sortBy} page={page} countryCode={countryCode} />
+          <AllProducts
+            sortBy={sortBy}
+            page={page}
+            countryCode={countryCode}
+            excludeCollectionIds={collections.map((c) => c.id)}
+          />
      
       </div>
     </>

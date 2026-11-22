@@ -4,6 +4,12 @@ import type { HttpTypes } from "@medusajs/types"
 import { useMemo } from "react"
 
 import { useProductSelection } from "@lib/context/product-selection-context"
+import { useTranslation } from "@lib/i18n/client"
+import { getLocalizedMetadata } from "@lib/i18n/metadata"
+import {
+  localizeDecimals,
+  parseApproxDimensions,
+} from "@lib/util/approx-dimensions"
 import type { ProductVideo } from "@lib/util/product-video"
 import {
   galleryDataOf,
@@ -61,10 +67,38 @@ const VariantGallery = ({
   )
   useFetchHeroesAhead(ahead)
 
+  // What the alt text adds to the product's name: its height and the chosen
+  // options ("Red Maple, 220 cm tall, Gold – image 1 of 6"), so each picture
+  // is described rather than only numbered.
+  const { t, locale } = useTranslation()
+  const details = useMemo(() => {
+    // Resolved the way the specifications read it, so JSON text is decoded.
+    const approx = parseApproxDimensions(
+      getLocalizedMetadata(product.metadata, locale || "en")?.approx_dimensions
+    )
+    const height = product.height
+      ? `${product.height} cm`
+      : approx?.height
+        ? `${approx.height} ${approx.unit ?? "cm"}`
+        : null
+    const parts = [
+      height &&
+        t("a11y.productImageHeight").replace(
+          "{height}",
+          localizeDecimals(height, locale)
+        ),
+      // Only name the chosen options when the pictures are the chosen
+      // plant's: a gallery that fell back to the whole product shows others.
+      ...(shown !== images ? Object.values(choice ?? {}) : []),
+    ].filter((part): part is string => !!part && !!part.trim())
+    return parts.length ? `, ${parts.join(", ")}` : ""
+  }, [product, choice, shown, images, t, locale])
+
   return (
     <ImageGallery
       images={shown}
       productTitle={productTitle}
+      productDetails={details}
       video={video}
       // A product with several pictures shows its thumbnails for most choices.
       // When a choice shows just one picture, their place stays free so the big

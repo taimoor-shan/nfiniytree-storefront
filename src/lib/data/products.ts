@@ -100,11 +100,15 @@ export const listProductsWithSort = async ({
   queryParams,
   sortBy = "created_at",
   countryCode,
+  excludeCollectionIds,
 }: {
   page?: number
   queryParams?: HttpTypes.FindParams & HttpTypes.StoreProductParams
   sortBy?: SortOptions
   countryCode: string
+  /** Leaves out the products of these collections (the homepage shows them in
+   *  their own rail above, so listing them again read as duplicates). */
+  excludeCollectionIds?: string[]
 }): Promise<{
   response: { products: HttpTypes.StoreProduct[]; count: number }
   nextPage: number | null
@@ -113,7 +117,7 @@ export const listProductsWithSort = async ({
   const limit = queryParams?.limit || 12
 
   const {
-    response: { products, count },
+    response: { products: listed, count: listedCount },
   } = await listProducts({
     pageParam: 0,
     queryParams: {
@@ -122,6 +126,12 @@ export const listProductsWithSort = async ({
     },
     countryCode,
   })
+
+  const excluded = new Set(excludeCollectionIds ?? [])
+  const products = excluded.size
+    ? listed.filter((p) => !p.collection_id || !excluded.has(p.collection_id))
+    : listed
+  const count = excluded.size ? products.length : listedCount
 
   const sortedProducts = sortProducts(products, sortBy)
 
