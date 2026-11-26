@@ -72,7 +72,7 @@ const ProductInfoBlocks = ({ product, locale: localeProp }: ProductInfoBlocksPro
   if (product.height) treeSpecs["Height"] = `${product.height}`
   if (product.width) treeSpecs["Width"] = `${product.width}`
   if (product.length) treeSpecs["Depth"] = `${product.length}`
-  if (product.weight) treeSpecs["Weight"] = `${product.weight} g`
+  if (product.weight) treeSpecs["Weight"] = `${product.weight} kg`
   if (product.material) treeSpecs["Material"] = product.material
   if (product.origin_country)
     treeSpecs["Country of origin"] = product.origin_country
