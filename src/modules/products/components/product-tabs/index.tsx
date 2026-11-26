@@ -261,7 +261,7 @@ const SpecificationsTab = ({
   }
 
   if (product.weight) {
-    treeSpecs["Weight"] = `${product.weight} g`
+    treeSpecs["Weight"] = `${product.weight} kg`
   }
   if (product.material) {
     treeSpecs["Material"] = product.material

@@ -163,7 +163,7 @@ export default function ProductJsonLd({
     brand: { "@type": "Brand", name: SITE_NAME },
     ...(productSku ? { sku: productSku } : {}),
     ...(product.material ? { material: product.material } : {}),
-    ...(product.weight ? { weight: { "@type": "QuantitativeValue", value: product.weight, unitCode: "GRM" } } : {}),
+    ...(product.weight ? { weight: { "@type": "QuantitativeValue", value: product.weight, unitCode: "KGM" } } : {}),
     ...(product.categories?.[0]?.name
       ? { category: product.categories[0].name }
       : {}),
