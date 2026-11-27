@@ -17,6 +17,12 @@ type ImageGalleryProps = {
   /** The pictures to show, the one to open on first. */
   images: GalleryImage[]
   /**
+   * The picture of the shopper's choice. When it changes (the shopper picked
+   * another variant), the gallery moves to it; the first render opens on the
+   * first picture whatever it is, so a first visit starts at the beginning.
+   */
+  focusImageId?: string
+  /**
    * Product name, used to build meaningful alt text. Without it the gallery can
    * only say "product image".
    */
@@ -44,6 +50,7 @@ type ImageGalleryProps = {
 
 const ImageGallery = ({
   images,
+  focusImageId,
   productTitle,
   productDetails,
   video,
@@ -79,10 +86,37 @@ const ImageGallery = ({
     setVideoFailed(false)
   }
 
+  // The shopper chose another variant: move to its first picture. Done while
+  // rendering, like the reset above, so no frame shows the old picture first.
+  const [shownFocus, setShownFocus] = useState(focusImageId)
+  if (shownFocus !== focusImageId) {
+    setShownFocus(focusImageId)
+    const target = focusImageId
+      ? slides.findIndex((slide) => slide.id === focusImageId)
+      : -1
+    if (target !== -1 && target !== activeIndex) {
+      setActiveIndex(target)
+      setPlaying(false)
+      setVideoFailed(false)
+    }
+  }
+
   // The thumbnails of a long set can be scrolled; a new set shows its first.
   useEffect(() => {
     if (thumbnailStrip.current) thumbnailStrip.current.scrollTop = 0
   }, [contents])
+
+  // Keep the active thumbnail in sight in a long strip (after a choice moved
+  // the gallery, or the arrows did). Only the strip scrolls, never the page.
+  useEffect(() => {
+    const strip = thumbnailStrip.current
+    const thumb = strip?.querySelectorAll("button")[activeIndex]
+    if (!strip || !thumb) return
+    const area = strip.getBoundingClientRect()
+    const box = thumb.getBoundingClientRect()
+    if (box.top < area.top) strip.scrollTop -= area.top - box.top
+    else if (box.bottom > area.bottom) strip.scrollTop += box.bottom - area.bottom
+  }, [activeIndex])
 
   // The player only exists while the video plays, so moving to another item
   // stops it, and coming back shows the still image and the play button again.

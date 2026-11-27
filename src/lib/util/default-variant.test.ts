@@ -140,6 +140,25 @@ test("the first variant when there is no price but the stock is not tracked", ()
   assert.deepEqual(getDefaultChoice(request), { [POD]: "Gold" })
 })
 
+test("the first available variant in the order of the options, not of the variants", () => {
+  const p = {
+    id: "prod_2",
+    metadata: { option_order: [PLANT, POD] },
+    options: [
+      { id: POD, values: [{ value: "Gold", rank: 2 }, { value: "Black", rank: 1 }] },
+      { id: PLANT, values: [{ value: "Green", rank: 1 }, { value: "Rose", rank: 2 }] },
+    ],
+    variants: [
+      variant("gold-rose", { [POD]: "Gold", [PLANT]: "Rose" }, { ...inStock, ...priced(100) }),
+      variant("black-green", { [POD]: "Black", [PLANT]: "Green" }, { ...soldOut, ...priced(100) }),
+      variant("gold-green", { [POD]: "Gold", [PLANT]: "Green" }, { ...inStock, ...priced(100) }),
+    ],
+  } as any
+  // Green first (the plant option comes first), Black first among the pods but
+  // sold out, so Gold + Green.
+  assert.deepEqual(getDefaultChoice(p), { [POD]: "Gold", [PLANT]: "Green" })
+})
+
 test("none for a product without variants", () => {
   assert.deepEqual(getDefaultChoice(product([])), {})
   assert.deepEqual(getDefaultChoice(product(undefined)), {})

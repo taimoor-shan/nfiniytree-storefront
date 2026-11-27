@@ -5,7 +5,11 @@ import { useProductSelection } from "@lib/context/product-selection-context"
 import { addToCart } from "@lib/data/cart"
 import { useIntersection } from "@lib/hooks/use-in-view"
 import { guardRepaint } from "@modules/common/components/repaint-guard"
-import { isVariantAvailable, optionsAsKeymap } from "@lib/util/default-variant"
+import {
+  isVariantAvailable,
+  optionsAsKeymap,
+  variantsInOptionOrder,
+} from "@lib/util/default-variant"
 import {
   getProductPrice,
   hasPriceRange,
@@ -83,8 +87,8 @@ export default function ProductActions({
     if (priceDependsOnVariant) return
     if (!product.variants || product.variants.length === 0) return
 
-    const firstAvailable =
-      product.variants.find(isVariantAvailable) || product.variants[0]
+    const ordered = variantsInOptionOrder(product)
+    const firstAvailable = ordered.find(isVariantAvailable) || ordered[0]
     const variantOptions = optionsAsKeymap(firstAvailable.options)
     // The page already opens on this choice (`getDefaultChoice()` made it on the
     // server, for the gallery too). This is for a buy box without that, and it
@@ -93,7 +97,7 @@ export default function ProductActions({
       Object.values(current).some(Boolean) ? current : (variantOptions ?? {})
     )
     preselectedRef.current = true
-  }, [product.variants, notifyForProduct, priceDependsOnVariant, setOptions])
+  }, [product, notifyForProduct, priceDependsOnVariant, setOptions])
 
   // Compute which option values lead only to unavailable (out-of-stock) variants
   const unavailableOptionValueIds = useMemo(() => {
