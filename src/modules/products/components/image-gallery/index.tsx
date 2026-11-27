@@ -19,9 +19,16 @@ type ImageGalleryProps = {
   /**
    * The picture of the shopper's choice. When it changes (the shopper picked
    * another variant), the gallery moves to it; the first render opens on the
-   * first picture whatever it is, so a first visit starts at the beginning.
+   * first picture of the choice the page opens on (the first picture when
+   * there is none).
    */
   focusImageId?: string
+  /**
+   * Changes with every choice the shopper makes. Two variants can share their
+   * first picture, so the focus id alone would not show that the shopper chose
+   * again after browsing elsewhere in the gallery.
+   */
+  focusKey?: string
   /**
    * Product name, used to build meaningful alt text. Without it the gallery can
    * only say "product image".
@@ -51,13 +58,22 @@ type ImageGalleryProps = {
 const ImageGallery = ({
   images,
   focusImageId,
+  focusKey,
   productTitle,
   productDetails,
   video,
   reserveThumbnails = false,
 }: ImageGalleryProps) => {
   const { t } = useTranslation()
-  const [activeIndex, setActiveIndex] = useState(0)
+  // Opens on the picture of the choice the page opens on: the first picture,
+  // unless that variant cannot be bought and another one is preselected.
+  const [activeIndex, setActiveIndex] = useState(() => {
+    if (!focusImageId) return 0
+    const at = buildGallerySlides(images ?? [], video).findIndex(
+      (slide) => slide.id === focusImageId
+    )
+    return at === -1 ? 0 : at
+  })
   const [playing, setPlaying] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
   const touchStartX = useRef(0)
@@ -88,9 +104,10 @@ const ImageGallery = ({
 
   // The shopper chose another variant: move to its first picture. Done while
   // rendering, like the reset above, so no frame shows the old picture first.
-  const [shownFocus, setShownFocus] = useState(focusImageId)
-  if (shownFocus !== focusImageId) {
-    setShownFocus(focusImageId)
+  const focusState = `${focusKey ?? ""}|${focusImageId ?? ""}`
+  const [shownFocus, setShownFocus] = useState(focusState)
+  if (shownFocus !== focusState) {
+    setShownFocus(focusState)
     const target = focusImageId
       ? slides.findIndex((slide) => slide.id === focusImageId)
       : -1

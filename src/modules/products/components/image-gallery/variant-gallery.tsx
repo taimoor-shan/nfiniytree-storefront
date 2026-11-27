@@ -1,7 +1,7 @@
 "use client"
 
 import type { HttpTypes } from "@medusajs/types"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 
 import { useProductSelection } from "@lib/context/product-selection-context"
 import { useTranslation } from "@lib/i18n/client"
@@ -62,6 +62,12 @@ const VariantGallery = ({
     [ordered, variants, choice]
   )
 
+  // Counts the shopper's choices. Each click on an option sets a new choice
+  // object, even for the value already chosen, so clicking it again after
+  // browsing the gallery brings that variant's picture back.
+  const [round, setRound] = useState({ choice, count: 0 })
+  if (round.choice !== choice) setRound({ choice, count: round.count + 1 })
+
   // The big picture each next click would show, fetched while the browser is
   // idle: choosing a plant then changes the picture at once, as it does in the
   // best online shops, instead of waiting for it to load.
@@ -102,6 +108,7 @@ const VariantGallery = ({
     <ImageGallery
       images={ordered}
       focusImageId={focus?.id}
+      focusKey={String(round.count)}
       productTitle={productTitle}
       productDetails={details}
       video={video}
