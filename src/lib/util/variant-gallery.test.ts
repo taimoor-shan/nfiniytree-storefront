@@ -1,19 +1,20 @@
 /**
- * Which pictures the product gallery shows for what the shopper has chosen.
+ * The order of the product gallery and where a choice moves it.
  *
  * In the admin a picture is tied to the variants it shows (Product → Media →
  * the picture → variants, or a variant's own images); a picture tied to none
- * belongs to every variant. The gallery shows the chosen variant's pictures
- * first, in the order the admin ranks them, then the shared ones, so the first
- * picture is always the plant the shopper picked.
+ * belongs to every variant. The gallery always shows every picture: each
+ * variant's, the variants in the order of their options, then the shared ones.
+ * Choosing a variant moves it to that variant's first picture.
  *
  * Run:  npx tsx src/lib/util/variant-gallery.test.ts
  */
 import assert from "node:assert/strict"
 import {
   galleryDataOf,
+  focusImageFor,
   nextGalleryHeads,
-  selectGalleryImages,
+  orderGalleryImages,
   type GalleryOption,
   type GalleryVariant,
   type VariantTiedImage,
@@ -64,14 +65,13 @@ const GOLD_2 = pic("gold-2", "var_gold")
 // In the order the admin ranks them: own and shared pictures are mixed.
 const TREE = [GOLD_1, SHARED_1, BLACK_1, SHARED_2, SHARED_3, GOLD_2]
 
+const POT_OPTION: GalleryOption = { id: POT, values: ["Black", "Gold", "White"] }
+
 console.log("One option: the pot")
 
-test("nothing chosen shows the whole product, untouched", () => {
-  assert.equal(selectGalleryImages(TREE, POTS, {}), TREE)
-})
-
-test("a variant's own pictures come first, in the admin's order, then the shared ones", () => {
-  assert.deepEqual(ids(selectGalleryImages(TREE, POTS, { [POT]: "Gold" })), [
+test("every picture is shown: the variants' in option order, then the shared ones", () => {
+  assert.deepEqual(ids(orderGalleryImages(TREE, POTS, [POT_OPTION])), [
+    "black-1",
     "gold-1",
     "gold-2",
     "shared-1",
@@ -80,8 +80,11 @@ test("a variant's own pictures come first, in the admin's order, then the shared
   ])
 })
 
-test("a variant with one picture of its own", () => {
-  assert.deepEqual(ids(selectGalleryImages(TREE, POTS, { [POT]: "Black" })), [
+test("the option order decides, not the order of the variants", () => {
+  const reversed: GalleryOption = { id: POT, values: ["White", "Gold", "Black"] }
+  assert.deepEqual(ids(orderGalleryImages(TREE, [...POTS].reverse(), [reversed])), [
+    "gold-1",
+    "gold-2",
     "black-1",
     "shared-1",
     "shared-2",
@@ -89,40 +92,24 @@ test("a variant with one picture of its own", () => {
   ])
 })
 
-test("a variant with nothing of its own shows the shared pictures", () => {
-  assert.deepEqual(ids(selectGalleryImages(TREE, POTS, { [POT]: "White" })), [
-    "shared-1",
-    "shared-2",
-    "shared-3",
+test("the pictures are the product's own objects, not copies", () => {
+  const ordered = orderGalleryImages(TREE, POTS, [POT_OPTION])
+  assert.equal(ordered[1], GOLD_1)
+})
+
+test("a picture tied to two variants is shown once, with the first of them", () => {
+  const both = pic("both", "var_gold", "var_black")
+  const images = [GOLD_1, both, BLACK_1]
+  assert.deepEqual(ids(orderGalleryImages(images, POTS, [POT_OPTION])), [
+    "both",
+    "black-1",
+    "gold-1",
   ])
 })
 
-test("the pictures are the product's own objects, not copies", () => {
-  const [first] = selectGalleryImages(TREE, POTS, { [POT]: "Gold" })
-  assert.equal(first, GOLD_1)
-})
-
-test("a picture tied to two variants shows for both, and not for the third", () => {
-  const both = pic("both", "var_gold", "var_black")
-  const images = [both, GOLD_1, BLACK_1]
-  assert.deepEqual(
-    ids(selectGalleryImages(images, POTS, { [POT]: "Gold" })),
-    ["both", "gold-1"]
-  )
-  assert.deepEqual(
-    ids(selectGalleryImages(images, POTS, { [POT]: "Black" })),
-    ["both", "black-1"]
-  )
-  // White has nothing of its own and there is nothing shared: the whole product
-  assert.deepEqual(
-    ids(selectGalleryImages(images, POTS, { [POT]: "White" })),
-    ["both", "gold-1", "black-1"]
-  )
-})
-
-test("a product whose pictures are tied to nothing is never touched", () => {
+test("a product whose pictures are tied to nothing keeps the admin's order", () => {
   const plain = [pic("a"), pic("b"), pic("c")]
-  assert.equal(selectGalleryImages(plain, POTS, { [POT]: "Gold" }), plain)
+  assert.equal(orderGalleryImages(plain, POTS, [POT_OPTION]), plain)
 })
 
 test("pictures whose ties the API did not send count as shared", () => {
@@ -130,24 +117,29 @@ test("pictures whose ties the API did not send count as shared", () => {
     { id: "a", url: "https://media.example.com/a.jpg" },
     { id: "b", url: "https://media.example.com/b.jpg", variants: null },
   ]
-  assert.equal(selectGalleryImages(untied, POTS, { [POT]: "Gold" }), untied)
+  assert.equal(orderGalleryImages(untied, POTS, [POT_OPTION]), untied)
 })
 
-test("a choice no variant has shows the whole product", () => {
-  assert.equal(selectGalleryImages(TREE, POTS, { [POT]: "Pink" }), TREE)
+test("a picture tied only to a variant the product no longer has is still shown", () => {
+  const images = [pic("old", "var_gone"), GOLD_1]
+  assert.deepEqual(ids(orderGalleryImages(images, POTS, [POT_OPTION])), [
+    "gold-1",
+    "old",
+  ])
 })
 
-test("a blank or missing value is not a choice", () => {
-  assert.equal(selectGalleryImages(TREE, POTS, { [POT]: undefined }), TREE)
-  assert.equal(selectGalleryImages(TREE, POTS, { [POT]: "" }), TREE)
+test("choosing a pot moves to its first picture", () => {
+  const ordered = orderGalleryImages(TREE, POTS, [POT_OPTION])
+  assert.equal(focusImageFor(ordered, POTS, { [POT]: "Gold" })?.id, "gold-1")
+  assert.equal(focusImageFor(ordered, POTS, { [POT]: "Black" })?.id, "black-1")
 })
 
-test("the gallery is never empty: all pictures are for other variants", () => {
-  const images = [GOLD_1, BLACK_1]
-  assert.equal(
-    selectGalleryImages(images, POTS, { [POT]: "White" }).length,
-    2
-  )
+test("nothing chosen, a blank value, a pot with no pictures or one no variant has: no move", () => {
+  const ordered = orderGalleryImages(TREE, POTS, [POT_OPTION])
+  assert.equal(focusImageFor(ordered, POTS, {}), undefined)
+  assert.equal(focusImageFor(ordered, POTS, { [POT]: "" }), undefined)
+  assert.equal(focusImageFor(ordered, POTS, { [POT]: "White" }), undefined)
+  assert.equal(focusImageFor(ordered, POTS, { [POT]: "Pink" }), undefined)
 })
 
 // ---------------------------------------------------------------------------
@@ -165,7 +157,12 @@ const BLACK_VAR = variant("v_black_var", {
   [POD]: "Black",
   [PLANT]: "Variegated",
 })
-const COMBOS = [GOLD_GREEN, GOLD_VAR, BLACK_GREEN, BLACK_VAR]
+const COMBOS = [BLACK_VAR, GOLD_GREEN, BLACK_GREEN, GOLD_VAR]
+const POD_OPTION: GalleryOption = { id: POD, values: ["Gold", "Black"] }
+const PLANT_OPTION: GalleryOption = {
+  id: PLANT,
+  values: ["Green", "Variegated"],
+}
 
 const PHOTOS = [
   pic("gold-pod", "v_gold_green", "v_gold_var"), // the gold pod, any plant
@@ -177,91 +174,63 @@ const PHOTOS = [
 
 console.log("\nTwo options: the pod and the plant")
 
-test("both chosen: the pictures of that one combination, then the shared ones", () => {
+test("by the first option's values, then the second's", () => {
   assert.deepEqual(
-    ids(selectGalleryImages(PHOTOS, COMBOS, { [POD]: "Gold", [PLANT]: "Green" })),
-    ["gold-pod", "gold-green", "room"]
-  )
-  assert.deepEqual(
-    ids(
-      selectGalleryImages(PHOTOS, COMBOS, {
-        [POD]: "Gold",
-        [PLANT]: "Variegated",
-      })
-    ),
-    ["gold-pod", "variegated", "room"]
-  )
-  assert.deepEqual(
-    ids(
-      selectGalleryImages(PHOTOS, COMBOS, {
-        [POD]: "Black",
-        [PLANT]: "Variegated",
-      })
-    ),
-    ["variegated", "room"]
+    ids(orderGalleryImages(PHOTOS, COMBOS, [POD_OPTION, PLANT_OPTION])),
+    ["gold-pod", "gold-green", "variegated", "black-green", "room"]
   )
 })
 
-test("only the pod chosen: the pictures of every variant with that pod", () => {
-  assert.deepEqual(ids(selectGalleryImages(PHOTOS, COMBOS, { [POD]: "Gold" })), [
-    "gold-pod",
-    "gold-green",
-    "variegated",
-    "room",
-  ])
-})
-
-test("only the plant chosen: the pictures of every variant with that plant", () => {
+test("the plant first when the admin puts it first", () => {
   assert.deepEqual(
-    ids(selectGalleryImages(PHOTOS, COMBOS, { [PLANT]: "Variegated" })),
-    ["gold-pod", "variegated", "room"]
+    ids(orderGalleryImages(PHOTOS, COMBOS, [PLANT_OPTION, POD_OPTION])),
+    // Green: gold, black; then variegated: gold, black.
+    ["gold-pod", "gold-green", "black-green", "variegated", "room"]
   )
 })
 
-test("a combination the product does not have shows the whole product", () => {
-  const withoutBlackGreen = [GOLD_GREEN, GOLD_VAR, BLACK_VAR]
+test("a full or half choice moves to the first fitting picture", () => {
+  const ordered = orderGalleryImages(PHOTOS, COMBOS, [POD_OPTION, PLANT_OPTION])
   assert.equal(
-    selectGalleryImages(PHOTOS, withoutBlackGreen, {
-      [POD]: "Black",
-      [PLANT]: "Green",
-    }),
-    PHOTOS
+    focusImageFor(ordered, COMBOS, { [POD]: "Black", [PLANT]: "Green" })?.id,
+    "black-green"
   )
+  assert.equal(
+    focusImageFor(ordered, COMBOS, { [POD]: "Black", [PLANT]: "Variegated" })?.id,
+    "variegated"
+  )
+  assert.equal(focusImageFor(ordered, COMBOS, { [POD]: "Black" })?.id, "variegated")
+  assert.equal(focusImageFor(ordered, COMBOS, { [PLANT]: "Green" })?.id, "gold-pod")
 })
 
 // ---------------------------------------------------------------------------
-// Which pictures to fetch ahead: the first one each next click would show
+// Which pictures to fetch ahead: the one each next click would move to
 // ---------------------------------------------------------------------------
-const POT_OPTION: GalleryOption = { id: POT, values: ["Black", "Gold", "White"] }
-const POD_OPTION: GalleryOption = { id: POD, values: ["Gold", "Black"] }
-const PLANT_OPTION: GalleryOption = {
-  id: PLANT,
-  values: ["Green", "Variegated"],
-}
-
 console.log("\nPictures to fetch ahead")
 
-test("from nothing chosen: what each pot would show first, bar what is on show", () => {
-  // On show now: gold-1 (the product's first). Gold shows it too.
-  assert.deepEqual(ids(nextGalleryHeads(TREE, POTS, [POT_OPTION], {})), [
-    "black-1",
-    "shared-1",
+const ORDERED_TREE = orderGalleryImages(TREE, POTS, [POT_OPTION])
+
+test("from nothing chosen: where each pot would move, bar the picture on show", () => {
+  // On show now: black-1, the first picture.
+  assert.deepEqual(ids(nextGalleryHeads(ORDERED_TREE, POTS, [POT_OPTION], {})), [
+    "gold-1",
   ])
 })
 
 test("with a pot chosen: the other pots' first pictures", () => {
   assert.deepEqual(
-    ids(nextGalleryHeads(TREE, POTS, [POT_OPTION], { [POT]: "Gold" })),
-    ["black-1", "shared-1"]
+    ids(nextGalleryHeads(ORDERED_TREE, POTS, [POT_OPTION], { [POT]: "Gold" })),
+    ["black-1"]
   )
 })
 
 test("two options: one click on either option, a picture at a time", () => {
-  // Gold + Green shows gold-pod. Black pod shows black-green; the variegated
-  // plant shows gold-pod again, which is already on show.
+  const ordered = orderGalleryImages(PHOTOS, COMBOS, [POD_OPTION, PLANT_OPTION])
+  // Gold + Green is on gold-pod. Black pod moves to black-green; the variegated
+  // plant moves to gold-pod again, which is already on show.
   assert.deepEqual(
     ids(
-      nextGalleryHeads(PHOTOS, COMBOS, [POD_OPTION, PLANT_OPTION], {
+      nextGalleryHeads(ordered, COMBOS, [POD_OPTION, PLANT_OPTION], {
         [POD]: "Gold",
         [PLANT]: "Green",
       })
@@ -270,17 +239,10 @@ test("two options: one click on either option, a picture at a time", () => {
   )
 })
 
-test("the same picture is only listed once", () => {
-  const images = [pic("x", "var_black", "var_white"), pic("y", "var_gold")]
-  assert.deepEqual(
-    ids(nextGalleryHeads(images, POTS, [POT_OPTION], { [POT]: "Gold" })),
-    ["x"]
-  )
-})
-
 test("it stops at the limit", () => {
+  const ordered = orderGalleryImages(PHOTOS, COMBOS, [POD_OPTION, PLANT_OPTION])
   assert.equal(
-    nextGalleryHeads(TREE, POTS, [POT_OPTION], {}, 1).length,
+    nextGalleryHeads(ordered, COMBOS, [POD_OPTION, PLANT_OPTION], {}, 1).length,
     1
   )
 })
@@ -290,15 +252,16 @@ test("a product without ties has nothing to fetch ahead", () => {
   assert.deepEqual(nextGalleryHeads(plain, POTS, [POT_OPTION], {}), [])
 })
 
-test("a picture without an address is never fetched", () => {
+test("a picture without an address is never moved to or fetched", () => {
   const images: VariantTiedImage[] = [
     { id: "gold-1", url: "https://media.example.com/gold-1.jpg", variants: [{ id: "var_gold" }] },
     { id: "black-nourl", url: null, variants: [{ id: "var_black" }] },
     { id: "shared-1", url: "https://media.example.com/shared-1.jpg", variants: [] },
   ]
+  assert.equal(focusImageFor(images, POTS, { [POT]: "Black" }), undefined)
   assert.deepEqual(
     ids(nextGalleryHeads(images, POTS, [POT_OPTION], { [POT]: "Gold" })),
-    ["shared-1"]
+    []
   )
 })
 
@@ -353,6 +316,26 @@ test("only what the gallery needs: addresses, ties, and each variant's option va
     variants: [{ id: "v1", options: [{ option_id: "opt_pod", value: "Gold" }] }],
     options: [{ id: "opt_pod", values: ["Gold", "Black"] }],
   })
+})
+
+test("the options come in the admin's order, values by rank", () => {
+  const data = galleryDataOf({
+    metadata: { option_order: ["opt_plant", "opt_pod"] },
+    options: [
+      {
+        id: "opt_pod",
+        values: [
+          { value: "Gold", rank: 2 },
+          { value: "Black", rank: 1 },
+        ],
+      },
+      { id: "opt_plant", values: [{ value: "Green" }] },
+    ],
+  })
+  assert.deepEqual(data.options, [
+    { id: "opt_plant", values: ["Green"] },
+    { id: "opt_pod", values: ["Black", "Gold"] },
+  ])
 })
 
 test("a product with no pictures, variants or options gives empty lists", () => {

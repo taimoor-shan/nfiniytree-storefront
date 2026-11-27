@@ -1,6 +1,7 @@
 "use server"
 
 import { sdk } from "@lib/config"
+import { withOrderedOptions } from "@lib/util/option-order"
 import { sortProducts } from "@lib/util/sort-products"
 import { HttpTypes } from "@medusajs/types"
 import { SortOptions } from "@modules/store/components/refinement-list/sort-products"
@@ -68,8 +69,11 @@ export const listProducts = async ({
           // (`src/lib/util/variant-gallery.ts`). `*variants.images` is gone with
           // it: Medusa lists a variant's shared pictures first and repeats every
           // picture once per variant, which this page never read.
+          // `+options.values.rank` is the order of each option's values set in
+          // the admin; `withOrderedOptions()` below applies it and the order of
+          // the options (`metadata.option_order`).
           fields:
-            "*variants.calculated_price,*variants.prices,+variants.inventory_quantity,+images.variants.id,+metadata,+tags,*categories,",
+            "*variants.calculated_price,*variants.prices,+variants.inventory_quantity,+images.variants.id,+options.values.rank,+metadata,+tags,*categories,",
           ...queryParams,
         },
         headers,
@@ -82,7 +86,7 @@ export const listProducts = async ({
 
       return {
         response: {
-          products,
+          products: products.map(withOrderedOptions),
           count,
         },
         nextPage: nextPage,

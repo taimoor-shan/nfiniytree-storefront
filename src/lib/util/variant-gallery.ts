@@ -1,24 +1,26 @@
 /**
- * Which pictures the product gallery shows for what the shopper has chosen.
+ * The order of the product gallery, and the picture it moves to when the
+ * shopper chooses.
  *
  * In the admin a picture is tied to the variants it shows (Product → Media →
  * the picture → variants, or a variant's own images). A picture tied to none is
  * shared: it belongs to every variant. The store API hands the ties over as
  * `images[].variants` (`+images.variants.id` in `listProducts()`).
  *
- * The gallery follows the shopper's choice:
- *   - nothing chosen yet: the whole product, in the order the admin ranks it
- *     (as the gallery always was);
- *   - a variant, or just some of its options, chosen: the pictures of the
- *     variants that still fit, then the shared ones. The first picture is the
- *     plant the shopper picked, and the rest of the gallery follows it.
- *
- * Medusa's own `variant.images` puts the shared pictures first, which would
- * show the picked plant last, so the order is worked out here instead.
+ * The gallery always shows every picture of the product, so a visitor sees all
+ * of them from the first visit:
+ *   - first the pictures of each variant, the variants in the order of their
+ *     options (the first value of the first option first, as the buy box lists
+ *     them; `sortVariantsByOptions()`), each variant's pictures in the admin's
+ *     order, a picture tied to several variants where its first variant is;
+ *   - then the shared pictures, in the admin's order.
+ * Choosing a variant (or just some of its options) moves the gallery to the
+ * first picture of a variant that fits (`focusImageFor()`); nothing is hidden.
  *
  * Pure and framework-free, so the rules are tested on their own.
  * `npx tsx src/lib/util/variant-gallery.test.ts`
  */
+import { sortProductOptions, sortVariantsByOptions } from "./option-order"
 import type { GalleryImage } from "./product-video"
 
 /** A picture of the product and the variants it is tied to in the admin. */
@@ -32,7 +34,7 @@ export type GalleryVariant = {
   options?: { option_id?: string | null; value?: string | null }[] | null
 }
 
-/** An option of the product (the pod, the plant) and the values it offers. */
+/** An option of the product (the pod, the plant) and the values it offers, in order. */
 export type GalleryOption = { id: string; values: string[] }
 
 /** The shopper's choice: option id → the value picked, none for an option not yet picked. */
@@ -41,22 +43,49 @@ export type OptionChoice = Record<string, string | undefined>
 const isTied = (image: VariantTiedImage) => (image.variants?.length ?? 0) > 0
 
 /**
- * The pictures to show for `choice`, in the order to show them.
- *
- * Always hands back the product's own picture objects, and the very same array
- * whenever the choice changes nothing (no ties, nothing chosen, no variant fits,
- * or nothing would be left), so callers can compare by identity.
+ * Every picture of the product, in gallery order (see above). Hands back the
+ * product's own picture objects, and the very same array when no picture is
+ * tied to a variant (the admin's order is then the gallery's), so callers can
+ * compare by identity.
  */
-export function selectGalleryImages<T extends VariantTiedImage>(
+export function orderGalleryImages<T extends VariantTiedImage>(
   images: T[],
   variants: GalleryVariant[],
-  choice: OptionChoice
+  options: GalleryOption[]
 ): T[] {
-  // A product that ties no picture to a variant has nothing to sort out.
   if (!images.some(isTied)) return images
 
+  const placed = new Set<string>()
+  const ordered: T[] = []
+  for (const variant of sortVariantsByOptions(variants, options)) {
+    for (const image of images) {
+      if (placed.has(image.id)) continue
+      if (image.variants?.some((tie) => tie.id === variant.id)) {
+        placed.add(image.id)
+        ordered.push(image)
+      }
+    }
+  }
+  // Shared pictures, and any tied only to a variant the product no longer has.
+  for (const image of images) {
+    if (!placed.has(image.id)) ordered.push(image)
+  }
+  return ordered
+}
+
+/**
+ * The picture the gallery moves to for `choice`: the first picture, in gallery
+ * order (`ordered`, from `orderGalleryImages()`), of a variant that fits every
+ * chosen option. None when nothing is chosen, no variant fits, or the fitting
+ * variants have no picture of their own (the gallery then stays where it is).
+ */
+export function focusImageFor<T extends VariantTiedImage>(
+  ordered: T[],
+  variants: GalleryVariant[],
+  choice: OptionChoice
+): T | undefined {
   const chosen = Object.entries(choice).filter(([, value]) => !!value)
-  if (chosen.length === 0) return images
+  if (chosen.length === 0) return undefined
 
   const fitting = new Set(
     variants
@@ -69,37 +98,29 @@ export function selectGalleryImages<T extends VariantTiedImage>(
       )
       .map((variant) => variant.id)
   )
-  // A combination the product does not have (an "unavailable" pick).
-  if (fitting.size === 0) return images
+  if (fitting.size === 0) return undefined
 
-  const own = images.filter((image) =>
-    image.variants?.some((tie) => fitting.has(tie.id))
+  return ordered.find(
+    (image) => !!image.url && image.variants?.some((tie) => fitting.has(tie.id))
   )
-  const shared = images.filter((image) => !isTied(image))
-  const shown = [...own, ...shared]
-
-  // Every picture belongs to some other variant: show the product rather than
-  // an empty gallery.
-  return shown.length > 0 ? shown : images
 }
 
 /**
- * The first picture each next click would put on show, except the one on show
- * now and any listed twice: what the page fetches ahead (when the browser is
- * idle), so choosing feels instant. A click is one option changed to one of its
- * other values. Stops after `limit` pictures.
+ * The picture each next click would move to, except the one on show for the
+ * current choice and any listed twice: what the page fetches ahead (when the
+ * browser is idle), so choosing feels instant. A click is one option changed to
+ * one of its other values. Stops after `limit` pictures.
  */
 export function nextGalleryHeads<T extends VariantTiedImage>(
-  images: T[],
+  ordered: T[],
   variants: GalleryVariant[],
   options: GalleryOption[],
   choice: OptionChoice,
   limit = 8
 ): T[] {
-  // A picture with no address cannot be fetched, nor put on show.
-  const head = (shown: T[]) => shown.find((image) => !!image.url)
-
-  const onShow = head(selectGalleryImages(images, variants, choice))
+  const onShow =
+    focusImageFor(ordered, variants, choice) ??
+    ordered.find((image) => !!image.url)
   const seen = new Set<string>(onShow ? [onShow.id] : [])
   const heads: T[] = []
 
@@ -107,9 +128,10 @@ export function nextGalleryHeads<T extends VariantTiedImage>(
     for (const value of option.values) {
       if (choice[option.id] === value) continue
 
-      const next = head(
-        selectGalleryImages(images, variants, { ...choice, [option.id]: value })
-      )
+      const next = focusImageFor(ordered, variants, {
+        ...choice,
+        [option.id]: value,
+      })
       if (!next || seen.has(next.id)) continue
 
       seen.add(next.id)
@@ -125,7 +147,10 @@ export function nextGalleryHeads<T extends VariantTiedImage>(
 type GalleryProduct = {
   images?: VariantTiedImage[] | null
   variants?: GalleryVariant[] | null
-  options?: { id: string; values?: { value: string }[] | null }[] | null
+  options?:
+    | { id: string; values?: { value: string; rank?: number | null }[] | null }[]
+    | null
+  metadata?: Record<string, unknown> | null
 }
 
 /**
@@ -135,7 +160,9 @@ type GalleryProduct = {
  * so the rules above never meet a missing array. The gallery runs in the
  * browser on the very product object the buy box gets, which crosses to the
  * browser once; this is worked out there rather than on the server, where it
- * would be a second copy to send.
+ * would be a second copy to send. The options come in the admin's order
+ * (`sortProductOptions()`, already applied by `listProducts()`; done again here
+ * so a product from anywhere else is ordered the same way).
  */
 export function galleryDataOf(product: GalleryProduct): {
   images: VariantTiedImage[]
@@ -155,9 +182,11 @@ export function galleryDataOf(product: GalleryProduct): {
         value: option.value,
       })),
     })),
-    options: (product.options ?? []).map((option) => ({
-      id: option.id,
-      values: (option.values ?? []).map((value) => value.value),
-    })),
+    options: sortProductOptions(product.options ?? [], product.metadata).map(
+      (option) => ({
+        id: option.id,
+        values: (option.values ?? []).map((value) => value.value),
+      })
+    ),
   }
 }

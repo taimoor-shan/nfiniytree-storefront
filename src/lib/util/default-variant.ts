@@ -9,7 +9,25 @@
  */
 import type { HttpTypes } from "@medusajs/types"
 import { hasPriceRange, isPriceOnRequest } from "./get-product-price"
+import { sortProductOptions, sortVariantsByOptions } from "./option-order"
 import type { OptionChoice } from "./variant-gallery"
+
+/**
+ * The product's variants in the order of its options (first value of the first
+ * option first, as the buy box and the gallery list them).
+ */
+export const variantsInOptionOrder = (
+  product: HttpTypes.StoreProduct
+): HttpTypes.StoreProductVariant[] =>
+  sortVariantsByOptions(
+    product.variants ?? [],
+    sortProductOptions(product.options ?? [], product.metadata).map(
+      (option) => ({
+        id: option.id,
+        values: (option.values ?? []).map((value) => value.value),
+      })
+    )
+  )
 
 /** A variant's options as option id → the value it has. */
 export const optionsAsKeymap = (
@@ -31,7 +49,8 @@ export const isVariantAvailable = (variant: HttpTypes.StoreProductVariant) => {
 
 /**
  * The options the page opens with: the first variant that can be bought (the
- * first variant when none can). Nothing is preselected when
+ * first variant when none can), in the order of the options, so the buy box
+ * opens on the plant whose pictures the gallery starts with. Nothing is preselected when
  *   - no variant has a price and nothing is in stock: the sign-up is for the
  *     product as a whole, and a preselected option would show a greyed-out one
  *     as chosen;
@@ -45,6 +64,7 @@ export function getDefaultChoice(product: HttpTypes.StoreProduct): OptionChoice 
   if (isPriceOnRequest(product) && !variants.some(isVariantAvailable)) return {}
   if (hasPriceRange(product)) return {}
 
-  const first = variants.find(isVariantAvailable) || variants[0]
+  const ordered = variantsInOptionOrder(product)
+  const first = ordered.find(isVariantAvailable) || ordered[0]
   return optionsAsKeymap(first.options) ?? {}
 }
